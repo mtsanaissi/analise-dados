@@ -1,0 +1,6 @@
+pandas
+chardet
+ydata-profiling
+streamlit
+openpyxl
+pytest

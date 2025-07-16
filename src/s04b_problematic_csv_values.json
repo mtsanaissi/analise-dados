@@ -1,0 +1,109 @@
+[
+  {
+    "arquivo": "2019-01\\2019-01.csv",
+    "Assunto": [
+      "Veículos  Peças e Acessórios (roda, pneu, rádio, farol, etc.)"
+    ],
+    "Problema": [
+      "Dados pessoais incorretos  dificuldade de retificação",
+      "Recall  descumprimento, dúvida",
+      "Negativação indevida sem contratação do serviço  fraude bancária",
+      "Reajuste  dúvida ou discordância (exceto idoso)",
+      "Dificuldade na inclusão em tarifa social  recusa / falta de informação"
+    ]
+  },
+  {
+    "arquivo": "2019-05\\2019-05.csv",
+    "Cidade": [
+      "S�o Gon�alo do Amarante - RN",
+      "Ub� - MG",
+      "Muria� - MG",
+      "Jaguari�na - SP",
+      "Ibirit� - MG",
+      "Ca�ador - SC",
+      "Vi�osa - MG",
+      "Est�ncia Velha - RS",
+      "S�o Sebasti�o do Pass� - BA",
+      "Santo Est�v�o - BA",
+      "Crate�s - CE",
+      "S�o Gabriel - RS",
+      "Fernand�polis - SP",
+      "Tr�s Cora��es - MG",
+      "Pen�polis - SP",
+      "Cosm�polis - SP",
+      "Chapada Ga�cha - MG",
+      "S�o Miguel dos Campos - AL",
+      "Uni�o da Vit�ria - PR",
+      "Jana�ba - MG"
+    ]
+  },
+  {
+    "arquivo": "2019-06\\2019-06.csv",
+    "Cidade": [
+      "Ibirit� - MG",
+      "S�o Gabriel - RS",
+      "Cosm�polis - SP",
+      "Fernand�polis - SP",
+      "Vi�osa - MG",
+      "Santo Est�v�o - BA",
+      "Est�ncia Velha - RS",
+      "Jaguari�na - SP",
+      "Ub� - MG",
+      "Muria� - MG",
+      "Tr�s Cora��es - MG",
+      "Manhua�u - MG",
+      "Pen�polis - SP",
+      "Gua�ba - RS",
+      "Chapada Ga�cha - MG",
+      "S�o Miguel dos Campos - AL",
+      "Ca�ador - SC",
+      "S�o Gon�alo do Amarante - RN",
+      "S�o Pedro do Turvo - SP",
+      "Jana�ba - MG",
+      "Piraju� - SP",
+      "S�o Sebasti�o do Pass� - BA",
+      "Una� - MG",
+      "Crate�s - CE",
+      "Uni�o da Vit�ria - PR",
+      "Tom�-A�u - PA",
+      "Santo Ant�nio de Posse - SP"
+    ]
+  },
+  {
+    "arquivo": "2019-07\\2019-07.csv",
+    "Cidade": [
+      "Fernand�polis - SP",
+      "Ub� - MG",
+      "Ca�ador - SC",
+      "Cerqueira C�sar - SP",
+      "Vi�osa - MG",
+      "Jaguari�na - SP",
+      "Muria� - MG",
+      "Santo Est�v�o - BA",
+      "Tr�s Cora��es - MG",
+      "Una� - MG",
+      "S�o Gon�alo do Amarante - RN",
+      "Gua�ba - RS",
+      "Belis�rio - MG",
+      "Chapada Ga�cha - MG",
+      "S�o Pedro do Turvo - SP",
+      "Est�ncia Velha - RS",
+      "S�o Gabriel - RS",
+      "Pen�polis - SP",
+      "S�o Sebasti�o do Pass� - BA",
+      "Uni�o da Vit�ria - PR",
+      "Manhua�u - MG",
+      "Ibirit� - MG",
+      "�ngelo Frechiani - ES",
+      "Jequi� da Praia - AL",
+      "Cosm�polis - SP",
+      "Jana�ba - MG",
+      "S�o Miguel dos Campos - AL",
+      "C�rrego Fundo - MG",
+      "Crate�s - CE",
+      "Tom�-A�u - PA",
+      "Esp�rito Santo do Turvo - SP",
+      "Corumba�ba - GO"
+    ]
+  }
+]
