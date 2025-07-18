@@ -91,19 +91,19 @@ A estrutura de diretórios segue as melhores práticas para projetos de ciência
 
 O projeto está organizado em um pipeline claro, onde cada diretório representa uma fase distinta do processo de tratamento e análise de dados.
 
-- **`\src\01_discovery\`**: **(Descoberta e Diagnóstico)**
+- **`\src\discovery\`**: **(Descoberta e Diagnóstico)**
   Scripts nesta pasta são focados em entender o estado bruto dos dados. Eles encontram os arquivos e realizam diagnósticos sobre sua estrutura e conteúdo sem modificá-los.
 
-- **`\src\02_standardize\`**: **(Padronização)**
+- **`\src\standardize\`**: **(Padronização)**
   O objetivo aqui é deixar os arquivos em um formato técnico consistente. Isso inclui a conversão de encoding e a padronização de estruturas como delimitadores.
 
-- **`\src\03_sanitize\`**: **(Limpeza e Correção)**
+- **`\src\sanitize\`**: **(Limpeza e Correção)**
   Esta fase trata de corrigir o _conteúdo_ dos dados. Scripts aqui identificam e corrigem valores problemáticos, como caracteres inválidos ou dados malformados, com base em mapas de correção.
 
-- **`\src\04_preprocess\`**: **(Pré-processamento)**
+- **`\src\preprocess\`**: **(Pré-processamento)**
   Aqui começam as transformações que preparam os dados para a análise. Isso inclui a seleção de dados de interesse e o tratamento de problemas comuns como valores ausentes.
 
-- **`\src.5_transform\`**: **(Transformação de Features)**
+- **`\src\transform\`**: **(Transformação de Features)**
   Scripts nesta pasta modificam a estrutura dos dados para criar novas representações ou features para análise ou modelagem.
 
 ## 🛠️ Como Usar
@@ -111,6 +111,3 @@ O projeto está organizado em um pipeline claro, onde cada diretório representa
 Os scripts principais estão localizados no diretório `src/`. Para executá-los, certifique-se de que seu ambiente virtual esteja ativado e então execute o script desejado com os argumentos necessários. Use o sufixo `-h` ou `--help` para ver as opções de cada script.
 
 **Exemplo de execução:**
-```bash
-python src/s01_data_volume.py -d ./data --recursive
-```
