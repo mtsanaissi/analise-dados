@@ -10,9 +10,9 @@ import pandas as pd
 from unittest.mock import patch, call
 
 # Adiciona o diretório src ao sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from s01_data_volume import (
+from src.discovery.s01_data_volume import (
     format_bytes,
     get_file_metrics,
     main as data_volume_main

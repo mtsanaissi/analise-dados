@@ -10,9 +10,9 @@ import csv
 from unittest.mock import patch, call
 
 # Adiciona o diretório src ao sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from s02_csv_delimiter import (
+from src.discovery.s02_csv_delimiter import (
     detect_csv_delimiter,
     main as delimiter_main
 )

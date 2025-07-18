@@ -9,9 +9,9 @@ import pytest
 from unittest.mock import patch
 
 # Adiciona o diretório src ao sys.path para permitir a importação dos módulos
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from s00_discover_and_convert import (
+from src.discovery.s00_discover_and_convert import (
     detect_encoding,
     convert_file_to_utf8,
     main as discover_main

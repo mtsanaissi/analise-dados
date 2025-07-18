@@ -9,9 +9,9 @@ import pytest
 from unittest.mock import patch
 
 # Adiciona o diretório src ao sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from s03_csv_columns import check_csv_structures, main as columns_main
+from src.discovery.s03_csv_columns import check_csv_structures, main as columns_main
 
 # --- Fixtures ---
 

@@ -10,10 +10,10 @@ import pandas as pd
 from unittest.mock import patch, call
 
 # Adiciona o diretório src ao sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # A importação deve ser feita após a modificação do path
-from s02b_convert_csv_delimiter import main as convert_delimiter_main
+from src.standardize.s02b_convert_csv_delimiter import main as convert_delimiter_main
 
 # --- Fixtures ---
 
