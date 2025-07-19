@@ -128,7 +128,7 @@ def test_main_integration_summary_output(mock_stdout, temp_data_dir):
     assert "TOTAL GERAL" in output
     assert "13" in output # 3 (csv) + 7 (xlsx) + 3 (json)
 
-@patch('s01_data_volume.pd.DataFrame.to_csv')
+@patch('src.discovery.s01_data_volume.pd.DataFrame.to_csv')
 def test_main_integration_save_report(mock_to_csv, temp_data_dir):
     """
     Testa a execução completa com a flag para salvar o relatório em CSV.

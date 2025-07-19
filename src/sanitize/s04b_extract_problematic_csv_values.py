@@ -19,7 +19,7 @@ import argparse
 import sys
 import pandas as pd
 import json
-from utils import find_files, has_problematic_char, read_csv_robust
+from ..utils import find_files, has_problematic_char, read_csv_robust
 
 
 def process_csv_file(file_path, csv_delimiter, column_name_cidade="Cidade", column_name_uf="UF"):

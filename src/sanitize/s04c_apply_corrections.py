@@ -18,7 +18,7 @@ import argparse
 import sys
 import pandas as pd
 import json
-from utils import read_csv_robust, save_df_to_csv
+from ..utils import read_csv_robust, save_df_to_csv
 
 
 def apply_csv_corrections(

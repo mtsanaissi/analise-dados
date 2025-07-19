@@ -18,7 +18,7 @@ import argparse
 import sys
 import pandas as pd
 import json
-from utils import find_files
+from ..utils import find_files
 
 
 def get_file_metrics(file_path, delimiter):

@@ -18,7 +18,7 @@ import sys
 import csv
 import chardet
 import pandas as pd
-from utils import find_files
+from ..utils import find_files
 
 
 def detect_csv_delimiter(file_path, sample_size_bytes=20480):  # Amostra de 20KB

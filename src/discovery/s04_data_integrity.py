@@ -22,7 +22,7 @@ import chardet
 import csv
 import json
 import codecs  # Para leitura com tratamento de erros de encoding
-from utils import find_files, has_problematic_char, read_csv_robust
+from ..utils import find_files, has_problematic_char, read_csv_robust
 
 
 # Amostra de 1MB

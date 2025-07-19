@@ -20,7 +20,7 @@ import os
 import argparse
 import sys
 import chardet  # Importa a biblioteca para detecção de encoding
-from utils import find_files # Importa a função centralizada
+from ..utils import find_files # Importa a função centralizada
 
 # Lista de extensões que são tipicamente binárias e não devem ser convertidas
 BINARY_EXTENSIONS = ['xlsx', 'xls', 'ods', 'doc',

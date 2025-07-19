@@ -75,7 +75,7 @@ def test_detect_delimiter_sniffer_error(temp_csv_dir):
     file_path = str(temp_csv_dir / "semicolon.csv")  # Pode ser qualquer arquivo válido
     
     # Força o Sniffer a levantar um erro para testar o bloco except
-    with patch('s02_csv_delimiter.csv.Sniffer.sniff', side_effect=csv.Error("mocked error")):
+    with patch('src.discovery.s02_csv_delimiter.csv.Sniffer.sniff', side_effect=csv.Error("mocked error")):
         result = detect_csv_delimiter(file_path)
     
     assert result["delimitador"] is None
@@ -107,7 +107,7 @@ def test_main_integration_console_output(mock_stdout, temp_csv_dir):
     assert "empty.csv" in output
     assert "Arquivo vazio" in output
 
-@patch('s02_csv_delimiter.pd.DataFrame.to_csv')
+@patch('src.discovery.s02_csv_delimiter.pd.DataFrame.to_csv')
 def test_main_integration_report_saving(mock_to_csv, temp_csv_dir):
     """Testa a funcionalidade de salvar o relatório em CSV."""
     report_path = temp_csv_dir / "report.csv"

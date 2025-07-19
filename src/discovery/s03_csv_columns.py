@@ -21,7 +21,7 @@ __llm__ = "Gemini 2.5 Pro"
 import os
 import argparse
 from pathlib import Path
-from utils import find_files, read_csv_robust
+from ..utils import find_files, read_csv_robust
 
 
 def get_csv_header(filepath):

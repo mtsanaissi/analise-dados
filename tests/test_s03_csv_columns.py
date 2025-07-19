@@ -76,7 +76,7 @@ def test_no_csv_files_found(tmp_path):
     assert ref_header is None
     assert not inconsistent_files
 
-@patch('s03_csv_columns.read_csv_robust', return_value=None)
+@patch('src.discovery.s03_csv_columns.read_csv_robust', return_value=None)
 def test_file_read_error(mock_read_csv, temp_csv_dir):
     """Testa o tratamento de erro quando a leitura de um arquivo falha."""
     # O mock fará com que a leitura de todos os arquivos falhe
@@ -92,7 +92,7 @@ def test_file_read_error(mock_read_csv, temp_csv_dir):
 
 # --- Teste de Integração para o main ---
 
-@patch('s03_csv_columns.check_csv_structures')
+@patch('src.discovery.s03_csv_columns.check_csv_structures')
 def test_main_function_call(mock_check, temp_csv_dir):
     """Testa se a função main invoca check_csv_structures com o diretório correto."""
     test_args = ["s03_csv_columns.py", "-d", str(temp_csv_dir)]
