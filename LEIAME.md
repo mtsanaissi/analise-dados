@@ -82,7 +82,7 @@ A estrutura de diretórios segue as melhores práticas para projetos de ciência
 ├── src/                 # Scripts Python modulares
 ├── .venv/               # Ambiente virtual Python
 ├── GEMINI.md            # Guia para o assistente Gemini
-├── GEMINI.md            # Guia para o assistente Jules
+├── JULES.md             # Guia para o assistente Jules
 ├── LEIAME.md
 └── requirements.txt     # Dependências do projeto
 ```
