@@ -17,21 +17,22 @@
 import os
 import argparse
 from pathlib import Path
-from ..utils import find_files, read_csv_robust
+from ..utils import find_files
+from ..connectors.factory import get_data_loader
 
 
 def get_csv_header(filepath):
     """
-    Lê o cabeçalho de um arquivo CSV usando a função robusta de leitura.
+    Lê o cabeçalho de um arquivo CSV usando o conector de dados.
     Retorna a lista de colunas do cabeçalho ou uma string de erro.
     """
     try:
-        # Usa a função robusta para ler o CSV, que já lida com encodings.
-        # Lemos apenas as primeiras linhas para otimizar, se possível,
-        # mas read_csv_robust não suporta `nrows` diretamente.
-        # A função já é otimizada para ler uma amostra para encoding,
-        # então o impacto é gerenciável.
-        df = read_csv_robust(filepath)
+        # Utiliza a fábrica para obter o conector apropriado
+        data_loader = get_data_loader(filepath)
+        # Lê o arquivo CSV. A lógica de detecção de encoding/delimitador
+        # pode ser adicionada ao conector ou passada como kwargs.
+        # Por enquanto, assumimos que o conector lida com isso.
+        df = data_loader.read()
 
         if df is None:
             return "READ_ERROR: Falha na leitura do arquivo (ver logs de erro)."
@@ -48,6 +49,8 @@ def get_csv_header(filepath):
 
     except FileNotFoundError:
         return "FILE_NOT_FOUND_ERROR"
+    except ValueError as e: # Captura o erro da factory
+        return f"CONNECTOR_ERROR: {e}"
     except Exception as e:
         return f"GENERAL_ERROR: {e}"
 

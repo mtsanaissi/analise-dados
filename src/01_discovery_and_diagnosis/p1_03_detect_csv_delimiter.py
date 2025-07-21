@@ -22,6 +22,7 @@ import csv
 import chardet
 import pandas as pd
 from ..utils import find_files
+from ..connectors.factory import get_data_loader
 
 
 def detect_csv_delimiter(file_path, sample_size_bytes=20480):  # Amostra de 20KB
@@ -161,8 +162,9 @@ def main():
     if args.output_report:
         try:
             df_report = pd.DataFrame(all_results)
-            df_report.to_csv(args.output_report, index=False,
-                             encoding='utf-8-sig')
+            # Utiliza a fábrica para obter o conector e salvar o relatório
+            report_connector = get_data_loader(args.output_report)
+            report_connector.write(df_report, encoding='utf-8-sig')
             print(
                 f"\nRelatório de detecção salvo com sucesso em: {args.output_report}")
         except Exception as e:
