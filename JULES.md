@@ -6,8 +6,10 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 
 1.  **Modularity**: Every piece of logic should be in its right place. Don't repeat code. If a function can be used by more than one script, it belongs in `utils.py`.
 2.  **Robustness**: Code must be resilient. Anticipate issues like missing files, incorrect formats, or permission errors. Every script that performs I/O or parsing must have solid error handling.
-3.  **Clarity**: Code is read more often than it is written. Use clear, descriptive names for variables and functions. Every script and function must be documented.
-4.  **Configurability**: Scripts should be flexible. Avoid hardcoding paths, filenames, or important parameters. Use command-line arguments for user-configurable settings.
+3.  **Clarity & Documentation**: Code is read more often than it is written. Use clear, descriptive names. All documentation must follow these rules:
+    *   **Docstrings**: Every function, class, and public method must have a PEP 257 compliant docstring in Portuguese, explaining its purpose, arguments (`Args:`), and return value (`Returns:`).
+    *   **Inline Comments**: Use inline comments sparingly. They should explain the *why* behind complex or non-obvious code, not the *what*.
+4.  **Configurability**: Scripts must be flexible. **Avoid hardcoding parameters**. Use command-line arguments (`argparse`) for all user-configurable settings. For static, internal settings that might need occasional adjustment, use an uppercase variable at the top of the script, marked with the comment `# CUSTOMIZAR:`.
 
 ## 2. Environment and Dependencies
 

@@ -37,74 +37,62 @@ Siga os passos abaixo para configurar o ambiente e executar os scripts.
     pip install -r requirements.txt
     ```
 
-## Fases do Pipeline e Scripts Correspondentes
+## Fases do Pipeline e Scripts
 
-Seu projeto está organizado como um pipeline de análise e preparação de dados, dividido em fases lógicas que vão desde a descoberta e diagnóstico até a correção e análise exploratória.
+O projeto é estruturado em fases que representam o ciclo de vida da análise de dados, desde a descoberta até a visualização. Cada fase é implementada em um diretório específico dentro de `src/`.
 
-### Fase 1: Descoberta e Diagnóstico de Dados
+### Fase 1: Descoberta e Diagnóstico (`src/01_discovery_and_diagnosis`)
 
-Esta fase foca em encontrar os dados e avaliar sua "saúde" estrutural e de conteúdo.
+O objetivo desta fase é avaliar a qualidade, estrutura e conteúdo dos dados brutos.
 
-*   **`s00_discover_and_convert.py`**: O ponto de partida. Ele localiza arquivos com base nas extensões fornecidas e, crucialmente, verifica e converte o encoding para UTF-8. Esta é uma etapa fundamental para evitar erros de leitura nas fases seguintes.
-*   **`s01_data_volume.py`**: Fornece uma visão macro dos dados, calculando métricas de volume como contagem de registros e tamanho em disco por tipo de arquivo. É o primeiro passo para entender a escala do conjunto de dados.
-*   **`s02_csv_delimiter.py`**: Especializado em CSVs, este script detecta qual delimitador (`;`, `,`, `\t`, etc.) está sendo usado, algo essencial para a leitura correta desses arquivos.
-*   **`s03_csv_columns.py`**: Verifica a consistência dos cabeçalhos em múltiplos arquivos CSV, garantindo que todos sigam a mesma estrutura. É vital para processos de `merge` ou `concat`.
-*   **`s04_data_integrity.py`**: Um script de diagnóstico mais aprofundado que consolida várias verificações: legibilidade, encoding, estrutura básica (cabeçalhos, planilhas), e a presença de caracteres problemáticos.
-*   **`profile_data_columns.py` e `data_profile.json`**: Esta dupla realiza o perfilamento detalhado dos dados. O script analisa cada coluna para inferir tipos de dados e calcular estatísticas descritivas (média, mediana, valores únicos, nulos, etc.), gerando um relatório JSON abrangente.
+*   **`p1_01_discover_and_convert_encoding.py`**: Localiza arquivos e converte seu encoding para UTF-8 para garantir a legibilidade.
+*   **`p1_02_calculate_data_volume.py`**: Calcula métricas de volume, como contagem de registros e tamanho dos arquivos.
+*   **`p1_03_detect_csv_delimiter.py`**: Detecta o delimitador utilizado em arquivos CSV.
+*   **`p1_04_check_column_consistency.py`**: Verifica se múltiplos arquivos CSV possuem a mesma estrutura de colunas.
+*   **`p1_05_check_data_integrity.py`**: Realiza um conjunto de verificações de integridade nos dados.
+*   **`p1_06_profile_data_columns.py`**: Gera um perfil detalhado de cada coluna, com estatísticas e tipos de dados inferidos.
 
-### Fase 2: Correção e Limpeza de Dados
+### Fase 2: Tratamento e Padronização (`src/02_treatment_and_standardization`)
 
-Com base nos diagnósticos da fase anterior, esta fase aplica as correções.
+Esta fase foca em corrigir os problemas identificados, limpando e padronizando os dados.
 
-*   **`s02b_convert_csv_delimiter.py`**: O contraponto do `s02`, este script padroniza os delimitadores dos arquivos CSV, salvando as versões corrigidas em um diretório de saída.
-*   **`s04b_extract_problematic_csv_values.py` e `s04b_problematic_csv_values.json`**: O script `s04b` identifica e extrai células com caracteres malformados (provavelmente por problemas de encoding) para um arquivo JSON (`problematic_csv_values.json`), criando uma "lista de tarefas" para correção.
-*   **`s04c_apply_corrections.py`**, **`s04c_corrections_map.json`** e **`s04c_corrections_map_2020_2024.json`**: Este conjunto é o "motor de correção". O script `s04c` utiliza um mapa de "de-para" (definido nos arquivos `corrections_map`) para substituir os valores problemáticos identificados pelo `s04b`.
-*   **`quick_fix.py`**: Um utilitário específico para um problema comum: remover uma coluna chamada "Total" no final dos arquivos CSV.
-*   **`data_transforms.py`**: Outro script de transformação específico, projetado para desnormalizar dados, separando valores de uma célula que contém quebras de linha em múltiplas linhas.
+*   **`p2_02_extract_problematic_values.py`**: Identifica e extrai células com valores problemáticos ou malformados.
+*   **`p2_03_apply_value_corrections.py`**: Aplica correções em lote com base em um mapa de "de-para".
+*   **`p2_04_fix_remove_total_column.py`**: Remove colunas desnecessárias, como "Total", que podem ser adicionadas por planilhas.
 
-### Fase 3: Análise Exploratória e Transformação Avançada
+### Fase 3: Análise Exploratória e Pré-processamento (`src/03_exploratory_analysis_and_preprocessing`)
 
-Uma vez que os dados estão limpos e padronizados, esta fase foca na análise e na preparação para modelos ou relatórios.
+Com os dados limpos, esta fase foca em explorar, filtrar e transformar os dados para análise.
 
-*   **`check_distinct_values.py`**: Uma ferramenta de análise exploratória (EDA) que permite ao usuário ver todos os valores únicos para colunas específicas, útil para entender a variedade de dados categóricos.
-*   **`filter_data_batch.py`**: Um script poderoso e customizável para filtrar os dados em lote. Ele permite ao usuário definir regras específicas (como manter apenas certos segmentos de mercado) e aplicar essas regras a todos os arquivos, preservando a estrutura de pastas.
-*   **`data_analysis.py`**: A joia da coroa da visualização. Usando Streamlit e `ydata-profiling`, este script cria um dashboard interativo para uma análise visual profunda de um único arquivo de dados, exibindo estatísticas, tipos de dados, valores ausentes e um relatório de perfil completo.
+*   **`p3_01_explore_distinct_values.py`**: Permite explorar os valores únicos em colunas categóricas.
+*   **`p3_02_preprocess_filter_batch.py`**: Filtra os dados em lote com base em regras customizáveis.
+*   **`p3_03_transform_denormalize_rows.py`**: Transforma dados, separando uma célula com múltiplos valores em várias linhas.
 
+### Fase 4: Visualização e Dashboards (`src/04_visualization_and_dashboards`)
+
+A fase final, onde os resultados são comunicados através de ferramentas visuais e interativas.
+
+*   **`app_explore_aggregated_profiles.py`**: Dashboard para explorar perfis de dados agregados.
+*   **`app_explore_single_profile.py`**: Dashboard para análise profunda de um único perfil de dados.
+*   **`app_generic_data_analyzer.py`**: Ferramenta de análise genérica para visualização de dados.
+*   **`tool_generate_html_profiles.py`**: Gera relatórios de perfil de dados em formato HTML.
 
 ## 📂 Estrutura do Projeto
 
-A estrutura de diretórios segue as melhores práticas para projetos de ciência de dados:
+A estrutura de diretórios foi organizada para refletir as fases do pipeline de análise:
 
 ```
 /
-├── data/                # Dados brutos, intermediários e processados
-├── notebooks/           # Jupyter notebooks para exploração
-├── src/                 # Scripts Python modulares
-├── .venv/               # Ambiente virtual Python
-├── GEMINI.md            # Guia para o assistente Gemini
-├── JULES.md             # Guia para o assistente Jules
+├── data/
+├── src/
+│   ├── 01_discovery_and_diagnosis/
+│   ├── 02_treatment_and_standardization/
+│   ├── 03_exploratory_analysis_and_preprocessing/
+│   └── 04_visualization_and_dashboards/
+├── .venv/
 ├── LEIAME.md
-└── requirements.txt     # Dependências do projeto
+└── requirements.txt
 ```
-
-## Estrutura de Diretórios e Mapeamento de Scripts
-
-O projeto está organizado em um pipeline claro, onde cada diretório representa uma fase distinta do processo de tratamento e análise de dados.
-
-- **`\src\discovery\`**: **(Descoberta e Diagnóstico)**
-  Scripts nesta pasta são focados em entender o estado bruto dos dados. Eles encontram os arquivos e realizam diagnósticos sobre sua estrutura e conteúdo sem modificá-los.
-
-- **`\src\standardize\`**: **(Padronização)**
-  O objetivo aqui é deixar os arquivos em um formato técnico consistente. Isso inclui a conversão de encoding e a padronização de estruturas como delimitadores.
-
-- **`\src\sanitize\`**: **(Limpeza e Correção)**
-  Esta fase trata de corrigir o _conteúdo_ dos dados. Scripts aqui identificam e corrigem valores problemáticos, como caracteres inválidos ou dados malformados, com base em mapas de correção.
-
-- **`\src\preprocess\`**: **(Pré-processamento)**
-  Aqui começam as transformações que preparam os dados para a análise. Isso inclui a seleção de dados de interesse e o tratamento de problemas comuns como valores ausentes.
-
-- **`\src\transform\`**: **(Transformação de Features)**
-  Scripts nesta pasta modificam a estrutura dos dados para criar novas representações ou features para análise ou modelagem.
 
 ## 🛠️ Como Usar
 

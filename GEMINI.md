@@ -8,7 +8,7 @@ Your role is to act as a programming assistant specializing in Python for data a
 
 ## 2. Directory Structure
 
-The project will follow this directory structure:
+The project follows this directory structure:
 
 ```
 /
@@ -27,11 +27,15 @@ The project will follow this directory structure:
 
 ## 4. Code Conventions
 
+
 - **Language**: Python 3.11+.
 - **Code Style**: Strictly follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
-- **Docstrings**: Use docstrings to document functions and classes.
-- **Typing**: Use type hints (PEP 484) whenever possible.
-- **Modularity**: Create modular and reusable scripts.
+- **Docstrings**: Toda função, classe e método público deve ter uma docstring (conforme PEP 257). A docstring deve explicar o propósito do objeto, seus argumentos (`Args:`) e seus retornos (`Returns:`).
+- **Comentários**:
+    - Use comentários em linha apenas para explicar o **"porquê"** de um trecho de código complexo, não o "o quê". O código deve ser autoexplicativo.
+    - Para indicar uma variável ou configuração que o usuário pode alterar diretamente no script (uma prática a ser evitada em favor de argumentos de linha de comando), use o marcador `# CUSTOMIZAR:`.
+- **Typing**: Use type hints (PEP 484) sempre que possível.
+- **Modularity**: Crie scripts modulares e reutilizáveis.
 
 ## 5. Standard Script Header
 
