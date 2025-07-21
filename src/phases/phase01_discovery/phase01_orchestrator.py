@@ -7,6 +7,7 @@ from phases.phase01_discovery.core.data_volume_analyzer import analyze_data_volu
 from phases.phase01_discovery.core.data_integrity_checker import analyze_data_integrity
 from phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
 from phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
+from phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
 from phases.phase01_discovery.core.data_profiler import analyze_data_profiling
 
 
@@ -27,6 +28,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         "data_integrity_analysis": {},
         "csv_delimiter_analysis": [],
         "csv_column_consistency_analysis": {},
+        "json_schema_validation": [],
         "data_profiling_analysis": []
     }
 
@@ -66,7 +68,15 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
     else:
         print("  Nenhum arquivo CSV encontrado para análise de consistência de colunas.")
 
-    # 6. Perfilamento de Dados
+    # 6. Análise de Esquema JSON (apenas para arquivos JSON)
+    print("\n--- Executando Análise de Esquema JSON ---")
+    json_files = [f for f in discovered_files if f.lower().endswith('.json')]
+    for file_path in json_files:
+        schema_result = validate_json_schema(file_path)
+        results["json_schema_validation"].append({"file": os.path.basename(file_path), "result": schema_result})
+        print(f"  {os.path.basename(file_path)}: Status da validação do esquema: {schema_result['status']}")
+
+    # 7. Perfilamento de Dados
     print("\n--- Executando Perfilamento de Dados ---")
     profiling_result = analyze_data_profiling(data_project_path, extensions, recursive)
     results["data_profiling_analysis"] = profiling_result
