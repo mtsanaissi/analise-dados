@@ -6,8 +6,8 @@
 #            colunas pré-definidas pelo usuário.
 # Exemplo de uso: python p3_01_explore_distinct_values.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules
@@ -109,7 +109,6 @@ def main():
         except Exception as e:
             print(
                 f"  ERRO ao processar o arquivo {relative_path}: {e}", file=sys.stderr)
-
 
     # --- Exibição dos Resultados ---
     print("\n\n" + "="*80)

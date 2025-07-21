@@ -5,7 +5,7 @@
 # Exemplo de uso: python p1_04_check_column_consistency.py
 #
 # Autor: Marcelo Anaissi
-# Criado em: 2025-05-28
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules
@@ -49,7 +49,7 @@ def get_csv_header(filepath):
 
     except FileNotFoundError:
         return "FILE_NOT_FOUND_ERROR"
-    except ValueError as e: # Captura o erro da factory
+    except ValueError as e:  # Captura o erro da factory
         return f"CONNECTOR_ERROR: {e}"
     except Exception as e:
         return f"GENERAL_ERROR: {e}"
@@ -193,12 +193,13 @@ def main():
     args = parser.parse_args()
 
     root_dir = args.directory
-    
+
     if not os.path.isdir(root_dir):
         print(f"Erro: O diretório especificado '{root_dir}' não existe.")
     else:
         print(f"Usando diretório: {Path(root_dir).resolve()}")
         check_csv_structures(root_dir)
+
 
 if __name__ == "__main__":
     main()

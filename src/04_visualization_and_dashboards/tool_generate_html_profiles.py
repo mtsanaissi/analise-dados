@@ -5,8 +5,8 @@
 #            para múltiplos arquivos e os salva como arquivos HTML individuais.
 # Exemplo de uso: python tool_generate_html_profiles.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules
@@ -74,7 +74,8 @@ def main():
         try:
             df = None
             if file_path.lower().endswith('.csv'):
-                df = read_csv_robust(file_path, delimiter=args.delimiter.replace('\t', '\t'))
+                df = read_csv_robust(
+                    file_path, delimiter=args.delimiter.replace('\t', '\t'))
             elif file_path.lower().endswith(('.xlsx', '.xls')):
                 # Para simplificar, vamos gerar um relatório apenas para a primeira planilha
                 df = pd.read_excel(file_path, sheet_name=0)
@@ -93,7 +94,6 @@ def main():
 
         except Exception as e:
             print(f"     ERRO ao processar {filename}: {e}", file=sys.stderr)
-
 
     print("\nProcesso concluído.")
 

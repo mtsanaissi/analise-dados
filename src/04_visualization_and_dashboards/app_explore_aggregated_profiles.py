@@ -6,8 +6,8 @@
 #            agregada por ano, ou do conjunto de dados completo.
 # Exemplo de uso: python app_explore_aggregated_profiles.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules

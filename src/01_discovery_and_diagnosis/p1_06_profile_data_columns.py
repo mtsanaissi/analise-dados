@@ -7,8 +7,8 @@
 #            descritivas, gerando um relatório estruturado em JSON.
 # Exemplo de uso: python p1_06_profile_data_columns.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.2
 #
 # Modificado por: Jules

@@ -9,8 +9,8 @@
 #            modificado, substituindo o original ou salvando com novo nome.
 # Exemplo de uso: python p2_04_fix_remove_total_column.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.2
 #
 # Modificado por: Jules

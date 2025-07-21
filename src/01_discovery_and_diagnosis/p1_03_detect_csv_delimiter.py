@@ -6,8 +6,8 @@
 #            Utiliza o csv.Sniffer do Python para a detecção.
 # Exemplo de uso: python p1_03_detect_csv_delimiter.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules

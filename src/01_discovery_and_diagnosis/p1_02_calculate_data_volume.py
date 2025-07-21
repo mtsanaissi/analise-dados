@@ -7,8 +7,8 @@
 #            agregado por tipo de arquivo.
 # Exemplo de uso: python p1_02_calculate_data_volume.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules
@@ -65,7 +65,8 @@ def get_file_metrics(file_path, delimiter):
                     record_count = len(df)
                 except (ValueError, TypeError):
                     # Se ambos falharem, o erro será capturado abaixo.
-                    raise ValueError("Formato JSON não suportado (nem padrão, nem Lines).")
+                    raise ValueError(
+                        "Formato JSON não suportado (nem padrão, nem Lines).")
 
     except pd.errors.EmptyDataError:
         record_count = 0  # Arquivo vazio, sem erro

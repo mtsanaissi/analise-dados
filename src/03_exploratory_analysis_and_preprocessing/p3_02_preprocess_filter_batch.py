@@ -7,8 +7,8 @@
 #            de saída, preservando a estrutura de pastas original.
 # Exemplo de uso: python p3_02_preprocess_filter_batch.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.3
 #
 # Modificado por: Jules

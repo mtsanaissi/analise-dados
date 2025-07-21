@@ -7,8 +7,8 @@
 #            diretório de saída especificado.
 # Exemplo de uso: python p2_03_apply_value_corrections.py --argumento valor
 #
-# Autor: Seu Nome/Empresa
-# Criado em: DD/MM/AAAA
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
 # Versão: 1.1
 #
 # Modificado por: Jules
