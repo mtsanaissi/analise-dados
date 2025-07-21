@@ -16,7 +16,7 @@ import re
 import streamlit as st
 import pandas as pd
 from ydata_profiling import ProfileReport
-from utils import find_files, read_csv_robust
+from ..utils import find_files, read_csv_robust
 
 # --- Funções Auxiliares ---
 

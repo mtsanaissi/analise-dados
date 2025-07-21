@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Testes para o script src/s02b_convert_csv_delimiter.py.
+Testes para o script src/02_treatment_and_standardization/p2_01_standardize_csv_delimiter.py.
 """
 
 import os
@@ -13,7 +13,7 @@ from unittest.mock import patch, call
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # A importação deve ser feita após a modificação do path
-from src.standardize.s02b_convert_csv_delimiter import main as convert_delimiter_main
+from src.s02_treatment_and_standardization.p2_01_standardize_csv_delimiter import main as convert_delimiter_main
 
 # --- Fixtures ---
 
@@ -51,7 +51,7 @@ def test_integration_conversion_success_recursive(temp_dirs):
     source_dir, output_dir = temp_dirs
     
     test_args = [
-        "s02b_convert_csv_delimiter.py",
+        "p2_01_standardize_csv_delimiter.py",
         "-d", str(source_dir),
         "-o", str(output_dir),
         "--from-delimiter", ";",
@@ -97,7 +97,7 @@ def test_integration_same_source_and_output_dirs(mock_exit, mock_stdout, temp_di
     source_dir, _ = temp_dirs
     
     test_args = [
-        "s02b_convert_csv_delimiter.py",
+        "p2_01_standardize_csv_delimiter.py",
         "-d", str(source_dir),
         "-o", str(source_dir)
     ]
@@ -121,7 +121,7 @@ def test_integration_identical_delimiters(mock_exit, mock_stdout, temp_dirs):
     source_dir, output_dir = temp_dirs
     
     test_args = [
-        "s02b_convert_csv_delimiter.py",
+        "p2_01_standardize_csv_delimiter.py",
         "-d", str(source_dir),
         "-o", str(output_dir),
         "--from-delimiter", ",",

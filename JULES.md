@@ -25,21 +25,26 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 *   Script names should be descriptive and use snake_case (e.g., `analyze_data_volume.py`).
 
 ## 4. Standard Script Header
-Every new Python script must start with a header block similar to this:
+Every new Python script must start with a header block following this standard.
+
 ```python
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: [script_name.py]
-# Author: [Jules if new file, otherwise keep the original author]
-# Date: [DD/MM/YYYY]
-# Version: 1.0
-# License: MIT
-# Description: [A clear, one-paragraph description of what the script does, in pt-BR.]
-# Example usage: [command-line examples]
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
+# Descrição: [Descrição concisa do propósito do script em português.]
+# Exemplo de uso: [Exemplo de uso do script a partir da linha de comando.]
+#
+# Autor: [Nome do autor]
+# Criado em: [DD/MM/AAAA]
+# Versão: 1.0
+#
+# Modificado por: [Nome de quem modificou]
+# Modificado em: [DD/MM/AAAA]
+# Licença: MIT
+# --------------------------------------------------------------------------------
 ```
+
+**Authorship:** When you, Jules, create a new script, set the `Autor` field to "Jules". When modifying an existing script, keep the original author and add your name to the `Modificado por` field. The license must always be `MIT`.
 
 ## 5. Workflow
 

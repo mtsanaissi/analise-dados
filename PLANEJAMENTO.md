@@ -7,7 +7,7 @@ Este documento detalha as tarefas planejadas para aprimorar os scripts de análi
 - [ ] **1.1. Implementar testes unitários**
   - [x] Criar um diretório `tests/`.
   - [x] Adicionar testes com `pytest` para as funções no novo módulo `utils.py`, garantindo que a lógica de busca de arquivos e leitura de CSV funcione como esperado.
-  - [ ] Implementar testes para os scripts src\s04\_\*.py.
+  - [ ] Implementar testes para todos os scripts.
 - [ ] **1.2. Tratamento de erros**
   - [ ] Conferir se o tratamento de erros está adequado em todos os scripts.
 - [ ] **1.3. Correção de Erros**

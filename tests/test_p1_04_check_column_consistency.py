@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Testes para o script src/s03_csv_columns.py.
+Testes para o script src/01_discovery_and_diagnosis/p1_04_check_column_consistency.py.
 """
 
 import os
@@ -11,7 +11,7 @@ from unittest.mock import patch
 # Adiciona o diretório src ao sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.discovery.s03_csv_columns import check_csv_structures, main as columns_main
+from src.s01_discovery_and_diagnosis.p1_04_check_column_consistency import check_csv_structures, main as columns_main
 
 # --- Fixtures ---
 
@@ -76,7 +76,7 @@ def test_no_csv_files_found(tmp_path):
     assert ref_header is None
     assert not inconsistent_files
 
-@patch('src.discovery.s03_csv_columns.read_csv_robust', return_value=None)
+@patch('src.01_discovery_and_diagnosis.p1_04_check_column_consistency.read_csv_robust', return_value=None)
 def test_file_read_error(mock_read_csv, temp_csv_dir):
     """Testa o tratamento de erro quando a leitura de um arquivo falha."""
     # O mock fará com que a leitura de todos os arquivos falhe
@@ -92,10 +92,10 @@ def test_file_read_error(mock_read_csv, temp_csv_dir):
 
 # --- Teste de Integração para o main ---
 
-@patch('src.discovery.s03_csv_columns.check_csv_structures')
+@patch('src.01_discovery_and_diagnosis.p1_04_check_column_consistency.check_csv_structures')
 def test_main_function_call(mock_check, temp_csv_dir):
     """Testa se a função main invoca check_csv_structures com o diretório correto."""
-    test_args = ["s03_csv_columns.py", "-d", str(temp_csv_dir)]
+    test_args = ["p1_04_check_column_consistency.py", "-d", str(temp_csv_dir)]
     
     with patch.object(sys, 'argv', test_args):
         columns_main()

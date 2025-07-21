@@ -4,7 +4,7 @@ This document serves as a guide for the Gemini assistant, defining the conventio
 
 ## 1. My Role
 
-Your role is to act as a programming assistant specializing in Python for data analysis and data science. You should help me create, refactor, and optimize scripts, following best practices and the conventions defined in this guide. When creating new scripts, always add a comment block at the beginning explaining the script's objective.
+Your role is to act as a programming assistant specializing in Python for data analysis and data science. You should help me create, refactor, and optimize scripts, following best practices and the conventions defined in this guide.
 
 ## 2. Directory Structure
 
@@ -14,16 +14,18 @@ The project will follow this directory structure:
 /
 ├── data/                # Raw, intermediate, and processed data
 ├── notebooks/           # Jupyter notebooks for exploration
-├── src_python/          # Python scripts
+├── src/                 # Python scripts
 ├── .venv/               # Python virtual environment
 ├── .gitignore
 ├── README.md
 └── requirements.txt     # Project dependencies
 ```
 
-*Note: The current project structure will be gradually migrated to this standard.*
+## 3. Path Conventions
 
-## 3. Code Conventions
+- **Relative Paths**: Always use relative paths based on the project root. For example, refer to the source directory as `src/` instead of `D:\w\analise-dados\src\`.
+
+## 4. Code Conventions
 
 - **Language**: Python 3.11+.
 - **Code Style**: Strictly follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
@@ -31,12 +33,36 @@ The project will follow this directory structure:
 - **Typing**: Use type hints (PEP 484) whenever possible.
 - **Modularity**: Create modular and reusable scripts.
 
-## 4. Dependency Management
+## 5. Standard Script Header
+
+Every new Python script must start with a header block following this standard:
+
+```python
+# -*- coding: utf-8 -*-
+
+# --------------------------------------------------------------------------------
+# Descrição: [Descrição concisa do propósito do script em português.]
+# Exemplo de uso: [Exemplo de uso do script a partir da linha de comando.]
+#
+# Autor: [Nome do autor]
+# Criado em: [DD/MM/AAAA]
+# Versão: 1.0
+#
+# Modificado por: [Nome de quem modificou]
+# Modificado em: [DD/MM/AAAA]
+# Licença: MIT
+# --------------------------------------------------------------------------------
+```
+
+- **Authorship**: When you, Gemini, create a new script, set the `Autor` field to "Gemini". When modifying an existing script, keep the original author and add your name to the `Modificado por` field.
+- **License**: The license must always be `MIT`.
+
+## 6. Dependency Management
 
 - All Python dependencies must be listed in the `requirements.txt` file.
 - Use the virtual environment located in `.venv/`.
 
-## 5. Workflow
+## 7. Workflow
 
 When creating a new script or feature:
 1.  **Understand**: Analyze the request and relevant data.
@@ -44,11 +70,11 @@ When creating a new script or feature:
 3.  **Implement**: Write the code following the conventions above.
 4.  **Verify**: Add logs or simple tests to verify correctness.
 
-## 6. Testing
+## 8. Testing
 
 For any new feature or modification, you must create or, at a minimum, suggest the creation of tests to ensure the quality and stability of the codebase. The `pytest` library is preferred for testing.
 
-## 7. Language Conventions
+## 9. Language Conventions
 
 - **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in English.
 - **Literal Texts**: Comments and literal strings (e.g., for printing, logging, or user messages) must be in Brazilian Portuguese.

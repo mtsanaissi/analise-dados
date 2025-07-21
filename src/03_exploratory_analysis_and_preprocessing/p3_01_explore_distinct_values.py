@@ -16,7 +16,7 @@ import os
 import argparse
 import sys
 import pandas as pd
-from utils import find_files, read_csv_robust
+from ..utils import find_files, read_csv_robust
 
 
 def main():

@@ -19,7 +19,7 @@ import sys
 import pandas as pd
 import json
 import numpy as np
-from utils import find_files, read_csv_robust
+from ..utils import find_files, read_csv_robust
 
 # Não precisamos mais do 'warnings' se a lógica for melhorada
 
@@ -69,7 +69,7 @@ def profile_dataframe(df):
                 "min": float(numeric_series.min()), "max": float(numeric_series.max()),
                 "media": float(numeric_series.mean()), "mediana": float(numeric_series.median()),
                 "desvio_padrao": float(numeric_series.std()), "soma": float(numeric_series.sum()),
-                "quantil_25": float(numeric_series.quantile(0.25)), "quantil_75": float(numeric_series.quantile(0.75)),
+                "quantil_25": float(numeric_series.quantile(0.25)), "quantil_75": float(numeric_series.quantile(0.25)),
                 "contagem_zeros": int((numeric_series == 0).sum())
             })
 
@@ -179,7 +179,7 @@ def main():
     print(f"Relatório de Saída: {args.output_report}")
     print("----------------------------------------------\n")
 
-    discovered_files = find_data_files(
+    discovered_files = find_files(
         root_dir_processed, args.extensions, args.recursive)
     if not discovered_files:
         print("Nenhum arquivo encontrado com os critérios especificados.")
