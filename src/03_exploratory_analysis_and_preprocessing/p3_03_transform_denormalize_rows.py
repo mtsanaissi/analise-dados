@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+
+# --------------------------------------------------------------------------------
+# Descrição: [Manter a descrição original, se houver. Se não, adicione uma descrição concisa do propósito do script em português.]
+# Exemplo de uso: python p3_03_transform_denormalize_rows.py --argumento valor
+#
+# Autor: [Manter o autor original.]
+# Criado em: [Manter a data de criação original.]
+# Versão: 1.0
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 import pandas as pd
 
 df = pd.read_excel('..\data\Categorias Recomendações.xlsx')

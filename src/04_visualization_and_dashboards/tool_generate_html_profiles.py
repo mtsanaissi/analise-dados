@@ -1,14 +1,18 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: generate_profiles.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
+# --------------------------------------------------------------------------------
 # Descrição: Gera relatórios de perfilamento de dados com ydata-profiling
 #            para múltiplos arquivos e os salva como arquivos HTML individuais.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python tool_generate_html_profiles.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

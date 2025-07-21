@@ -1,16 +1,19 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Módulo: utils.py
-# Autor: Gemini
-# Data: 15/07/2025
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este módulo centraliza funções de utilidade reutilizáveis
 #            para o projeto de análise de dados, como descoberta de arquivos,
 #            leitura e gravação de dados, e verificações de qualidade.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: import utils
+#
+# Autor: Gemini
+# Criado em: 15/07/2025
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import sys

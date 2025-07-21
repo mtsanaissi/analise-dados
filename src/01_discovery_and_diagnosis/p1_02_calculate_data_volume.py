@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: summarize_data_volume.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script analisa o volume de dados em um diretório,
 #            calculando a contagem de registros e o tamanho em disco
 #            para arquivos CSV, Excel e JSON. Apresenta um resumo
 #            agregado por tipo de arquivo.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p1_02_calculate_data_volume.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

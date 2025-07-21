@@ -1,14 +1,18 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: explore_profiles_app.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
+# --------------------------------------------------------------------------------
 # Descrição: Uma aplicação web com Streamlit para explorar dinamicamente
 #            conjuntos de dados usando ydata-profiling.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python app_explore_single_profile.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import streamlit as st

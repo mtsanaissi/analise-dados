@@ -1,15 +1,19 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: explore_aggregated_profiles_app.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
+# --------------------------------------------------------------------------------
 # Descrição: Uma aplicação web com Streamlit para explorar dinamicamente
 #            o perfil de dados de forma individual (por arquivo),
 #            agregada por ano, ou do conjunto de dados completo.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python app_explore_aggregated_profiles.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import re

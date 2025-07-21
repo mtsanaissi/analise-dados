@@ -1,18 +1,21 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: check_data_integrity.py
-# Autor: Marcelo Anaissi
-# Data: 29/05/2025
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script realiza uma verificação inicial da integridade e
 #            estrutura de arquivos de dados (CSV, XLSX, JSON).
 #            Ele verifica a legibilidade, encoding, estrutura básica
 #            (delimitadores, cabeçalhos para CSV; planilhas para Excel;
 #            validade para JSON) e a presença de caracteres problemáticos.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p1_05_check_data_integrity.py --argumento valor
+#
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

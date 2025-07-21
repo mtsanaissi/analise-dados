@@ -1,21 +1,17 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Script para conferir consistência de colunas de cabeçalho de arquivos CSV.
-
-Configuração Principal (variáveis globais no script):
-- diretorio_raiz: Caminho da pasta local dos arquivos.
-
-Execução:
-  python check_csv_columns.py
-"""
-
-__author__ = "Marcelo Anaissi"
-__version__ = "1.0.0"
-__last_modified__ = "2025-05-28"
-__status__ = "Development"
-__llm__ = "Gemini 2.5 Pro"
+# --------------------------------------------------------------------------------
+# Descrição: Script para conferir consistência de colunas de cabeçalho de arquivos CSV.
+# Exemplo de uso: python p1_04_check_column_consistency.py
+#
+# Autor: Marcelo Anaissi
+# Criado em: 2025-05-28
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 
 import os

@@ -1,20 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: discover_and_convert.py
-# Autor: Marcelo Anaissi
-# Data: 29/05/2025
-# Versão: 2.0
-# Licença: (Se aplicável, ex: MIT, GPL, etc.)
+# --------------------------------------------------------------------------------
 # Descrição: Este script localiza arquivos em um diretório com base em
 #            extensões fornecidas. Após a localização, ele verifica
 #            o encoding de cada arquivo de texto e converte
 #            automaticamente para UTF-8 aqueles que não estiverem nesse formato.
+# Exemplo de uso: python p1_01_discover_and_convert_encoding.py --argumento valor
 #
-# Requisito: A biblioteca 'chardet' precisa ser instalada.
-#            Execute: pip install chardet
-# ----------------------------------------------------------------------------
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
+# Versão: 2.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: apply_corrections.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script aplica correções a arquivos CSV com base em um
 #            mapa de correções e uma lista de tarefas (arquivos e colunas
 #            problemáticos). Os arquivos corrigidos são salvos em um
 #            diretório de saída especificado.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p2_03_apply_value_corrections.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

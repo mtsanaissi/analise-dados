@@ -1,16 +1,19 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: detect_delimiter.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script varre arquivos CSV em um diretório e seus
 #            subdiretórios para detectar o delimitador de cada arquivo.
 #            Utiliza o csv.Sniffer do Python para a detecção.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p1_03_detect_csv_delimiter.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

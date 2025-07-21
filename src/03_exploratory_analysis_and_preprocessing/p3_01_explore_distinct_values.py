@@ -1,16 +1,19 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: show_unique_values.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.0
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script percorre um diretório de arquivos de dados (CSVs),
 #            coleta e exibe os valores distintos para um conjunto de
 #            colunas pré-definidas pelo usuário.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p3_01_explore_distinct_values.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.1
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

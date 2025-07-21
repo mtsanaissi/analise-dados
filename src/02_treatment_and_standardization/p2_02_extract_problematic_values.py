@@ -1,18 +1,21 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: extract_problematic_csv_values.py
-# Autor: Marcelo Anaissi
-# Data: 29/05/2025
-# Versão: 1.1 (Adicionado delimitador CSV parametrizável)
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script varre arquivos CSV em um diretório e subdiretórios,
 #            identifica caracteres problemáticos nas células e extrai
 #            os valores completos dessas células para um arquivo JSON.
 #            Há um tratamento especial para concatenar colunas "Cidade" e "UF".
 #            O delimitador CSV pode ser especificado pelo usuário.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p2_02_extract_problematic_values.py --argumento valor
+#
+# Autor: Marcelo Anaissi
+# Criado em: 29/05/2025
+# Versão: 1.2
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

@@ -1,19 +1,22 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: fix_csv_remove_total_column_recursive.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.1 (Adicionada busca recursiva)
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script processa arquivos CSV em um diretório especificado
 #            e, opcionalmente, em seus subdiretórios.
 #            Para cada arquivo CSV, ele verifica se a última coluna se chama
 #            "Total" (ignorando maiúsculas/minúsculas e espaços extras).
 #            Se for o caso, remove essa coluna e salva o arquivo CSV
 #            modificado, substituindo o original ou salvando com novo nome.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p2_04_fix_remove_total_column.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.2
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

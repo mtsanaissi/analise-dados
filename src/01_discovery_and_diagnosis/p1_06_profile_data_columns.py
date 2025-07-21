@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: profile_data_columns.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.1 (Otimizada a detecção de datas para reduzir warnings)
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script realiza um perfilamento (profiling) detalhado
 #            de cada coluna em arquivos de dados (CSV, Excel, JSON).
 #            Ele infere o tipo de dado e calcula estatísticas
 #            descritivas, gerando um relatório estruturado em JSON.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p1_06_profile_data_columns.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.2
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse

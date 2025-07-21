@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Script: filter_data_batch.py
-# Autor: Seu Nome/Empresa
-# Data: DD/MM/AAAA
-# Versão: 1.2 (Atualizado filtro de segmentos e corrigida a lógica de busca de arquivos)
-# Licença: (Se aplicável)
+# --------------------------------------------------------------------------------
 # Descrição: Este script processa arquivos de dados em lote. Ele lê
 #            arquivos de um diretório raiz, aplica um conjunto de filtros
 #            personalizáveis e salva os dados filtrados em um diretório
 #            de saída, preservando a estrutura de pastas original.
-# ----------------------------------------------------------------------------
+# Exemplo de uso: python p3_02_preprocess_filter_batch.py --argumento valor
+#
+# Autor: Seu Nome/Empresa
+# Criado em: DD/MM/AAAA
+# Versão: 1.3
+#
+# Modificado por: Jules
+# Modificado em: 21/07/2025
+# Licença: MIT
+# --------------------------------------------------------------------------------
 
 import os
 import argparse
