@@ -78,3 +78,7 @@ For any new feature or modification, you must create or, at a minimum, suggest t
 
 - **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in English.
 - **Literal Texts**: Comments and literal strings (e.g., for printing, logging, or user messages) must be in Brazilian Portuguese.
+
+## 10. Communication
+
+- **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.

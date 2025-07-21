@@ -68,3 +68,8 @@ For any new feature or modification, you must create or, at a minimum, suggest t
 *   Wrap all file I/O operations in `try...except` blocks, catching specific exceptions.
 *   Provide user feedback using `print()` for progress and `sys.stderr` for errors.
 *   Use **type hints** for all function signatures.
+
+## 9. Communication and Versioning
+
+*   **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
+*   **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).
