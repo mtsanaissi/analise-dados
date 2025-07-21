@@ -24,75 +24,38 @@ Esta é a fase mais crucial e frequentemente negligenciada. O objetivo aqui não
 
 ---
 
-### **Fase 1: Coleta e Descoberta de Dados**
+### **Fase 1: Descoberta e Diagnóstico de Dados**
 
-Com o problema definido, o foco se volta para obter a matéria-prima.
+Esta fase combina a coleta inicial com a avaliação da "saúde" dos dados.
 
--   **Objetivo:** Identificar, acessar e coletar todos os dados brutos necessários para a análise.
--   **Atividades Principais:**
-    -   Mapear fontes de dados (Bancos de dados, APIs, planilhas, arquivos locais, data lakes).
-    -   Executar queries SQL, consumir APIs, ou usar scripts para encontrar e agrupar arquivos.
-    -   Ingestão dos dados para um ambiente de análise (staging area).
+-   **Objetivo:** Identificar, acessar e coletar todos os dados brutos necessários, e simultaneamente avaliar sua qualidade, estrutura, conteúdo e metadados.
+-   **Atividades Principais (Orquestradas):**
+    -   **Descoberta de Arquivos:** Localização de arquivos de dados em diretórios especificados.
+    -   **Análise de Encoding:** Detecção e, se necessário, conversão automática de encoding para UTF-8 para garantir a legibilidade.
+    -   **Análise de Volume:** Cálculo de métricas como contagem de registros e tamanho em disco para diversos formatos (CSV, Excel, JSON).
+    -   **Verificação de Integridade:** Checagens iniciais de legibilidade, validade estrutural (ex: delimitadores CSV, validade JSON) e presença de caracteres problemáticos.
+    -   **Análise Estrutural Específica:** Detecção de delimitadores em CSVs, verificação de consistência de colunas, e validação de estruturas para outros tipos de arquivo (JSON, Excel).
+    -   **Perfilamento de Conteúdo (Data Profiling):** Geração de estatísticas descritivas detalhadas para cada coluna (tipos inferidos, valores únicos, nulos, min/max, etc.).
 -   **Entregáveis:**
-    -   Conjunto de dados brutos.
-    -   Dicionário de dados (se disponível).
-    -   Documentação sobre a origem e o processo de coleta.
+    -   Conjunto de dados brutos (potencialmente com encoding padronizado).
+    -   **Relatório Consolidado de Descoberta e Diagnóstico:** Um resumo abrangente de todas as análises realizadas, incluindo problemas identificados e insights sobre a estrutura e qualidade dos dados.
 -   **Escalabilidade:**
-    -   **Simples:** Usar um único arquivo CSV fornecido.
-    -   **Complexo:** Construir um pipeline de ETL (Extract, Transform, Load) para coletar dados de múltiplas fontes (bancos de dados relacionais, NoSQL, dados de streaming de eventos) e centralizá-los em um Data Warehouse ou Data Lake.
+    -   **Simples:** Análise automatizada de um pequeno conjunto de arquivos locais.
+    -   **Complexo:** Processamento de grandes volumes de dados de diversas fontes, com relatórios detalhados para cada arquivo e agregação de insights.
 
 ---
 
-### **Fase 2: Diagnóstico e Profiling de Dados**
-
-Antes de usar os dados, precisamos entender sua "saúde". É uma fase de investigação forense.
-
--   **Objetivo:** Avaliar a qualidade, estrutura, conteúdo e metadados dos dados brutos.
--   **Atividades Principais:**
-    -   **Análise de Volume:** Contar registros, tamanho dos arquivos.
-    -   **Análise Estrutural:** Detectar delimitadores (CSVs), verificar consistência de colunas, validar schemas (JSONs), identificar planilhas (Excel).
-    -   **Profiling de Conteúdo:** Para cada coluna, calcular estatísticas descritivas (média, mediana, desvio padrão), contar valores únicos, nulos, e inferir tipos de dados (numérico, categórico, data, etc.).
-    -   **Detecção de Anomalias:** Identificar valores atípicos (outliers), caracteres problemáticos (erros de encoding), e formatos inconsistentes.
--   **Entregáveis:**
-    -   **Relatório de Perfil de Dados (Data Profile):** Um documento (JSON, HTML) que resume as características de cada coluna.
-    -   **Relatório de Qualidade de Dados:** Uma lista de todos os problemas encontrados (ex: "Coluna 'Data' está como texto", "Valores nulos em 'Vendas'", "Encoding incorreto no arquivo X").
--   **Escalabilidade:**
-    -   **Simples:** Abrir o CSV no Excel e inspecionar visualmente as colunas.
-    -   **Complexo:** Usar ferramentas automatizadas (como `ydata-profiling` ou soluções de mercado como Great Expectations) para gerar perfis detalhados e validar regras de qualidade de dados em terabytes de informação.
-
----
-
-### **Fase 3: Tratamento e Limpeza de Dados**
-
-Com o diagnóstico em mãos, esta é a fase de "consertar" os dados.
-
--   **Objetivo:** Corrigir os problemas estruturais e de conteúdo para tornar os dados confiáveis e utilizáveis.
--   **Atividades Principais:**
-    -   **Padronização:** Converter encoding para UTF-8, padronizar delimitadores de CSV.
-    -   **Limpeza:** Corrigir erros de digitação e caracteres inválidos (usando mapas de "de-para"), remover duplicatas, tratar outliers.
-    -   **Tratamento de Valores Ausentes:** Decidir a estratégia (remover, preencher com média/mediana/moda, ou usar um modelo para prever os valores).
-    -   **Correção de Tipos:** Converter colunas para os tipos corretos (ex: string para datetime, object para float).
--   **Entregáveis:**
-    -   Conjunto de dados limpo e padronizado.
-    -   Scripts de limpeza documentados e reproduzíveis.
-    -   Relatório das transformações aplicadas.
--   **Escalabilidade:**
-    -   **Simples:** Fazer algumas substituições manuais em um script.
-    -   **Complexo:** Criar um pipeline de limpeza com regras de negócio complexas, logging de todas as alterações e controle de versão dos dados (ex: usando DVC - Data Version Control).
-
----
-
-### **Fase 4: Análise Exploratória (EDA) e Pré-processamento**
+### **Fase 3: Análise Exploratória (EDA) e Pré-processamento**
 
 Agora com dados limpos, a verdadeira exploração começa.
 
 -   **Objetivo:** Entender profundamente os padrões, relações e a estrutura dos dados, e prepará-los para análises mais complexas ou modelagem.
--   **Atividades Principais:**
+-   **Atividades Principais (Orquestradas):**
     -   **Visualização:** Criar gráficos (histogramas, box plots, scatter plots) para visualizar distribuições e correlações.
     -   **Análise Estatística:** Testar hipóteses, calcular correlações.
-    *   **Feature Engineering:** Criar novas colunas a partir das existentes (ex: extrair o mês de uma data, agrupar categorias).
-    *   **Seleção de Dados:** Filtrar os dados para focar em um segmento de interesse.
-    *   **Normalização/Escalonamento:** Preparar dados numéricos para algoritmos de Machine Learning.
+    -   **Feature Engineering:** Criar novas colunas a partir das existentes (ex: extrair o mês de uma data, agrupar categorias).
+    -   **Seleção de Dados:** Filtrar os dados para focar em um segmento de interesse.
+    -   **Normalização/Escalonamento:** Preparar dados numéricos para algoritmos de Machine Learning.
 -   **Entregáveis:**
     -   Notebooks de análise (Jupyter) ou dashboards interativos (Streamlit, Plotly).
     -   Visualizações que respondem às perguntas de negócio iniciais.
@@ -103,17 +66,36 @@ Agora com dados limpos, a verdadeira exploração começa.
 
 ---
 
+### **Fase 4: Visualização e Dashboards**
+
+A fase final, onde os resultados são comunicados através de ferramentas visuais e interativas.
+
+-   **Objetivo:** Traduzir os achados técnicos em insights acionáveis para os stakeholders através de visualizações e dashboards.
+-   **Atividades Principais (Orquestradas):**
+    -   **Criação de Dashboards:** Desenvolvimento de painéis interativos para exploração de dados agregados e perfis individuais.
+    -   **Geração de Relatórios HTML:** Criação de relatórios de perfil de dados em formato HTML para fácil compartilhamento.
+    -   **Análise Genérica de Dados:** Ferramentas para visualização e análise de dados de forma flexível.
+-   **Entregáveis:**
+    -   Dashboards interativos (Streamlit).
+    -   Relatórios HTML de perfil de dados.
+    -   Ferramentas de análise genérica.
+-   **Escalabilidade:**
+    -   **Simples:** Geração de relatórios estáticos.
+    -   **Complexo:** Dashboards em tempo real com funcionalidades avançadas de filtragem e drill-down.
+
+---
+
 ### **Fase 5: Análise Aprofundada e Modelagem (Opcional)**
 
 Esta fase é o coração dos projetos de Data Science, mas pode não ser necessária para análises puramente descritivas.
 
 -   **Objetivo:** Aplicar técnicas estatísticas avançadas ou algoritmos de Machine Learning para fazer previsões ou encontrar padrões ocultos.
--   **Atividades Principais:**
-    -   Seleção de algoritmos (regressão, classificação, clusterização).
-    -   Treinamento e validação de modelos.
-    -   Otimização de hiperparâmetros.
+-   **Atividades Principais (Orquestradas):**
+    -   **Seleção de Algoritmos:** Escolha de modelos apropriados (regressão, classificação, clusterização).
+    -   **Treinamento e Validação:** Desenvolvimento e teste de modelos de Machine Learning.
+    -   **Otimização de Hiperparâmetros:** Ajuste fino dos modelos para melhor desempenho.
 -   **Entregáveis:**
-    -   Modelo treinado.
+    -   Modelo treinado e validado.
     -   Métricas de performance do modelo.
 -   **Escalabilidade:**
     -   **Simples:** Uma regressão linear simples em um notebook.

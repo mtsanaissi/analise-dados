@@ -18,13 +18,17 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 
 ## 3. Project Structure and Naming
 
-*   All new scripts must be placed in the appropriate subfolder within `\src\` based on their function:
-    *   **`\01_discovery\`**: For scripts that diagnose and explore data without changing it.
-    *   **`\02_standardize\`**: For scripts that standardize file formats (encoding, delimiters, etc.).
-    *   **`\03_sanitize\`**: For scripts that fix the content of the data (e.g., correcting values).
-    *   **`\04_preprocess\`**: For scripts that handle missing data, outliers, or initial feature selection.
-    *   **`\05_transform\`**: For scripts that perform structural data transformations (e.g., binning, pivoting).
-*   Script names should be descriptive and use snake_case (e.g., `analyze_data_volume.py`).
+*   The project follows a modular, phase-based structure, with a central orchestrator for execution.
+*   **Main Orchestrator**: The primary entry point for executing phases is `src/main/orchestrator.py`.
+*   **Phase Directories**: All phase-specific logic and tools are located within `src/phases/`. Each phase has its own dedicated directory (e.g., `src/phases/phase01_discovery/`).
+    *   **`src/phases/phaseXX_name/`**: Contains the specific orchestrator for that phase (e.g., `phase01_orchestrator.py`) and subdirectories for modular functions.
+    *   **`core/`**: For generic functions within a phase, independent of specific file types (e.g., `encoding_detector.py`, `data_volume_analyzer.py`, `data_integrity_checker.py`, `data_profiler.py`).
+    *   **`file_type_specific/`**: For functions tailored to specific file types (e.g., `csv/delimiter_detector.py`, `csv/column_consistency_checker.py`).
+    *   **`reporting/`**: For modules responsible for generating consolidated reports for the phase.
+*   **General Utilities**:
+    *   `src/utils.py`: Contains general utility functions used across multiple parts of the project (e.g., `find_files`).
+    *   `src/connectors/`: Contains data loading connectors for various file formats (e.g., `csv_connector.py`, `factory.py`).
+*   **Script Naming**: Individual Python files within these modules should be descriptive and use `snake_case` (e.g., `encoding_detector.py`, `delimiter_detector.py`).
 
 ## 4. Standard Script Header
 Every new Python script must start with a header block following this standard.
