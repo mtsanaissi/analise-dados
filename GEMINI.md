@@ -86,3 +86,6 @@ For any new feature or modification, you must create or, at a minimum, suggest t
 ## 10. Communication
 
 - **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
+- When asked to generate prompts for Jules, you **must** follow this specific structure for the generated text:
+  1.  **Opening:** The prompt must begin **directly** with a short, descriptive title (up to 5 words) that summarizes the task. Do not use a prefix like "Title:".
+  2.  **First Actionable Step:** The first numbered or bulleted step in the task list must be: "Review Guiding Principles: Your top priority is to read and strictly adhere to all rules and guidelines defined in `JULES.md`..."
