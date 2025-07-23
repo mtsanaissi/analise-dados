@@ -8,6 +8,7 @@ from phases.phase01_discovery.core.data_integrity_checker import analyze_data_in
 from phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
 from phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
 from phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
+from phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
 from phases.phase01_discovery.core.data_profiler import analyze_data_profiling
 
 
@@ -29,6 +30,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         "csv_delimiter_analysis": [],
         "csv_column_consistency_analysis": {},
         "json_schema_validation": [],
+        "excel_sheet_analysis": [],
         "data_profiling_analysis": []
     }
 
@@ -76,7 +78,15 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         results["json_schema_validation"].append({"file": os.path.basename(file_path), "result": schema_result})
         print(f"  {os.path.basename(file_path)}: Status da validação do esquema: {schema_result['status']}")
 
-    # 7. Perfilamento de Dados
+    # 7. Análise de Planilhas Excel (apenas para arquivos XLSX)
+    print("\n--- Executando Análise de Planilhas Excel ---")
+    excel_files = [f for f in discovered_files if f.lower().endswith('.xlsx')]
+    for file_path in excel_files:
+        sheet_analysis_result = analyze_excel_sheets(file_path)
+        results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "result": sheet_analysis_result})
+        print(f"  {os.path.basename(file_path)}: Status da análise de planilhas: {sheet_analysis_result['status']}")
+
+    # 8. Perfilamento de Dados
     print("\n--- Executando Perfilamento de Dados ---")
     profiling_result = analyze_data_profiling(data_project_path, extensions, recursive)
     results["data_profiling_analysis"] = profiling_result
