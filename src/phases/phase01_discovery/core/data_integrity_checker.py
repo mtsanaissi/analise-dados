@@ -6,7 +6,7 @@ import chardet
 import csv
 import json
 import codecs  # Para leitura com tratamento de erros de encoding
-from utils import find_files # Importa a função centralizada
+from utils import find_files  # Importa a função centralizada
 # from utils import has_problematic_char, read_csv_robust # Estas funções não estão no utils.py atual, vou refatorar para usar as funções internas ou remover se não forem necessárias.
 
 
@@ -18,16 +18,14 @@ def detect_problematic_chars(file_path, encoding_to_try, sample_size_bytes=1024*
     """
     problematic_chars_found = False
     problematic_char_samples = []
-    control_chars_allowed = {'	', '
-', ''}  # Tab, Newline, Carriage Return
+    control_chars_allowed = {'	', '\n', '\r'}  # Tab, Newline, Carriage Return
 
     try:
         with codecs.open(file_path, 'r', encoding=encoding_to_try, errors='replace') as f:
             sample_content = f.read(sample_size_bytes // 2)
 
             for i, char_read in enumerate(sample_content):
-                if char_read == '
-':  # Caractere de substituição Unicode
+                if char_read == '\ufffd':  # Caractere de substituição Unicode
                     problematic_chars_found = True
                     if len(problematic_char_samples) < 5:
                         problematic_char_samples.append(
@@ -93,7 +91,8 @@ def check_csv_file(file_path):
             report["details"]["encoding_confidence"] = detection['confidence']
     except Exception as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Falha ao tentar detectar encoding: {str(e)}"
+        report["details"][
+            "error_message"] = f"Falha ao tentar detectar encoding: {str(e)}"
         return report
 
     detected_encoding = report["details"]["encoding"] if report["details"]["encoding_confidence"] > 0.7 else 'utf-8'
@@ -133,7 +132,8 @@ def check_csv_file(file_path):
         report["details"]["error_message"] = f"CSV Sniffer falhou: {str(e)}. Pode indicar delimitador incomum ou arquivo malformatado."
     except Exception as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Falha ao analisar CSV para delimitador/cabeçalho: {str(e)}"
+        report["details"][
+            "error_message"] = f"Falha ao analisar CSV para delimitador/cabeçalho: {str(e)}"
         return report
 
     try:
@@ -167,7 +167,8 @@ def check_csv_file(file_path):
         report["details"]["error_message"] = f"Pandas UnicodeDecodeError: {str(e)}. Encoding '{detected_encoding}' pode estar incorreto."
     except Exception as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Pandas: Erro ao ler amostra do CSV: {str(e)}"
+        report["details"][
+            "error_message"] = f"Pandas: Erro ao ler amostra do CSV: {str(e)}"
 
     if report["status"] != "Erro" or "Encoding" not in report["details"]["error_message"]:
         prob_chars, prob_samples = detect_problematic_chars(
@@ -230,7 +231,8 @@ def check_excel_file(file_path):
                     sheet_info["error_message"] = "Amostra da planilha lida como vazia, mas o arquivo é grande."
                     all_sheets_ok = False
             except Exception as e_sheet:
-                sheet_info["error_message"] = f"Erro ao ler amostra da planilha '{sheet_name}': {str(e_sheet)}"
+                sheet_info[
+                    "error_message"] = f"Erro ao ler amostra da planilha '{sheet_name}': {str(e_sheet)}"
                 all_sheets_ok = False
             report["details"]["sheets_info"].append(sheet_info)
 
@@ -238,7 +240,8 @@ def check_excel_file(file_path):
 
     except Exception as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Falha ao abrir ou processar arquivo Excel: {str(e)}"
+        report["details"][
+            "error_message"] = f"Falha ao abrir ou processar arquivo Excel: {str(e)}"
         return report
 
     if report["status"] == "Pendente":
@@ -285,7 +288,8 @@ def check_json_file(file_path):
             report["details"]["encoding_confidence"] = detection['confidence']
     except Exception as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Falha ao tentar detectar encoding do JSON: {str(e)}"
+        report["details"][
+            "error_message"] = f"Falha ao tentar detectar encoding do JSON: {str(e)}"
         return report
 
     detected_encoding = report["details"]["encoding"] if report["details"]["encoding_confidence"] > 0.7 else 'utf-8'
@@ -324,11 +328,13 @@ def check_json_file(file_path):
         except Exception as e_lines:
             report["details"]["json_type"] = "Inválido"
             report["status"] = "Erro"
-            report["details"]["error_message"] = f"Erro ao processar como JSON Lines: {str(e_lines)}"
+            report["details"][
+                "error_message"] = f"Erro ao processar como JSON Lines: {str(e_lines)}"
     except UnicodeDecodeError as e_unicode:
         report["status"] = "Erro"
         report["details"]["json_type"] = "Inválido"
-        report["details"]["error_message"] = f"UnicodeDecodeError: Encoding '{detected_encoding}' incorreto para JSON. Detalhes: {str(e_unicode)}"
+        report["details"][
+            "error_message"] = f"UnicodeDecodeError: Encoding '{detected_encoding}' incorreto para JSON. Detalhes: {str(e_unicode)}"
     except Exception as e_gen:
         report["status"] = "Erro"
         report["details"]["json_type"] = "Inválido"
@@ -373,9 +379,8 @@ def analyze_data_integrity(root_directory, extensions=['csv', 'xlsx', 'json', 'x
             report = check_excel_file(file_path)
         elif extension == 'json':
             report = check_json_file(file_path)
-        
+
         if report:
             all_reports.append(report)
-    
-    return {"status": "success", "message": "Verificação de integridade concluída.", "reports": all_reports}
 
+    return {"status": "success", "message": "Verificação de integridade concluída.", "reports": all_reports}

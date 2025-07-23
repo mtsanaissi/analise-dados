@@ -1,4 +1,5 @@
-from src.connectors.csv_connector import CsvConnector
+from .csv_connector import CsvConnector
+
 
 def get_data_loader(file_path: str) -> CsvConnector:
     """
@@ -16,4 +17,5 @@ def get_data_loader(file_path: str) -> CsvConnector:
     if file_path.endswith('.csv'):
         return CsvConnector(file_path)
     else:
-        raise ValueError(f"Extensão de arquivo não suportada para: {file_path}")
+        raise ValueError(
+            f"Extensão de arquivo não suportada para: {file_path}")
