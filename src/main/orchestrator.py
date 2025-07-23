@@ -3,6 +3,7 @@
 import argparse
 import os
 import sys
+import json
 
 # Adiciona o diretório 'src' ao sys.path para permitir importações relativas
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -37,8 +38,14 @@ def main():
     if args.phase == 'discovery':
         print("Executando Fase 1: Descoberta e Diagnóstico...")
         results = run_discovery_phase(data_project_abs_path)
-        print("\n--- Resultados da Fase 1 ---")
-        print(results)
+
+        output_filename = "discovery_report.json"
+        output_path = os.path.join(data_project_abs_path, output_filename)
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=4, ensure_ascii=False)
+
+        print(f"\n--- Relatório da Fase 1 salvo em: {output_path} ---")
     elif args.phase == 'treatment':
         print("Executando Fase 2: Tratamento e Padronização...")
         # Lógica para a Fase 2
