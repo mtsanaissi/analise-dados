@@ -20,7 +20,10 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
     """
     logging.info(f"Iniciando Fase 1: Descoberta e Diagnóstico para {data_project_path}")
 
-    discovered_files = find_files(data_project_path, extensions, recursive)
+    # Define padrões de exclusão para não analisar os próprios relatórios gerados
+    exclude_patterns = ['*_report.json', '*_report.html']
+    discovered_files = find_files(data_project_path, extensions, recursive, exclude_patterns=exclude_patterns)
+
     if not discovered_files:
         return {"status": "success", "message": "Nenhum arquivo encontrado para análise.", "results": {}}
 

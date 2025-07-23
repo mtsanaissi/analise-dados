@@ -5,7 +5,7 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 ## 1. Core Principles
 
 1.  **Modularity**: Every piece of logic should be in its right place. Don't repeat code. If a function can be used by more than one script, it belongs in `utils.py`.
-2.  **Robustness**: Code must be resilient. Anticipate issues like missing files, incorrect formats, or permission errors. Every script that performs I/O or parsing must have solid error handling.
+2.  **Robustness**: Code must be resilient. Anticipate issues like missing files or incorrect formats. All I/O and parsing operations must have robust `try...except` blocks and provide clear feedback via logging.
 3.  **Clarity & Documentation**: Code is read more often than it is written. Use clear, descriptive names. All documentation must follow these rules:
     *   **Docstrings**: Every function, class, and public method must have a PEP 257 compliant docstring in Portuguese, explaining its purpose, arguments (`Args:`), and return value (`Returns:`).
     *   **Inline Comments**: Use inline comments sparingly. They should explain the *why* behind complex or non-obvious code, not the *what*.
@@ -52,7 +52,17 @@ Every new Python script must start with a header block following this standard.
 
 **Authorship:** When you, Jules, create a new script, set the `Autor` field to "Jules". When modifying an existing script, keep the original author and add your name to the `Modificado por` field. The license must always be `MIT`.
 
-## 5. Workflow
+## 5. Logging and Reporting
+
+1.  **Logging Standard**: Use the standard Python `logging` module for all script output. **Do not use `print()` for status updates or errors.**
+2.  **Configuration**: The main orchestrator (`src/main/orchestrator.py`) is responsible for the basic logging configuration (`logging.basicConfig`). Sub-modules and other scripts should not reconfigure the logger.
+3.  **Logging Levels**:
+    *   `logging.info()`: For messages about progress and the current state of execution.
+    *   `logging.warning()`: For non-critical issues that do not stop the process but should be noted.
+    *   `logging.error()`: For errors that prevent a specific task (e.g., processing one file) from completing. The script should attempt to continue.
+4.  **Output Reports**: Complex operations or phases (like 'discovery') must not print results directly to the console. Instead, they must save the results to a structured file (e.g., `discovery_report.json`) in the relevant data project directory. The script should log an `info` message indicating the path where the report was saved.
+
+## 6. Workflow
 
 When creating a new script or feature:
 1.  **Understand**: Analyze the request and relevant data.
@@ -60,22 +70,22 @@ When creating a new script or feature:
 3.  **Implement**: Write the code following all conventions listed here.
 4.  **Verify**: Add logs or simple tests to verify correctness.
 
-## 6. Testing
+## 7. Testing
 
 For any new feature or modification, you must create or, at a minimum, suggest the creation of tests to ensure the quality and stability of the codebase. The `pytest` library is preferred for testing.
 
-## 7. Language Conventions
+## 8. Language Conventions
 
 *   **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in **English**.
-*   **Literal Texts**: Comments, docstrings, and literal strings for user interaction (e.g., `print()`, `logging`, `argparse` help messages) must be in **Brazilian Portuguese**.
+*   **Literal Texts**: Comments, docstrings, and literal strings for user interaction (e.g., logging messages, `argparse` help messages) must be in **Brazilian Portuguese**.
 
-## 8. General Rules
+## 9. General Rules
 
-*   Wrap all file I/O operations in `try...except` blocks, catching specific exceptions.
-*   Provide user feedback using `print()` for progress and `sys.stderr` for errors.
-*   Use **type hints** for all function signatures.
+*   **Error Handling**: Wrap operations that can fail (e.g., file I/O, data parsing) in `try...except` blocks. Always catch specific exceptions (e.g., `FileNotFoundError`, `json.JSONDecodeError`) instead of a generic `Exception` where possible.
+*   **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
+*   **Type Hints**: Use **type hints** for all function signatures.
 
-## 9. Communication and Versioning
+## 10. Communication and Versioning
 
 *   **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
 *   **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).

@@ -20,22 +20,27 @@ import sys
 import pandas as pd
 import chardet
 import csv
+import fnmatch
 
-def find_files(root_path: str, extensions: list[str], recursive: bool = True) -> list[str]:
+def find_files(root_path: str, extensions: list[str], recursive: bool = True, exclude_patterns: list[str] = None) -> list[str]:
     """
-    Encontra arquivos em um diretório com base em uma lista de extensões.
+    Encontra arquivos em um diretório com base em uma lista de extensões,
+    com a opção de excluir arquivos que correspondem a determinados padrões.
 
     Args:
         root_path (str): O diretório raiz para a busca.
         extensions (list[str]): Uma lista de extensões de arquivo (sem o ponto).
         recursive (bool): Se True, busca recursivamente em subdiretórios.
+        exclude_patterns (list[str], optional): Uma lista de padrões de nome de arquivo
+                                                  a serem excluídos (ex: ['*_report.json', 'temp_*']).
 
     Returns:
         list[str]: Uma lista de caminhos absolutos para os arquivos encontrados.
     """
     found_files = []
     normalized_extensions = [ext.lower().lstrip('.') for ext in extensions]
-    
+    exclude_patterns = exclude_patterns or []
+
     if not os.path.isdir(root_path):
         print(f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
         return found_files
@@ -43,6 +48,10 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True) ->
     if recursive:
         for dirpath, _, filenames in os.walk(root_path):
             for filename in filenames:
+                # Verifica se o arquivo deve ser excluído
+                if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns):
+                    continue
+
                 _, file_ext_with_dot = os.path.splitext(filename)
                 file_extension = file_ext_with_dot.lstrip('.').lower()
                 if file_extension in normalized_extensions:
@@ -50,6 +59,10 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True) ->
     else:
         try:
             for filename in os.listdir(root_path):
+                # Verifica se o arquivo deve ser excluído
+                if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns):
+                    continue
+
                 full_path = os.path.join(root_path, filename)
                 if os.path.isfile(full_path):
                     _, file_ext_with_dot = os.path.splitext(filename)

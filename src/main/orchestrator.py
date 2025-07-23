@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 
-from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
 import argparse
 import logging
 import os
 import sys
 import json
+import numpy as np
 
-# Adiciona o diretório 'src' ao sys.path para permitir importações relativas
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
+
+
+class NpEncoder(json.JSONEncoder):
+    """
+    Codificador JSON personalizado para lidar com tipos de dados NumPy.
+    Converte tipos NumPy em tipos nativos do Python para serialização.
+    """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 
 def main():
@@ -50,10 +65,11 @@ def main():
         output_path = os.path.join(data_project_abs_path, output_filename)
 
         with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(results, f, indent=4, ensure_ascii=False)
+            json.dump(results, f, indent=4,
+                      ensure_ascii=False, cls=NpEncoder)
 
-        logging.info("\n--- Resultados da Fase 1 ---")
-        logging.info(results)
+        logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
+
     elif args.phase == 'treatment':
         logging.info("Executando Fase 2: Tratamento e Padronização...")
         # Lógica para a Fase 2
