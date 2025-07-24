@@ -12,7 +12,7 @@ from phases.phase01_discovery.file_type_specific.json.schema_validator import va
 from phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
 
 
-def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True):
+def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True, output_format='text'):
     """
     Orquestra todas as ferramentas da Fase 1: Descoberta e Diagnóstico.
     Retorna um relatório consolidado de todas as análises.
@@ -117,4 +117,11 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
             results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
 
     logging.info("\nFase 1: Descoberta e Diagnóstico concluída.")
-    return {"status": "success", "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.", "detailed_results": results}
+
+    results_wrapper = {"status": "success", "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.", "detailed_results": results}
+
+    if output_format == 'interactive':
+        from .interactive_visualizer import display_interactive_report
+        display_interactive_report(results_wrapper)
+
+    return results_wrapper

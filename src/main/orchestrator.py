@@ -42,6 +42,11 @@ def main():
         choices=['discovery', 'treatment', 'exploratory', 'visualization'],
         help="Fase a ser executada (discovery, treatment, exploratory, visualization)."
     )
+    parser.add_argument(
+        "--output-format", type=str, default="text",
+        choices=['text', 'interactive'],
+        help="Formato da saída para a fase de descoberta (text, interactive)."
+    )
     args = parser.parse_args()
 
     data_project_abs_path = os.path.abspath(
@@ -58,8 +63,11 @@ def main():
     if args.phase == 'discovery':
         from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
         logging.info("Executando Fase 1: Descoberta e Diagnóstico...")
-        results = run_discovery_phase(data_project_abs_path)
+        results = run_discovery_phase(
+            data_project_abs_path, output_format=args.output_format)
 
+        # A lógica de salvar o relatório JSON é mantida, pois o modo interativo
+        # é um adicional que não substitui o relatório padrão.
         output_filename = "discovery_report.json"
         output_path = os.path.join(data_project_abs_path, output_filename)
 
