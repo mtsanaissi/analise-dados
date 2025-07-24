@@ -25,10 +25,6 @@ class NpEncoder(json.JSONEncoder):
 
 
 def main():
-    # Configuração central do logging
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
-
     parser = argparse.ArgumentParser(
         description="Orquestrador principal para as fases de análise de dados.",
         formatter_class=argparse.RawTextHelpFormatter
@@ -52,10 +48,12 @@ def main():
     # Ajusta o nível de logging com base no formato de saída
     if args.output_format == 'interactive':
         logging.basicConfig(level=logging.WARNING,  # Suprime INFO e DEBUG
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+                            format='%(asctime)s - %(levelname)s - %(message)s',
+                            force=True)
     else:
         logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+                            format='%(asctime)s - %(levelname)s - %(message)s',
+                            force=True)
 
     data_project_abs_path = os.path.abspath(
         os.path.expanduser(args.data_project_path))

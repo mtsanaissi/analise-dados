@@ -68,20 +68,21 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         results["data_integrity_analysis"] = {"status": "error", "message": str(e)}
 
     # 4. Análise de Delimitador CSV (apenas para arquivos CSV)
-    logging.info("--- Executando Análise de Delimitador CSV ---")
     csv_files = [f for f in discovered_files if f.lower().endswith('.csv')]
-    for file_path in csv_files:
-        try:
-            delimiter_result = detect_csv_delimiter(file_path)
-            results["csv_delimiter_analysis"].append({"file": os.path.basename(file_path), "result": delimiter_result})
-            logging.info(f"  {os.path.basename(file_path)}: Delimitador detectado: {delimiter_result.get('delimiter', 'N/A')}")
-        except Exception as e:
-            logging.error(f"Falha na Análise de Delimitador CSV para {os.path.basename(file_path)}: {e}")
-            results["csv_delimiter_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
+    if csv_files:
+        logging.info("--- Executando Análise de Delimitador CSV ---")
+        for file_path in csv_files:
+            try:
+                delimiter_result = detect_csv_delimiter(file_path)
+                results["csv_delimiter_analysis"].append({"file": os.path.basename(file_path), "result": delimiter_result})
+                logging.info(f"  {os.path.basename(file_path)}: Delimitador detectado: {delimiter_result.get('delimiter', 'N/A')}")
+            except Exception as e:
+                logging.error(f"Falha na Análise de Delimitador CSV para {os.path.basename(file_path)}: {e}")
+                results["csv_delimiter_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
 
     # 5. Análise de Consistência de Colunas CSV (apenas para arquivos CSV)
-    logging.info("--- Executando Análise de Consistência de Colunas CSV ---")
     if csv_files:
+        logging.info("--- Executando Análise de Consistência de Colunas CSV ---")
         try:
             column_consistency_result = check_csv_structures(data_project_path)
             results["csv_column_consistency_analysis"] = column_consistency_result
@@ -89,32 +90,32 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         except Exception as e:
             logging.error(f"Falha na Análise de Consistência de Colunas CSV: {e}")
             results["csv_column_consistency_analysis"] = {"status": "error", "message": str(e)}
-    else:
-        logging.info("Nenhum arquivo CSV encontrado para análise de consistência de colunas.")
 
     # 6. Análise de Esquema JSON (apenas para arquivos JSON)
-    logging.info("--- Executando Análise de Esquema JSON ---")
     json_files = [f for f in discovered_files if f.lower().endswith('.json')]
-    for file_path in json_files:
-        try:
-            schema_result = validate_json_schema(file_path)
-            results["json_schema_validation"].append({"file": os.path.basename(file_path), "result": schema_result})
-            logging.info(f"  {os.path.basename(file_path)}: Status da validação do esquema: {schema_result['status']}")
-        except Exception as e:
-            logging.error(f"Falha na Análise de Esquema JSON para {os.path.basename(file_path)}: {e}")
-            results["json_schema_validation"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
+    if json_files:
+        logging.info("--- Executando Análise de Esquema JSON ---")
+        for file_path in json_files:
+            try:
+                schema_result = validate_json_schema(file_path)
+                results["json_schema_validation"].append({"file": os.path.basename(file_path), "result": schema_result})
+                logging.info(f"  {os.path.basename(file_path)}: Status da validação do esquema: {schema_result['status']}")
+            except Exception as e:
+                logging.error(f"Falha na Análise de Esquema JSON para {os.path.basename(file_path)}: {e}")
+                results["json_schema_validation"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
 
     # 7. Análise de Planilhas Excel (apenas para arquivos XLSX)
-    logging.info("--- Executando Análise de Planilhas Excel ---")
-    excel_files = [f for f in discovered_files if f.lower().endswith('.xlsx')]
-    for file_path in excel_files:
-        try:
-            sheet_analysis_result = analyze_excel_sheets(file_path)
-            results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "result": sheet_analysis_result})
-            logging.info(f"  {os.path.basename(file_path)}: Status da análise de planilhas: {sheet_analysis_result['status']}")
-        except Exception as e:
-            logging.error(f"Falha na Análise de Planilhas Excel para {os.path.basename(file_path)}: {e}")
-            results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
+    excel_files = [f for f in discovered_files if f.lower().endswith(('.xlsx', '.xls'))]
+    if excel_files:
+        logging.info("--- Executando Análise de Planilhas Excel ---")
+        for file_path in excel_files:
+            try:
+                sheet_analysis_result = analyze_excel_sheets(file_path)
+                results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "result": sheet_analysis_result})
+                logging.info(f"  {os.path.basename(file_path)}: Status da análise de planilhas: {sheet_analysis_result['status']}")
+            except Exception as e:
+                logging.error(f"Falha na Análise de Planilhas Excel para {os.path.basename(file_path)}: {e}")
+                results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
 
     logging.info("\nFase 1: Descoberta e Diagnóstico concluída.")
 

@@ -15,9 +15,9 @@ def display_interactive_report(results):
     detailed_results = results.get('detailed_results', {})
 
     # --- 1. Análise de Volume de Dados ---
-    display(HTML('<h2>Análise de Volume de Dados</h2>'))
     data_volume = detailed_results.get('data_volume_analysis', {})
-    if data_volume.get('status') == 'success':
+    if data_volume and data_volume.get('total_files') is not None:
+        display(HTML('<h2>Análise de Volume de Dados</h2>'))
         # Tabela com métricas principais
         volume_summary = {
             "Métrica": ["Total de Arquivos", "Tamanho Total (MB)"],
@@ -39,13 +39,11 @@ def display_interactive_report(results):
             plt.ylabel('Arquivo')
             plt.tight_layout()
             plt.show()
-    else:
-        display(HTML(f"<p>Erro na análise de volume: {data_volume.get('message', 'Erro desconhecido')}</p>"))
 
     # --- 2. Análise de Encoding ---
-    display(HTML('<h2>Análise de Encoding</h2>'))
     encoding_results = detailed_results.get('encoding_analysis', [])
     if encoding_results:
+        display(HTML('<h2>Análise de Encoding</h2>'))
         # Renomeia 'file' para 'Arquivo' para consistência
         df_encoding = pd.DataFrame(encoding_results)
         df_encoding.rename(columns={'file': 'Arquivo', 'encoding': 'Encoding', 'confidence': 'Confiança'}, inplace=True)
@@ -53,13 +51,11 @@ def display_interactive_report(results):
         display_cols = ['Arquivo', 'Encoding', 'Confiança', 'status', 'message']
         df_encoding_display = df_encoding[[col for col in display_cols if col in df_encoding.columns]]
         display(HTML(df_encoding_display.to_html(index=False)))
-    else:
-        display(HTML("<p>Nenhum resultado de análise de encoding para exibir.</p>"))
 
     # --- 3. Análise de Delimitador CSV ---
-    display(HTML('<h2>Análise de Delimitador CSV</h2>'))
     delimiter_results = detailed_results.get('csv_delimiter_analysis', [])
     if delimiter_results:
+        display(HTML('<h2>Análise de Delimitador CSV</h2>'))
         # Processa os resultados para criar um DataFrame limpo
         processed_delimiters = []
         for item in delimiter_results:
@@ -72,13 +68,11 @@ def display_interactive_report(results):
             })
         df_delimiter = pd.DataFrame(processed_delimiters)
         display(HTML(df_delimiter.to_html(index=False)))
-    else:
-        display(HTML("<p>Nenhum arquivo CSV analisado para delimitadores.</p>"))
 
     # --- 4. Análise de Consistência de Colunas CSV ---
-    display(HTML('<h2>Análise de Consistência de Colunas CSV</h2>'))
     column_consistency = detailed_results.get('csv_column_consistency_analysis', {})
-    if column_consistency:
+    if column_consistency and column_consistency.get('status') != 'error':
+        display(HTML('<h2>Análise de Consistência de Colunas CSV</h2>'))
         display(HTML(f"<h4>{column_consistency.get('message', '')}</h4>"))
         if not column_consistency.get('is_consistent', True):
             structures = column_consistency.get('structures', {})
@@ -93,22 +87,20 @@ def display_interactive_report(results):
                 df_comparison = pd.DataFrame(comparison_data)
                 display(HTML("<h5>Comparação das Estruturas Encontradas:</h5>"))
                 display(HTML(df_comparison.to_html(index=False)))
-    else:
-        display(HTML("<p>Nenhuma análise de consistência de colunas CSV realizada.</p>"))
 
     # --- 5. Outras Análises (JSON, Excel, etc.) ---
-    display(HTML('<h2>Outras Análises (Resultados em JSON)</h2>'))
-
     other_analyses = {
         "Análise de Integridade de Dados": detailed_results.get('data_integrity_analysis', {}),
         "Validação de Esquema JSON": detailed_results.get('json_schema_validation', []),
         "Análise de Planilhas Excel": detailed_results.get('excel_sheet_analysis', [])
     }
 
+    # Verifica se há algum resultado em "Outras Análises" antes de exibir o título principal
+    if any(other_analyses.values()):
+        display(HTML('<h2>Outras Análises (Resultados em JSON)</h2>'))
+
     for title, analysis_result in other_analyses.items():
-        display(HTML(f"<h3>{title}</h3>"))
         if analysis_result:
+            display(HTML(f"<h3>{title}</h3>"))
             # Usando IPython.display.JSON para uma visualização aninhada e interativa
             display(JSON(analysis_result))
-        else:
-            display(HTML("<p>Nenhum resultado para esta análise.</p>"))
