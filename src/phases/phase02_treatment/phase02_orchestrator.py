@@ -1,10 +1,11 @@
 import os
 import pandas as pd
-from ...utils import find_files, save_df_to_csv
-from ...connectors.factory import ConnectorFactory
+from utils import find_files, save_df_to_csv
+from ...connectors.factory import get_data_loader
 from .core.problematic_value_extractor import extract_values
 from .core.value_corrector import apply_corrections
 from .core.column_transformer import transform_columns
+
 
 def run_treatment_phase(data_project_path):
     """
@@ -36,8 +37,8 @@ def run_treatment_phase(data_project_path):
             print(f"Processando arquivo: {os.path.basename(file_path)}")
 
             # 1. Carregar dados usando a fábrica de conectores
-            connector = ConnectorFactory.get_connector(file_path)
-            df = connector.read_data()
+            connector = get_data_loader(file_path)
+            df = connector.read()
 
             if df is None:
                 print(f"  -> Falha ao carregar o arquivo.")
@@ -46,7 +47,8 @@ def run_treatment_phase(data_project_path):
             # 2. Extrair valores problemáticos (opcional, pode ser usado para gerar um relatório)
             problematic_values = extract_values(df)
             if problematic_values:
-                print(f"  -> Valores problemáticos encontrados: {problematic_values}")
+                print(
+                    f"  -> Valores problemáticos encontrados: {problematic_values}")
 
             # 3. Aplicar correções de valor
             df = apply_corrections(df, corrections_map)
@@ -55,13 +57,15 @@ def run_treatment_phase(data_project_path):
             df = transform_columns(df)
 
             # 5. Salvar o DataFrame tratado como CSV
-            output_filename = os.path.splitext(os.path.basename(file_path))[0] + "_treated.csv"
+            output_filename = os.path.splitext(os.path.basename(file_path))[
+                0] + "_treated.csv"
             output_path = os.path.join(treated_dir, output_filename)
             save_df_to_csv(df, output_path)
 
             print(f"  -> Arquivo tratado salvo em: {output_path}")
 
         except Exception as e:
-            print(f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}")
+            print(
+                f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}")
 
     print("--- Fase 02: Tratamento Concluída ---")
