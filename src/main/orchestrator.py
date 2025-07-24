@@ -8,6 +8,7 @@ import json
 import numpy as np
 
 from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
+from phases.phase02_treatment.phase02_orchestrator import run_treatment_phase
 
 
 class NpEncoder(json.JSONEncoder):
@@ -72,7 +73,7 @@ def main():
 
     elif args.phase == 'treatment':
         logging.info("Executando Fase 2: Tratamento e Padronização...")
-        # Lógica para a Fase 2
+        run_treatment_phase(data_project_abs_path)
     elif args.phase == 'exploratory':
         logging.info(
             "Executando Fase 3: Análise Exploratória e Pré-processamento...")
