@@ -7,6 +7,14 @@ import sys
 import json
 import numpy as np
 
+# --- Configuração Inicial do Logging ---
+# Configura o logging antes de qualquer outra coisa para garantir que
+# o formato e o nível sejam aplicados globalmente.
+# O nível será ajustado depois de parsear os argumentos.
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    force=True)
+
 
 class NpEncoder(json.JSONEncoder):
     """
@@ -47,13 +55,9 @@ def main():
 
     # Ajusta o nível de logging com base no formato de saída
     if args.output_format == 'interactive':
-        logging.basicConfig(level=logging.WARNING,  # Suprime INFO e DEBUG
-                            format='%(asctime)s - %(levelname)s - %(message)s',
-                            force=True)
+        logging.getLogger().setLevel(logging.WARNING)  # Suprime INFO e DEBUG
     else:
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s',
-                            force=True)
+        logging.getLogger().setLevel(logging.INFO)
 
     data_project_abs_path = os.path.abspath(
         os.path.expanduser(args.data_project_path))
