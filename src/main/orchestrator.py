@@ -43,11 +43,19 @@ def main():
         help="Fase a ser executada (discovery, treatment, exploratory, visualization)."
     )
     parser.add_argument(
-        "--output-format", type=str, default="text",
+        "-o", "--output-format", type=str, default="text",
         choices=['text', 'interactive'],
         help="Formato da saída para a fase de descoberta (text, interactive)."
     )
     args = parser.parse_args()
+
+    # Ajusta o nível de logging com base no formato de saída
+    if args.output_format == 'interactive':
+        logging.basicConfig(level=logging.WARNING,  # Suprime INFO e DEBUG
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
 
     data_project_abs_path = os.path.abspath(
         os.path.expanduser(args.data_project_path))
