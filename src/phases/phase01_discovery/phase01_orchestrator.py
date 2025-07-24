@@ -10,7 +10,6 @@ from phases.phase01_discovery.file_type_specific.csv.delimiter_detector import d
 from phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
 from phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
 from phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
-from phases.phase01_discovery.core.data_profiler import analyze_data_profiling
 
 
 def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True):
@@ -34,8 +33,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         "csv_delimiter_analysis": [],
         "csv_column_consistency_analysis": {},
         "json_schema_validation": [],
-        "excel_sheet_analysis": [],
-        "data_profiling_analysis": []
+        "excel_sheet_analysis": []
     }
 
     # 1. Análise de Encoding
@@ -117,17 +115,6 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         except Exception as e:
             logging.error(f"Falha na Análise de Planilhas Excel para {os.path.basename(file_path)}: {e}")
             results["excel_sheet_analysis"].append({"file": os.path.basename(file_path), "status": "error", "message": str(e)})
-
-    # 8. Perfilamento de Dados
-    logging.info("--- Executando Perfilamento de Dados ---")
-    try:
-        profiling_result = analyze_data_profiling(data_project_path, extensions, recursive)
-        results["data_profiling_analysis"] = profiling_result
-        logging.info(f"  Perfilamento de Dados: {profiling_result['message']}")
-    except Exception as e:
-        logging.error(f"Falha na Análise de Perfilamento de Dados: {e}")
-        results["data_profiling_analysis"] = {"status": "error", "message": str(e)}
-
 
     logging.info("\nFase 1: Descoberta e Diagnóstico concluída.")
     return {"status": "success", "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.", "detailed_results": results}
