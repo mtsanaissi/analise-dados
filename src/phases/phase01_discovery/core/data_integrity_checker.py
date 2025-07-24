@@ -362,7 +362,7 @@ def analyze_data_integrity(root_directory, extensions=['csv', 'xlsx', 'json', 'x
     if not os.path.isdir(root_directory):
         return {"status": "error", "message": f"O diretório '{root_directory}' não existe ou não é um diretório.", "reports": []}
 
-    discovered_files = find_files(root_directory, extensions, recursive)
+    discovered_files = find_files(root_directory, extensions, recursive, exclude_patterns=['*_report.json'])
 
     if not discovered_files:
         return {"status": "success", "message": "Nenhum arquivo encontrado com os critérios especificados.", "reports": []}

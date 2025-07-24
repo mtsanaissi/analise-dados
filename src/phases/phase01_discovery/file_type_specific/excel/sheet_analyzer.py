@@ -1,5 +1,17 @@
 import pandas as pd
 
+def get_excel_columns(file_path):
+    """
+    Lê um arquivo Excel e retorna as colunas da primeira planilha.
+    """
+    try:
+        # Lê apenas o cabeçalho da primeira planilha para eficiência
+        df = pd.read_excel(file_path, nrows=0)
+        return list(df.columns)
+    except Exception:
+        return []
+
+
 def analyze_excel_sheets(file_path):
     """
     Analyzes the structure of sheets in an Excel (XLSX) file.

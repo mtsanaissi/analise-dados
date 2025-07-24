@@ -27,6 +27,23 @@ def infer_schema(data):
     else:
         return {}
 
+def get_json_keys(file_path):
+    """
+    Lê um arquivo JSON e retorna as chaves de nível superior.
+    """
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        if isinstance(data, list) and data:
+            # Se for uma lista de objetos, pega as chaves do primeiro objeto
+            return list(data[0].keys()) if isinstance(data[0], dict) else []
+        elif isinstance(data, dict):
+            return list(data.keys())
+        return []
+    except (json.JSONDecodeError, IndexError):
+        return []
+
+
 def validate_json_schema(file_path, schema=None):
     """
     Valida um arquivo JSON contra um esquema ou infere um esquema.

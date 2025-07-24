@@ -137,3 +137,10 @@ def display_interactive_report(results):
             })
         df_json = pd.DataFrame(processed_json)
         display(HTML(df_json.to_html(index=False)))
+
+    # --- 7. Análise de Comparação de Campos ---
+    field_comparison = detailed_results.get('field_comparison_analysis', [])
+    if field_comparison:
+        display(HTML('<h2>Análise de Comparação de Campos</h2>'))
+        df_comparison = pd.DataFrame(field_comparison)
+        display(HTML(df_comparison.to_html(index=False)))

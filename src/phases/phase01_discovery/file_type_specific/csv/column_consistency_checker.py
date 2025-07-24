@@ -34,6 +34,14 @@ def get_csv_header(filepath):
         return {"error": f"Erro geral ao ler o cabeçalho: {e}"}
 
 
+def get_csv_headers(filepath):
+    """
+    Lê o cabeçalho de um arquivo CSV e retorna apenas a lista de colunas.
+    """
+    result = get_csv_header(filepath)
+    return result.get("header", [])
+
+
 def check_csv_structures(root_directory):
     """
     Verifica se todos os arquivos CSV em um diretório (e subdiretórios)

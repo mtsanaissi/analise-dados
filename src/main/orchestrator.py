@@ -51,6 +51,11 @@ def main():
         choices=['text', 'interactive'],
         help="Formato da saída para a fase de descoberta (text, interactive)."
     )
+    parser.add_argument(
+        "--compare-fields",
+        action="store_true",
+        help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
+    )
     args = parser.parse_args()
 
     # Ajusta o nível de logging com base no formato de saída
@@ -74,7 +79,10 @@ def main():
         from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
         logging.info("Executando Fase 1: Descoberta e Diagnóstico...")
         results = run_discovery_phase(
-            data_project_abs_path, output_format=args.output_format)
+            data_project_abs_path,
+            output_format=args.output_format,
+            compare_fields=args.compare_fields
+        )
 
         # A lógica de salvar o relatório JSON é mantida, pois o modo interativo
         # é um adicional que não substitui o relatório padrão.
