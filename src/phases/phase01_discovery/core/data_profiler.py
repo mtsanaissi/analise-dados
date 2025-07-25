@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import json
 import numpy as np
-from utils import find_files # Importa a função centralizada
+from src.utils import find_files  # Importa a função centralizada
 
 
 # Lista de formatos de data comuns para teste rápido
@@ -53,7 +53,8 @@ def profile_dataframe(df):
                 "min": float(numeric_series.min()), "max": float(numeric_series.max()),
                 "media": float(numeric_series.mean()), "mediana": float(numeric_series.median()),
                 "desvio_padrao": float(numeric_series.std()), "soma": float(numeric_series.sum()),
-                "quantil_25": float(numeric_series.quantile(0.25)), "quantil_75": float(numeric_series.quantile(0.75)), # Corrigido para 0.75
+                # Corrigido para 0.75
+                "quantil_25": float(numeric_series.quantile(0.25)), "quantil_75": float(numeric_series.quantile(0.75)),
                 "contagem_zeros": int((numeric_series == 0).sum())
             })
 
@@ -137,20 +138,20 @@ def analyze_data_profiling(root_directory, extensions=['csv', 'xlsx', 'json', 'x
                         "planilha": sheet_name,
                         "perfil_colunas": profile
                     })
-                continue # Pula para o próximo arquivo, pois as planilhas já foram processadas
+                continue  # Pula para o próximo arquivo, pois as planilhas já foram processadas
 
             elif extension == 'json':
                 try:
                     df = pd.read_json(file_path, lines=True)
                 except (ValueError, TypeError):
                     df = pd.read_json(file_path)
-            
+
             if df is not None:
                 profile = profile_dataframe(df)
-                full_report.append({"arquivo": relative_path, "perfil_colunas": profile})
+                full_report.append(
+                    {"arquivo": relative_path, "perfil_colunas": profile})
 
         except Exception as e:
             full_report.append({"arquivo": relative_path, "erro": str(e)})
-    
-    return {"status": "success", "message": "Perfilamento de dados concluído.", "profiles": full_report}
 
+    return {"status": "success", "message": "Perfilamento de dados concluído.", "profiles": full_report}

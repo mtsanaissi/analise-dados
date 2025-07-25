@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Any
 
+
 class CsvConnector:
     """
     Conector de dados para arquivos CSV.

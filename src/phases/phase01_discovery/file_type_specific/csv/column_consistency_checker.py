@@ -2,8 +2,8 @@
 
 import os
 import pandas as pd
-from utils import find_files # Importa a função centralizada
-from connectors.factory import get_data_loader # Importa a fábrica de conectores
+from src.utils import find_files
+from src.connectors.factory import get_data_loader
 
 
 def get_csv_header(filepath):
@@ -63,26 +63,30 @@ def check_csv_structures(root_directory):
 
     for filepath in csv_files:
         relative_path = os.path.relpath(filepath, root_directory)
-        file_report = {"file": os.path.basename(filepath), "status": "Pendente", "details": {}}
-        
-        print(f"Processando arquivo: {filepath}") # DEBUG
+        file_report = {"file": os.path.basename(
+            filepath), "status": "Pendente", "details": {}}
+
+        print(f"Processando arquivo: {filepath}")  # DEBUG
         header_result = get_csv_header(filepath)
-        print(f"Resultado do cabeçalho: {header_result}") # DEBUG
+        print(f"Resultado do cabeçalho: {header_result}")  # DEBUG
 
         if "error" in header_result:
             file_report["status"] = "Erro"
             file_report["details"]["error_message"] = header_result['error']
             all_file_reports.append(file_report)
-            print(f"Relatório do arquivo (Erro): {file_report}") # DEBUG
+            print(f"Relatório do arquivo (Erro): {file_report}")  # DEBUG
             continue
-        
+
         current_header = header_result.get("header")
-        
+
         if current_header is None or len(current_header) == 0:
             file_report["status"] = "Atenção"
-            file_report["details"]["message"] = header_result.get("message", "CSV vazio ou sem cabeçalho.")
+            file_report["details"]["message"] = header_result.get(
+                "message", "CSV vazio ou sem cabeçalho.")
             all_file_reports.append(file_report)
-            print(f"Relatório do arquivo (Atenção - sem cabeçalho): {file_report}") # DEBUG
+            # DEBUG
+            print(
+                f"Relatório do arquivo (Atenção - sem cabeçalho): {file_report}")
             continue
 
         if reference_header is None:
@@ -94,7 +98,7 @@ def check_csv_structures(root_directory):
             if len(current_header) != len(reference_header):
                 file_report["status"] = "Inconsistente"
                 file_report["details"]["message"] = (f"Número de colunas diferente. Esperado: {len(reference_header)}, "
-                                                   f"Encontrado: {len(current_header)}.")
+                                                     f"Encontrado: {len(current_header)}.")
             elif current_header != reference_header:
                 file_report["status"] = "Inconsistente"
                 diff_reason = "Nomes/ordem das colunas diferente."
@@ -107,9 +111,8 @@ def check_csv_structures(root_directory):
             else:
                 file_report["status"] = "OK"
                 file_report["details"]["message"] = "Estrutura consistente com o arquivo de referência."
-        
-        all_file_reports.append(file_report)
-        print(f"Relatório do arquivo (Final): {file_report}") # DEBUG
-    
-    return {"status": "success", "message": "Verificação de estrutura CSV concluída.", "results": all_file_reports}
 
+        all_file_reports.append(file_report)
+        print(f"Relatório do arquivo (Final): {file_report}")  # DEBUG
+
+    return {"status": "success", "message": "Verificação de estrutura CSV concluída.", "results": all_file_reports}

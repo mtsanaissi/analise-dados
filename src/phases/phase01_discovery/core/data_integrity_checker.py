@@ -6,8 +6,7 @@ import chardet
 import csv
 import json
 import codecs  # Para leitura com tratamento de erros de encoding
-from utils import find_files  # Importa a função centralizada
-# from utils import has_problematic_char, read_csv_robust # Estas funções não estão no utils.py atual, vou refatorar para usar as funções internas ou remover se não forem necessárias.
+from src.utils import find_files  # Importa a função centralizada
 
 
 # Amostra de 1MB
@@ -362,7 +361,8 @@ def analyze_data_integrity(root_directory, extensions=['csv', 'xlsx', 'json', 'x
     if not os.path.isdir(root_directory):
         return {"status": "error", "message": f"O diretório '{root_directory}' não existe ou não é um diretório.", "reports": []}
 
-    discovered_files = find_files(root_directory, extensions, recursive, exclude_patterns=['*_report.json'])
+    discovered_files = find_files(
+        root_directory, extensions, recursive, exclude_patterns=['*_report.json'])
 
     if not discovered_files:
         return {"status": "success", "message": "Nenhum arquivo encontrado com os critérios especificados.", "reports": []}
