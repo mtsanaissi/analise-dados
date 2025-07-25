@@ -4,13 +4,13 @@
     "detailed_results": {
         "encoding_analysis": [
             {
-                "file": "d:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
+                "file": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
                 "status": "skipped",
                 "reason": "already_utf8",
                 "message": "O arquivo já está no formato UTF-8. Nenhuma ação necessária."
             },
             {
-                "file": "d:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
+                "file": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
                 "status": "skipped",
                 "reason": "already_utf8",
                 "message": "O arquivo já está no formato UTF-8. Nenhuma ação necessária."
@@ -41,7 +41,7 @@
             "message": "Verificação de integridade concluída.",
             "reports": [
                 {
-                    "file_path": "d:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
+                    "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
                     "file_type": "CSV",
                     "status": "OK",
                     "details": {
@@ -58,7 +58,7 @@
                     }
                 },
                 {
-                    "file_path": "d:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
+                    "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
                     "file_type": "CSV",
                     "status": "OK",
                     "details": {
@@ -99,16 +99,16 @@
         "csv_column_consistency_analysis": [
             {
                 "file": "consumidorgovbr_2025-01.csv",
-                "status": "Erro",
+                "status": "Referência",
                 "details": {
-                    "error_message": "Erro no conector: Error tokenizing data. C error: Expected 4 fields in line 4, saw 5\n"
+                    "message": "Definido como arquivo de referência."
                 }
             },
             {
                 "file": "consumidorgovbr_2025-02.csv",
-                "status": "Erro",
+                "status": "OK",
                 "details": {
-                    "error_message": "Erro no conector: Error tokenizing data. C error: Expected 5 fields in line 23, saw 8\n"
+                    "message": "Estrutura consistente com o arquivo de referência."
                 }
             }
         ],
