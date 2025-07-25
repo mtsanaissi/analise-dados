@@ -1,5 +1,6 @@
 import pandas as pd
-from ...utils import has_problematic_char
+from src.utils import has_problematic_char
+
 
 def extract_values(df: pd.DataFrame, column_name_cidade="Cidade", column_name_uf="UF") -> dict | None:
     """

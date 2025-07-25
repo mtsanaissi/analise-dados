@@ -3,8 +3,8 @@ import pandas as pd
 import argparse
 import json
 import logging
-from utils import find_files, save_df_to_csv
-from ...connectors.factory import get_data_loader
+from src.utils import find_files, save_df_to_csv
+from src.connectors.factory import get_data_loader
 from .core.problematic_value_extractor import extract_values
 from .core.value_corrector import apply_corrections
 from .core.column_transformer import transform_columns
@@ -15,7 +15,8 @@ def run_treatment_phase(data_project_path, extra_args):
     """
     Orquestra a fase de tratamento dos dados.
     """
-    parser = argparse.ArgumentParser(description="Argumentos para a fase de tratamento.")
+    parser = argparse.ArgumentParser(
+        description="Argumentos para a fase de tratamento.")
     parser.add_argument("--enrich-data",
                         dest="enrich_config_path",
                         metavar="PATH",
@@ -25,22 +26,28 @@ def run_treatment_phase(data_project_path, extra_args):
     logging.info("--- Iniciando Fase 02: Tratamento ---")
 
     if args.enrich_config_path:
-        logging.info(f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
+        logging.info(
+            f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
         try:
             with open(args.enrich_config_path, 'r', encoding='utf-8') as f:
                 enrich_config = json.load(f)
 
             enricher = DataEnricher(enrich_config)
             status = enricher.enrich_data()
-            logging.info(f"Enriquecimento de dados concluído com sucesso. Status: {status}")
+            logging.info(
+                f"Enriquecimento de dados concluído com sucesso. Status: {status}")
         except FileNotFoundError:
-            logging.error(f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
+            logging.error(
+                f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
         except json.JSONDecodeError:
-            logging.error(f"Erro ao decodificar o arquivo JSON de configuração: {args.enrich_config_path}")
+            logging.error(
+                f"Erro ao decodificar o arquivo JSON de configuração: {args.enrich_config_path}")
         except Exception as e:
-            logging.error(f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
+            logging.error(
+                f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
 
-        logging.info("--- Fase 02: Tratamento (Apenas Enriquecimento) Concluída ---")
+        logging.info(
+            "--- Fase 02: Tratamento (Apenas Enriquecimento) Concluída ---")
         return
 
     # Encontrar todos os arquivos de dados suportados
@@ -99,4 +106,3 @@ def run_treatment_phase(data_project_path, extra_args):
                 f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
 
     logging.info("--- Fase 02: Tratamento Concluída ---")
-

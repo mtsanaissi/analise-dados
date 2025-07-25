@@ -64,12 +64,12 @@ def main():
     logging.info(f"Caminho do projeto de dados: {data_project_abs_path}")
 
     if args.phase == 'discovery':
-        from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
+        from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
         logging.info("Executando Fase 1: Descoberta e Diagnóstico...")
         run_discovery_phase(data_project_abs_path, unknown_args)
 
     elif args.phase == 'treatment':
-        from phases.phase02_treatment.phase02_orchestrator import run_treatment_phase
+        from src.phases.phase02_treatment.phase02_orchestrator import run_treatment_phase
         logging.info("Executando Fase 2: Tratamento e Padronização...")
         run_treatment_phase(data_project_abs_path, unknown_args)
     elif args.phase == 'exploratory':
