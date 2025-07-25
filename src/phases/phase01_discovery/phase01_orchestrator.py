@@ -11,11 +11,50 @@ from phases.phase01_discovery.file_type_specific.csv.column_consistency_checker 
 from phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
 from phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
 
-def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True, output_format='text', compare_fields: bool = False):
+import argparse
+import json
+import numpy as np
+from .interactive_visualizer import display_interactive_report
+
+class NpEncoder(json.JSONEncoder):
+    """
+    Codificador JSON personalizado para lidar com tipos de dados NumPy.
+    Converte tipos NumPy em tipos nativos do Python para serialização.
+    """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+
+
+def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True):
     """
     Orquestra todas as ferramentas da Fase 1: Descoberta e Diagnóstico.
     Retorna um relatório consolidado de todas as análises.
     """
+    parser = argparse.ArgumentParser(description="Argumentos para a fase de descoberta.")
+    parser.add_argument(
+        "-o", "--output-format", type=str, default="text",
+        choices=['text', 'interactive'],
+        help="Formato da saída para a fase de descoberta (text, interactive)."
+    )
+    parser.add_argument(
+        "--compare-fields",
+        action="store_true",
+        help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
+    )
+    args = parser.parse_args(extra_args)
+
+    if args.output_format == 'interactive':
+        logging.getLogger().setLevel(logging.WARNING)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
+
     logging.info(f"Iniciando Fase 1: Descoberta e Diagnóstico para {data_project_path}")
 
     discovered_files = find_files(data_project_path, extensions, recursive, exclude_patterns=['*_report.json'])
@@ -52,7 +91,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         logging.info("--- Executando Análises de CSV ---")
         for fp in csv_files:
             results["csv_delimiter_analysis"].append({"file": os.path.basename(fp), "result": detect_csv_delimiter(fp)})
-            if compare_fields:
+            if args.compare_fields:
                 # Importa a função aqui para evitar dependência circular
                 from .file_type_specific.csv.column_consistency_checker import get_csv_headers
                 current_headers = get_csv_headers(fp)
@@ -76,7 +115,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         logging.info("--- Executando Análises de JSON ---")
         for fp in json_files:
             results["json_schema_validation"].append({"file": os.path.basename(fp), "result": validate_json_schema(fp)})
-            if compare_fields:
+            if args.compare_fields:
                 from .file_type_specific.json.schema_validator import get_json_keys
                 current_keys = get_json_keys(fp)
                 if reference_columns['json'] is None:
@@ -98,7 +137,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
         logging.info("--- Executando Análises de Excel ---")
         for fp in excel_files:
             results["excel_sheet_analysis"].append({"file": os.path.basename(fp), "result": analyze_excel_sheets(fp)})
-            if compare_fields:
+            if args.compare_fields:
                 from .file_type_specific.excel.sheet_analyzer import get_excel_columns
                 current_columns = get_excel_columns(fp)
                 if reference_columns['excel'] is None:
@@ -120,8 +159,16 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
 
     results_wrapper = {"status": "success", "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.", "detailed_results": results}
 
-    if output_format == 'interactive':
-        from .interactive_visualizer import display_interactive_report
+    if args.output_format == 'interactive':
         display_interactive_report(results_wrapper)
+
+    output_filename = "discovery_report.json"
+    output_path = os.path.join(data_project_path, output_filename)
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(results_wrapper, f, indent=4,
+                    ensure_ascii=False, cls=NpEncoder)
+
+    logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
 
     return results_wrapper

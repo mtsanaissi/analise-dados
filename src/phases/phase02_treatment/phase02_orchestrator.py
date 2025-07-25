@@ -11,25 +11,32 @@ from .core.column_transformer import transform_columns
 from .core.data_enricher import DataEnricher
 
 
-def run_treatment_phase(data_project_path, enrich_config_path=None):
+def run_treatment_phase(data_project_path, extra_args):
     """
     Orquestra a fase de tratamento dos dados.
     """
+    parser = argparse.ArgumentParser(description="Argumentos para a fase de tratamento.")
+    parser.add_argument("--enrich-data",
+                        dest="enrich_config_path",
+                        metavar="PATH",
+                        help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados. Se especificado, apenas a tarefa de enriquecimento será executada.")
+    args = parser.parse_args(extra_args)
+
     logging.info("--- Iniciando Fase 02: Tratamento ---")
 
-    if enrich_config_path:
-        logging.info(f"Modo de enriquecimento de dados ativado. Carregando configuração de: {enrich_config_path}")
+    if args.enrich_config_path:
+        logging.info(f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
         try:
-            with open(enrich_config_path, 'r', encoding='utf-8') as f:
+            with open(args.enrich_config_path, 'r', encoding='utf-8') as f:
                 enrich_config = json.load(f)
 
             enricher = DataEnricher(enrich_config)
             status = enricher.enrich_data()
             logging.info(f"Enriquecimento de dados concluído com sucesso. Status: {status}")
         except FileNotFoundError:
-            logging.error(f"Arquivo de configuração de enriquecimento não encontrado em: {enrich_config_path}")
+            logging.error(f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
         except json.JSONDecodeError:
-            logging.error(f"Erro ao decodificar o arquivo JSON de configuração: {enrich_config_path}")
+            logging.error(f"Erro ao decodificar o arquivo JSON de configuração: {args.enrich_config_path}")
         except Exception as e:
             logging.error(f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
 
@@ -93,26 +100,3 @@ def run_treatment_phase(data_project_path, enrich_config_path=None):
 
     logging.info("--- Fase 02: Tratamento Concluída ---")
 
-def main():
-    """
-    Ponto de entrada principal para a execução da fase de tratamento a partir da linha de comando.
-    """
-    parser = argparse.ArgumentParser(description="Orquestrador da Fase 02: Tratamento de Dados.")
-    parser.add_argument("data_project_path",
-                        help="Caminho para o diretório do projeto de dados.")
-    parser.add_argument("--enrich-data",
-                        dest="enrich_config_path",
-                        metavar="PATH",
-                        help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados. Se especificado, apenas a tarefa de enriquecimento será executada.")
-
-    args = parser.parse_args()
-
-    # Configuração básica de logging
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
-
-    run_treatment_phase(args.data_project_path, args.enrich_config_path)
-
-if __name__ == "__main__":
-    main()

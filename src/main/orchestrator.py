@@ -46,23 +46,11 @@ def main():
         choices=['discovery', 'treatment', 'exploratory', 'visualization'],
         help="Fase a ser executada (discovery, treatment, exploratory, visualization)."
     )
-    parser.add_argument(
-        "-o", "--output-format", type=str, default="text",
-        choices=['text', 'interactive'],
-        help="Formato da saída para a fase de descoberta (text, interactive)."
-    )
-    parser.add_argument(
-        "--compare-fields",
-        action="store_true",
-        help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
-    )
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
     # Ajusta o nível de logging com base no formato de saída
-    if args.output_format == 'interactive':
-        logging.getLogger().setLevel(logging.WARNING)  # Suprime INFO e DEBUG
-    else:
-        logging.getLogger().setLevel(logging.INFO)
+    # O logging será configurado dentro de cada fase, se necessário
+    logging.getLogger().setLevel(logging.INFO)
 
     data_project_abs_path = os.path.abspath(
         os.path.expanduser(args.data_project_path))
@@ -78,27 +66,12 @@ def main():
     if args.phase == 'discovery':
         from phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
         logging.info("Executando Fase 1: Descoberta e Diagnóstico...")
-        results = run_discovery_phase(
-            data_project_abs_path,
-            output_format=args.output_format,
-            compare_fields=args.compare_fields
-        )
-
-        # A lógica de salvar o relatório JSON é mantida, pois o modo interativo
-        # é um adicional que não substitui o relatório padrão.
-        output_filename = "discovery_report.json"
-        output_path = os.path.join(data_project_abs_path, output_filename)
-
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(results, f, indent=4,
-                      ensure_ascii=False, cls=NpEncoder)
-
-        logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
+        run_discovery_phase(data_project_abs_path, unknown_args)
 
     elif args.phase == 'treatment':
         from phases.phase02_treatment.phase02_orchestrator import run_treatment_phase
         logging.info("Executando Fase 2: Tratamento e Padronização...")
-        run_treatment_phase(data_project_abs_path)
+        run_treatment_phase(data_project_abs_path, unknown_args)
     elif args.phase == 'exploratory':
         logging.info(
             "Executando Fase 3: Análise Exploratória e Pré-processamento...")
