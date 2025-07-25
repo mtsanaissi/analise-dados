@@ -34,11 +34,15 @@ def get_csv_header(filepath, delimiter=None):
         return {"error": f"Erro geral ao ler o cabeçalho: {e}"}
 
 
-def get_csv_headers(filepath):
+def get_csv_headers(filepath, delimiter=None):
     """
     Lê o cabeçalho de um arquivo CSV e retorna apenas a lista de colunas.
+
+    Args:
+        filepath (str): O caminho para o arquivo CSV.
+        delimiter (str, optional): O delimitador a ser usado. Defaults to None.
     """
-    result = get_csv_header(filepath)
+    result = get_csv_header(filepath, delimiter=delimiter)
     return result.get("header", [])
 
 
