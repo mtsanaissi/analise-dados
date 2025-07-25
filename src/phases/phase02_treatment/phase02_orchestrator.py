@@ -29,8 +29,17 @@ def run_treatment_phase(data_project_path, extra_args):
         logging.info(
             f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
         try:
-            with open(args.enrich_config_path, 'r', encoding='utf-8') as f:
+            config_path = os.path.abspath(args.enrich_config_path)
+            config_dir = os.path.dirname(config_path)
+
+            with open(config_path, 'r', encoding='utf-8') as f:
                 enrich_config = json.load(f)
+
+            # Resolve caminhos relativos para absolutos
+            for key in ['main_file', 'lookup_file', 'output_file']:
+                if key in enrich_config:
+                    enrich_config[key] = os.path.join(
+                        config_dir, enrich_config[key])
 
             enricher = DataEnricher(enrich_config)
             status = enricher.enrich_data()
