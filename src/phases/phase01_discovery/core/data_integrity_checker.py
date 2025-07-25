@@ -48,9 +48,11 @@ def detect_problematic_chars(file_path, encoding_to_try, sample_size_bytes=1024*
     return problematic_chars_found, problematic_char_samples
 
 
+from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
+
 def check_csv_file(file_path):
     """
-    Realiza verificações de integridade em um arquivo CSV.
+    Realiza verificações de integridade em um arquivo CSV, centralizando a detecção de formato.
     """
     report = {
         "file_path": file_path,
@@ -58,7 +60,6 @@ def check_csv_file(file_path):
         "status": "Pendente",
         "details": {
             "encoding": None,
-            "encoding_confidence": None,
             "delimiter": None,
             "has_header": None,
             "num_columns_header": None,
@@ -76,82 +77,36 @@ def check_csv_file(file_path):
         report["details"]["error_message"] = "Arquivo está vazio."
         return report
 
-    try:
-        with open(file_path, 'rb') as f:
-            raw_data = f.read(1024 * 20)
-            if not raw_data:
-                report["details"]["is_empty"] = True
-                report["status"] = "Atenção"
-                report["details"]["error_message"] = "Arquivo não contém dados suficientes para análise de encoding."
-                return report
-
-            detection = chardet.detect(raw_data)
-            report["details"]["encoding"] = detection['encoding']
-            report["details"]["encoding_confidence"] = detection['confidence']
-    except Exception as e:
+    detection_result = detect_csv_delimiter(file_path)
+    if "error" in detection_result:
         report["status"] = "Erro"
-        report["details"][
-            "error_message"] = f"Falha ao tentar detectar encoding: {str(e)}"
+        report["details"]["error_message"] = detection_result["error"]
         return report
 
-    detected_encoding = report["details"]["encoding"] if report["details"]["encoding_confidence"] > 0.7 else 'utf-8'
-    if detected_encoding is None:
-        detected_encoding = 'utf-8'
-        report["details"]["encoding"] = "utf-8 (fallback)"
-        report["details"]["encoding_confidence"] = 0.0
+    detected_encoding = detection_result.get("encoding_used", "utf-8")
+    delimiter = detection_result.get("delimiter")
+    has_header = detection_result.get("has_header")
 
-    try:
-        with codecs.open(file_path, 'r', encoding=detected_encoding, errors='replace') as f_csv:
-            sample_lines = "".join(f_csv.readline() for _ in range(20))
-            if not sample_lines.strip():
-                report["status"] = "Atenção"
-                report["details"]["error_message"] = "Arquivo CSV parece conter apenas linhas vazias ou muito poucas linhas para análise."
-                return report
-
-            dialect = csv.Sniffer().sniff(
-                sample_lines, delimiters=[',', ';', '\t', '|', ':'])
-            report["details"]["delimiter"] = repr(dialect.delimiter)[1:-1]
-
-            f_csv.seek(0)
-            report["details"]["has_header"] = csv.Sniffer().has_header(
-                "".join(f_csv.readline() for _ in range(5)))
-
-            f_csv.seek(0)
-            reader = csv.reader(f_csv, dialect=dialect)
-            first_row = next(reader, None)
-            if first_row:
-                report["details"]["num_columns_header"] = len(first_row)
-            else:
-                report["status"] = "Atenção"
-                report["details"]["error_message"] = "Não foi possível ler a primeira linha para determinar o número de colunas."
-                return report
-
-    except csv.Error as e:
-        report["status"] = "Atenção"
-        report["details"]["error_message"] = f"CSV Sniffer falhou: {str(e)}. Pode indicar delimitador incomum ou arquivo malformatado."
-    except Exception as e:
-        report["status"] = "Erro"
-        report["details"][
-            "error_message"] = f"Falha ao analisar CSV para delimitador/cabeçalho: {str(e)}"
-        return report
+    report["details"]["encoding"] = detected_encoding
+    report["details"]["delimiter"] = delimiter
+    report["details"]["has_header"] = has_header
 
     try:
         df_sample = pd.read_csv(
             file_path,
             encoding=detected_encoding,
-            sep=report["details"]["delimiter"],
+            sep=delimiter,
             nrows=100,
-            header=0 if report["details"]["has_header"] else None,
+            header=0 if has_header else None,
             on_bad_lines='skip'
         )
-        if df_sample.empty and report["details"]["num_columns_header"] is not None:
-            report["details"]["error_message"] = (report["details"].get("error_message", "") +
-                                                  " Pandas leu um DataFrame vazio da amostra, verifique o arquivo.").strip()
-            report["status"] = "Atenção"
 
-        report["status"] = "OK"
-        if report["details"]["error_message"] and "CSV Sniffer falhou" in report["details"]["error_message"]:
-            report["status"] = "Atenção"
+        if df_sample.empty and os.path.getsize(file_path) > 0:
+             report["details"]["error_message"] = "Pandas leu um DataFrame vazio, verifique o arquivo."
+             report["status"] = "Atenção"
+        else:
+            report["details"]["num_columns_header"] = len(df_sample.columns)
+            report["status"] = "OK"
 
     except pd.errors.EmptyDataError:
         report["status"] = "Atenção"
@@ -159,29 +114,24 @@ def check_csv_file(file_path):
         report["details"]["is_empty"] = True
     except pd.errors.ParserError as e:
         report["status"] = "Erro"
-        report["details"]["error_message"] = f"Pandas ParserError: {str(e)}. Provável inconsistência no número de colunas ou formato."
+        report["details"]["error_message"] = f"Pandas ParserError: {str(e)}. Inconsistência no número de colunas."
         report["details"]["column_consistency_issue"] = True
     except UnicodeDecodeError as e:
         report["status"] = "Erro"
         report["details"]["error_message"] = f"Pandas UnicodeDecodeError: {str(e)}. Encoding '{detected_encoding}' pode estar incorreto."
     except Exception as e:
         report["status"] = "Erro"
-        report["details"][
-            "error_message"] = f"Pandas: Erro ao ler amostra do CSV: {str(e)}"
+        report["details"]["error_message"] = f"Pandas: Erro ao ler amostra do CSV: {str(e)}"
 
-    if report["status"] != "Erro" or "Encoding" not in report["details"]["error_message"]:
-        prob_chars, prob_samples = detect_problematic_chars(
-            file_path, detected_encoding)
+    if report["status"] != "Erro":
+        prob_chars, prob_samples = detect_problematic_chars(file_path, detected_encoding)
         report["details"]["problematic_chars_found"] = prob_chars
         report["details"]["problematic_char_samples"] = prob_samples
         if prob_chars and report["status"] == "OK":
             report["status"] = "Atenção"
 
     if report["status"] == "Pendente":
-        if report["details"]["error_message"]:
-            report["status"] = "Atenção"
-        else:
-            report["status"] = "OK"
+        report["status"] = "Atenção" if report["details"]["error_message"] else "OK"
 
     return report
 
