@@ -47,7 +47,9 @@ def display_interactive_report(results):
             file_name = report.get('file_path', 'N/A').split('\\')[-1]
             
             num_columns = 'N/A'
-            if 'sheets_info' in details and details.get('sheets_info'):
+            if report.get('file_type') == 'CSV':
+                num_columns = details.get('num_columns_header', 'N/A')
+            elif 'sheets_info' in details and details.get('sheets_info'):
                 num_columns = details['sheets_info'][0].get('num_columns', 'N/A')
 
             processed_reports.append({
@@ -88,20 +90,18 @@ def display_interactive_report(results):
         df_delimiter = pd.DataFrame(processed_delimiters)
         display(HTML(df_delimiter.to_html(index=False)))
 
-    column_consistency = detailed_results.get('csv_column_consistency_analysis', {})
-    if column_consistency and not column_consistency.get('is_consistent', True):
+    column_consistency_reports = detailed_results.get('csv_column_consistency_analysis', [])
+    if column_consistency_reports:
         display(HTML('<h3>Consistência de Colunas (CSV)</h3>'))
-        display(HTML(f"<b>Mensagem:</b> {column_consistency.get('message', '')}"))
-        structures = column_consistency.get('structures', {})
-        if structures:
-            comparison_data = []
-            for i, (struct_key, files) in enumerate(structures.items()):
-                col_str = ", ".join(struct_key)
-                for file_name in files:
-                    comparison_data.append({'Grupo': f'Estrutura {i+1}', 'Arquivo': file_name.split('\\')[-1], 'Colunas': col_str})
-            df_comparison = pd.DataFrame(comparison_data)
-            display(HTML("<b>Comparação das Estruturas Encontradas:</b>"))
-            display(HTML(df_comparison.to_html(index=False)))
+        processed_consistency = []
+        for report in column_consistency_reports:
+            processed_consistency.append({
+                'Arquivo': report.get('file', 'N/A'),
+                'Status': report.get('status', 'N/A'),
+                'Mensagem': report.get('details', {}).get('message', '')
+            })
+        df_consistency = pd.DataFrame(processed_consistency)
+        display(HTML(df_consistency.to_html(index=False)))
 
     # --- 5. Análise Específica de Excel ---
     excel_analysis = detailed_results.get('excel_sheet_analysis', [])

@@ -70,7 +70,7 @@ def run_discovery_phase(data_project_path, extensions=['csv', 'xlsx', 'xls', 'js
                         "extra_columns": extra_columns
                     }
                 results["field_comparison_analysis"].append(comparison_result)
-        results["csv_column_consistency_analysis"] = check_csv_structures(data_project_path)
+        results["csv_column_consistency_analysis"] = check_csv_structures(data_project_path).get("results", [])
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")

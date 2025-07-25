@@ -35,7 +35,6 @@ Esta fase combina a coleta inicial com a avaliação da "saúde" dos dados.
     -   **Análise de Volume:** Cálculo de métricas como contagem de registros e tamanho em disco para diversos formatos (CSV, Excel, JSON).
     -   **Verificação de Integridade:** Checagens iniciais de legibilidade, validade estrutural (ex: delimitadores CSV, validade JSON) e presença de caracteres problemáticos.
     -   **Análise Estrutural Específica:** Detecção de delimitadores em CSVs, verificação de consistência de colunas, e validação de estruturas para outros tipos de arquivo (JSON, Excel).
-    -   **Perfilamento de Conteúdo (Data Profiling):** Geração de estatísticas descritivas detalhadas para cada coluna (tipos inferidos, valores únicos, nulos, min/max, etc.).
 -   **Entregáveis:**
     -   Conjunto de dados brutos (potencialmente com encoding padronizado).
     -   **Relatório Consolidado de Descoberta e Diagnóstico:** Um resumo abrangente de todas as análises realizadas, incluindo problemas identificados e insights sobre a estrutura e qualidade dos dados.

@@ -18,7 +18,7 @@ def detect_problematic_chars(file_path, encoding_to_try, sample_size_bytes=1024*
     """
     problematic_chars_found = False
     problematic_char_samples = []
-    control_chars_allowed = {'	', '\n', '\r'}  # Tab, Newline, Carriage Return
+    control_chars_allowed = {'\t', '\n', '\r'}  # Tab, Newline, Carriage Return
 
     try:
         with codecs.open(file_path, 'r', encoding=encoding_to_try, errors='replace') as f:
@@ -110,7 +110,7 @@ def check_csv_file(file_path):
                 return report
 
             dialect = csv.Sniffer().sniff(
-                sample_lines, delimiters=[',', ';', '	', '|', ':'])
+                sample_lines, delimiters=[',', ';', '\t', '|', ':'])
             report["details"]["delimiter"] = repr(dialect.delimiter)[1:-1]
 
             f_csv.seek(0)

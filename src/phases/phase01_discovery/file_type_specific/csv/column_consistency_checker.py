@@ -46,69 +46,70 @@ def check_csv_structures(root_directory):
     """
     Verifica se todos os arquivos CSV em um diretório (e subdiretórios)
     possuem a mesma estrutura de cabeçalho.
-    Retorna um dicionário com o resultado da verificação.
+    Retorna uma lista de dicionários com o resultado da verificação para cada arquivo.
     """
     if not os.path.isdir(root_directory):
-        return {"status": "error", "message": f"O diretório '{root_directory}' não existe ou não é um diretório.", "results": {}}
+        return {"status": "error", "message": f"O diretório '{root_directory}' não existe ou não é um diretório.", "results": []}
 
     csv_files = find_files(root_directory, ['csv'], recursive=True)
     csv_files.sort()
 
     if not csv_files:
-        return {"status": "success", "message": f"Nenhum arquivo .csv encontrado em '{root_directory}'.", "results": {}}
+        return {"status": "success", "message": f"Nenhum arquivo .csv encontrado em '{root_directory}'.", "results": []}
 
     reference_header = None
     reference_filepath = None
-    inconsistent_files = {}
-    consistent_files_count = 0
-    total_files_processed = 0
+    all_file_reports = []
 
     for filepath in csv_files:
-        total_files_processed += 1
         relative_path = os.path.relpath(filepath, root_directory)
+        file_report = {"file": os.path.basename(filepath), "status": "Pendente", "details": {}}
         
+        print(f"Processando arquivo: {filepath}") # DEBUG
         header_result = get_csv_header(filepath)
+        print(f"Resultado do cabeçalho: {header_result}") # DEBUG
 
         if "error" in header_result:
-            inconsistent_files[str(relative_path)] = f"Erro ao obter cabeçalho: {header_result['error']}"
+            file_report["status"] = "Erro"
+            file_report["details"]["error_message"] = header_result['error']
+            all_file_reports.append(file_report)
+            print(f"Relatório do arquivo (Erro): {file_report}") # DEBUG
             continue
         
         current_header = header_result.get("header")
         
         if current_header is None or len(current_header) == 0:
-            inconsistent_files[str(relative_path)] = header_result.get("message", "CSV vazio ou sem cabeçalho.")
+            file_report["status"] = "Atenção"
+            file_report["details"]["message"] = header_result.get("message", "CSV vazio ou sem cabeçalho.")
+            all_file_reports.append(file_report)
+            print(f"Relatório do arquivo (Atenção - sem cabeçalho): {file_report}") # DEBUG
             continue
 
         if reference_header is None:
             reference_header = current_header
             reference_filepath = relative_path
-            consistent_files_count += 1
+            file_report["status"] = "Referência"
+            file_report["details"]["message"] = "Definido como arquivo de referência."
         else:
             if len(current_header) != len(reference_header):
-                msg = (f"Número de colunas diferente. Esperado: {len(reference_header)}, "
-                       f"Encontrado: {len(current_header)}.")
-                inconsistent_files[str(relative_path)] = msg
+                file_report["status"] = "Inconsistente"
+                file_report["details"]["message"] = (f"Número de colunas diferente. Esperado: {len(reference_header)}, "
+                                                   f"Encontrado: {len(current_header)}.")
             elif current_header != reference_header:
+                file_report["status"] = "Inconsistente"
                 diff_reason = "Nomes/ordem das colunas diferente."
                 for i, (ref_col, cur_col) in enumerate(zip(reference_header, current_header)):
                     if ref_col != cur_col:
                         diff_reason = (f"Diferença na coluna {i+1}. "
                                        f"Esperado: '{ref_col}', Encontrado: '{cur_col}'.")
                         break
-                inconsistent_files[str(relative_path)] = diff_reason
+                file_report["details"]["message"] = diff_reason
             else:
-                consistent_files_count += 1
+                file_report["status"] = "OK"
+                file_report["details"]["message"] = "Estrutura consistente com o arquivo de referência."
+        
+        all_file_reports.append(file_report)
+        print(f"Relatório do arquivo (Final): {file_report}") # DEBUG
     
-    status = "success" if not inconsistent_files else "warning"
-    message = "Todos os arquivos CSV analisados possuem a mesma estrutura." if not inconsistent_files else "Alguns arquivos CSV possuem estrutura inconsistente ou erros."
-
-    return {
-        "status": status,
-        "message": message,
-        "total_files_processed": total_files_processed,
-        "consistent_files_count": consistent_files_count,
-        "reference_header": reference_header,
-        "reference_filepath": reference_filepath,
-        "inconsistent_files": inconsistent_files
-    }
+    return {"status": "success", "message": "Verificação de estrutura CSV concluída.", "results": all_file_reports}
 
