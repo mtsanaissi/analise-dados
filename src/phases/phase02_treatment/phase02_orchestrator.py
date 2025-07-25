@@ -1,24 +1,47 @@
 import os
 import pandas as pd
+import argparse
+import json
+import logging
 from utils import find_files, save_df_to_csv
 from ...connectors.factory import get_data_loader
 from .core.problematic_value_extractor import extract_values
 from .core.value_corrector import apply_corrections
 from .core.column_transformer import transform_columns
+from .core.data_enricher import DataEnricher
 
 
-def run_treatment_phase(data_project_path):
+def run_treatment_phase(data_project_path, enrich_config_path=None):
     """
     Orquestra a fase de tratamento dos dados.
     """
-    print("--- Iniciando Fase 02: Tratamento ---")
+    logging.info("--- Iniciando Fase 02: Tratamento ---")
+
+    if enrich_config_path:
+        logging.info(f"Modo de enriquecimento de dados ativado. Carregando configuração de: {enrich_config_path}")
+        try:
+            with open(enrich_config_path, 'r', encoding='utf-8') as f:
+                enrich_config = json.load(f)
+
+            enricher = DataEnricher(enrich_config)
+            status = enricher.enrich_data()
+            logging.info(f"Enriquecimento de dados concluído com sucesso. Status: {status}")
+        except FileNotFoundError:
+            logging.error(f"Arquivo de configuração de enriquecimento não encontrado em: {enrich_config_path}")
+        except json.JSONDecodeError:
+            logging.error(f"Erro ao decodificar o arquivo JSON de configuração: {enrich_config_path}")
+        except Exception as e:
+            logging.error(f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
+
+        logging.info("--- Fase 02: Tratamento (Apenas Enriquecimento) Concluída ---")
+        return
 
     # Encontrar todos os arquivos de dados suportados
     supported_extensions = ["csv", "json", "xlsx"]
     files_to_process = find_files(data_project_path, supported_extensions)
 
     if not files_to_process:
-        print("Nenhum arquivo de dados encontrado para tratamento.")
+        logging.warning("Nenhum arquivo de dados encontrado para tratamento.")
         return
 
     # Diretório para salvar os arquivos tratados
@@ -34,20 +57,20 @@ def run_treatment_phase(data_project_path):
 
     for file_path in files_to_process:
         try:
-            print(f"Processando arquivo: {os.path.basename(file_path)}")
+            logging.info(f"Processando arquivo: {os.path.basename(file_path)}")
 
             # 1. Carregar dados usando a fábrica de conectores
             connector = get_data_loader(file_path)
             df = connector.read()
 
             if df is None:
-                print(f"  -> Falha ao carregar o arquivo.")
+                logging.warning(f"  -> Falha ao carregar o arquivo.")
                 continue
 
             # 2. Extrair valores problemáticos (opcional, pode ser usado para gerar um relatório)
             problematic_values = extract_values(df)
             if problematic_values:
-                print(
+                logging.info(
                     f"  -> Valores problemáticos encontrados: {problematic_values}")
 
             # 3. Aplicar correções de valor
@@ -62,10 +85,34 @@ def run_treatment_phase(data_project_path):
             output_path = os.path.join(treated_dir, output_filename)
             save_df_to_csv(df, output_path)
 
-            print(f"  -> Arquivo tratado salvo em: {output_path}")
+            logging.info(f"  -> Arquivo tratado salvo em: {output_path}")
 
         except Exception as e:
-            print(
-                f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}")
+            logging.error(
+                f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
 
-    print("--- Fase 02: Tratamento Concluída ---")
+    logging.info("--- Fase 02: Tratamento Concluída ---")
+
+def main():
+    """
+    Ponto de entrada principal para a execução da fase de tratamento a partir da linha de comando.
+    """
+    parser = argparse.ArgumentParser(description="Orquestrador da Fase 02: Tratamento de Dados.")
+    parser.add_argument("data_project_path",
+                        help="Caminho para o diretório do projeto de dados.")
+    parser.add_argument("--enrich-data",
+                        dest="enrich_config_path",
+                        metavar="PATH",
+                        help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados. Se especificado, apenas a tarefa de enriquecimento será executada.")
+
+    args = parser.parse_args()
+
+    # Configuração básica de logging
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+
+    run_treatment_phase(args.data_project_path, args.enrich_config_path)
+
+if __name__ == "__main__":
+    main()

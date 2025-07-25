@@ -98,4 +98,47 @@ python src/main/orchestrator.py --data-project-path data/meu_projeto --phase dis
 
 Use o sufixo `-h` ou `--help` com o `orchestrator.py` para ver as opções disponíveis.
 
+### Ferramenta de Enriquecimento de Dados (Fase 2)
+
+A fase de tratamento inclui uma ferramenta poderosa para enriquecer um conjunto de dados principal com informações de uma fonte de dados secundária (look up). Esta funcionalidade é ideal para cenários onde você precisa, por exemplo, adicionar descrições a códigos de categoria, mesclar informações de clientes ou complementar dados transacionais.
+
+**Propósito:**
+
+-   **Unir Dataframes**: Executa uma operação de `merge` (junção) entre dois arquivos de dados (principal e de consulta) com base em uma coluna-chave comum.
+-   **Validação de Integridade**: Antes de unir, a ferramenta verifica se a coluna-chave no arquivo de consulta contém valores duplicados, o que poderia levar a resultados incorretos. Se duplicatas forem encontradas, a operação é interrompida com uma mensagem de erro clara.
+-   **Flexibilidade**: Permite configurar os caminhos dos arquivos, a coluna de junção e o tipo de `merge` através de um arquivo de configuração JSON.
+
+**Como Usar:**
+
+A ferramenta de enriquecimento é executada através do orquestrador da **Fase 2** (`phase02_orchestrator.py`), utilizando o argumento `--enrich-data`. Este modo de execução é independente do fluxo de tratamento padrão e foca exclusivamente na tarefa de enriquecimento.
+
+Use o seguinte comando, a partir da raiz do projeto:
+
+```bash
+python src/phases/phase02_treatment/phase02_orchestrator.py <caminho_para_pasta_de_dados> --enrich-data <caminho_para_config.json>
+```
+
+-   **`<caminho_para_pasta_de_dados>`**: Argumento posicional que, neste modo, serve como um contexto para o projeto, embora os caminhos dos arquivos sejam definidos no JSON.
+-   **`--enrich-data <caminho_para_config.json>`**: Aponta para o arquivo de configuração JSON que define os parâmetros da operação de enriquecimento.
+
+**Exemplo de Arquivo de Configuração (`enrich_config.json`):**
+
+Crie um arquivo JSON com a seguinte estrutura para definir a operação:
+
+```json
+{
+  "main_file_path": "data/meu_projeto/transacoes.csv",
+  "query_file_path": "data/meu_projeto/categorias.csv",
+  "join_on": "id_categoria",
+  "join_how": "left",
+  "output_file_path": "data/meu_projeto/transacoes_enriquecidas.csv"
+}
+```
+
+-   `main_file_path`: Caminho para o arquivo principal que será enriquecido.
+-   `query_file_path`: Caminho para o arquivo de consulta que contém os dados adicionais.
+-   `join_on`: Nome da coluna usada como chave para a junção.
+-   `join_how` (opcional): Tipo de `merge` a ser executado (ex: `left`, `inner`, `right`, `outer`). O padrão é `left`.
+-   `output_file_path`: Caminho onde o arquivo resultante e enriquecido será salvo.
+
 **Exemplo de execução:**
