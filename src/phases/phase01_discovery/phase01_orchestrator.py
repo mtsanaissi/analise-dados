@@ -96,13 +96,20 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
     if csv_files:
         logging.info("--- Executando Análises de CSV ---")
+        detected_delimiters = {}
         for fp in csv_files:
+            delimiter_result = detect_csv_delimiter(fp)
             results["csv_delimiter_analysis"].append(
-                {"file": os.path.basename(fp), "result": detect_csv_delimiter(fp)})
+                {"file": os.path.basename(fp), "result": delimiter_result})
+            # CUSTOMIZAR: Adicionar verificação para o caso de erro na detecção
+            if "delimiter" in delimiter_result:
+                detected_delimiters[fp] = delimiter_result["delimiter"]
+
             if args.compare_fields:
                 # Importa a função aqui para evitar dependência circular
                 from .file_type_specific.csv.column_consistency_checker import get_csv_headers
-                current_headers = get_csv_headers(fp)
+                delimiter = detected_delimiters.get(fp)
+                current_headers = get_csv_headers(fp, delimiter=delimiter)
                 if reference_columns['csv'] is None:
                     reference_columns['csv'] = current_headers
                     comparison_result = {"file": os.path.basename(
@@ -122,7 +129,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
         results["csv_column_consistency_analysis"] = check_csv_structures(
-            data_project_path).get("results", [])
+            data_project_path, detected_delimiters_map=detected_delimiters).get("results", [])
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")

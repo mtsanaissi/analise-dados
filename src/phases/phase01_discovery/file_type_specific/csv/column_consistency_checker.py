@@ -6,13 +6,13 @@ from src.utils import find_files
 from src.connectors.factory import get_data_loader
 
 
-def get_csv_header(filepath):
+def get_csv_header(filepath, delimiter=None):
     """
     Lê o cabeçalho de um arquivo CSV usando o conector de dados.
     Retorna a lista de colunas do cabeçalho ou um dicionário de erro.
     """
     try:
-        data_loader = get_data_loader(filepath)
+        data_loader = get_data_loader(filepath, delimiter=delimiter)
         df = data_loader.read()
 
         if df is None:
@@ -42,12 +42,15 @@ def get_csv_headers(filepath):
     return result.get("header", [])
 
 
-def check_csv_structures(root_directory):
+def check_csv_structures(root_directory, detected_delimiters_map=None):
     """
     Verifica se todos os arquivos CSV em um diretório (e subdiretórios)
     possuem a mesma estrutura de cabeçalho.
     Retorna uma lista de dicionários com o resultado da verificação para cada arquivo.
     """
+    if detected_delimiters_map is None:
+        detected_delimiters_map = {}
+
     if not os.path.isdir(root_directory):
         return {"status": "error", "message": f"O diretório '{root_directory}' não existe ou não é um diretório.", "results": []}
 
@@ -66,8 +69,10 @@ def check_csv_structures(root_directory):
         file_report = {"file": os.path.basename(
             filepath), "status": "Pendente", "details": {}}
 
+        delimiter = detected_delimiters_map.get(filepath)
+
         print(f"Processando arquivo: {filepath}")  # DEBUG
-        header_result = get_csv_header(filepath)
+        header_result = get_csv_header(filepath, delimiter=delimiter)
         print(f"Resultado do cabeçalho: {header_result}")  # DEBUG
 
         if "error" in header_result:

@@ -10,14 +10,16 @@ class CsvConnector:
     abstraindo a interação direta com a biblioteca pandas.
     """
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, delimiter: str = None):
         """
         Inicializa o CsvConnector.
 
         Args:
             file_path (str): O caminho para o arquivo CSV.
+            delimiter (str, optional): O delimitador a ser usado. Defaults to None.
         """
         self.file_path = file_path
+        self.delimiter = delimiter
 
     def read(self, **kwargs: Any) -> pd.DataFrame:
         """
@@ -33,6 +35,8 @@ class CsvConnector:
         Returns:
             pd.DataFrame: O conteúdo do arquivo CSV como um DataFrame.
         """
+        if self.delimiter:
+            kwargs['sep'] = self.delimiter
         return pd.read_csv(self.file_path, **kwargs)
 
     def write(self, df: pd.DataFrame, **kwargs: Any) -> None:
