@@ -9,6 +9,7 @@ from .core.problematic_value_extractor import extract_values
 from .core.value_corrector import apply_corrections
 from .core.column_transformer import transform_columns
 from .core.data_enricher import DataEnricher
+from .core.data_concatenator import DataConcatenator
 
 
 def run_treatment_phase(data_project_path, extra_args):
@@ -21,6 +22,10 @@ def run_treatment_phase(data_project_path, extra_args):
                         dest="enrich_config_path",
                         metavar="PATH",
                         help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados. Se especificado, apenas a tarefa de enriquecimento será executada.")
+    parser.add_argument("--concatenate-data",
+                        dest="concatenate_config_path",
+                        metavar="PATH",
+                        help="Caminho para o arquivo de configuração JSON para a concatenação de dados. Se especificado, apenas a tarefa de concatenação será executada.")
     args = parser.parse_args(extra_args)
 
     logging.info("--- Iniciando Fase 02: Tratamento ---")
@@ -57,6 +62,40 @@ def run_treatment_phase(data_project_path, extra_args):
 
         logging.info(
             "--- Fase 02: Tratamento (Apenas Enriquecimento) Concluída ---")
+        return
+
+    if args.concatenate_config_path:
+        logging.info(
+            f"Modo de concatenação de dados ativado. Carregando configuração de: {args.concatenate_config_path}")
+        try:
+            config_path = os.path.abspath(args.concatenate_config_path)
+            config_dir = os.path.dirname(config_path)
+
+            with open(config_path, 'r', encoding='utf-8') as f:
+                concat_config = json.load(f)
+
+            # Resolve caminhos relativos para absolutos
+            for key in ['input_folder', 'output_file']:
+                if key in concat_config:
+                    concat_config[key] = os.path.join(
+                        config_dir, concat_config[key])
+
+            concatenator = DataConcatenator(concat_config)
+            concatenator.concatenate_files()
+            logging.info("Concatenação de dados concluída com sucesso.")
+
+        except FileNotFoundError:
+            logging.error(
+                f"Arquivo de configuração de concatenação não encontrado em: {args.concatenate_config_path}")
+        except json.JSONDecodeError:
+            logging.error(
+                f"Erro ao decodificar o arquivo JSON de configuração: {args.concatenate_config_path}")
+        except Exception as e:
+            logging.error(
+                f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
+
+        logging.info(
+            "--- Fase 02: Tratamento (Apenas Concatenação) Concluída ---")
         return
 
     # Encontrar todos os arquivos de dados suportados

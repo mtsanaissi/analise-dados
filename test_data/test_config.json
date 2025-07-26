@@ -1,0 +1,5 @@
+{
+    "input_folder": "./",
+    "output_file": "../report.csv",
+    "file_type": "csv"
+}
