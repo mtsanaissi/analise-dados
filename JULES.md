@@ -9,7 +9,7 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 3.  **Clarity & Documentation**: Code is read more often than it is written. Use clear, descriptive names. All documentation must follow these rules:
     *   **Docstrings**: Every function, class, and public method must have a PEP 257 compliant docstring in Portuguese, explaining its purpose, arguments (`Args:`), and return value (`Returns:`).
     *   **Inline Comments**: Use inline comments sparingly. They should explain the *why* behind complex or non-obvious code, not the *what*.
-4.  **Configurability**: Scripts must be flexible. **Avoid hardcoding parameters**. Use command-line arguments (`argparse`) for all user-configurable settings. For static, internal settings that might need occasional adjustment, use an uppercase variable at the top of the script, marked with the comment `# CUSTOMIZAR:`.
+4.  **Configurability**: Scripts must be flexible. **Avoid hardcoding parameters**. Use command-line arguments (`argparse`) for all user-configurable settings.
 
 ## 2. Environment and Dependencies
 
@@ -70,22 +70,32 @@ When creating a new script or feature:
 3.  **Implement**: Write the code following all conventions listed here.
 4.  **Verify**: Add logs or simple tests to verify correctness.
 
-## 7. Testing
 
-For any new feature or modification, you must create or, at a minimum, suggest the creation of tests to ensure the quality and stability of the codebase. The `pytest` library is preferred for testing.
-
-## 8. Language Conventions
+## 7. Language Conventions
 
 *   **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in **English**.
 *   **Literal Texts**: Comments, docstrings, and literal strings for user interaction (e.g., logging messages, `argparse` help messages) must be in **Brazilian Portuguese**.
 
-## 9. General Rules
+## 8. General Rules
 
 *   **Error Handling**: Wrap operations that can fail (e.g., file I/O, data parsing) in `try...except` blocks. Always catch specific exceptions (e.g., `FileNotFoundError`, `json.JSONDecodeError`) instead of a generic `Exception` where possible.
 *   **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
 *   **Type Hints**: Use **type hints** for all function signatures.
 
-## 10. Communication and Versioning
+## 9. Communication and Versioning
 
 *   **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
 *   **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).
+
+## 10. Environment and Workflow
+
+1.  Assume the user is using **Windows 11** and a Python environment located in the **`.venv`** folder, unless otherwise stated.
+2.  For tasks not directly related to tests, **do not** try to implement or run tests.
+
+## 11. Communication Style
+
+*   **Directness**: Be direct and to the point. Avoid unnecessary introductions, conclusions, or conversational filler.
+
+## 12. Learning from Mistakes
+
+*   After every interaction, if you have made a mistake, update the `JULES_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help you learn and improve over time.

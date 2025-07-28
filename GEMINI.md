@@ -36,6 +36,8 @@ The project follows this directory structure:
     - Para indicar uma variável ou configuração que o usuário pode alterar diretamente no script (uma prática a ser evitada em favor de argumentos de linha de comando), use o marcador `# CUSTOMIZAR:`.
 - **Typing**: Use type hints (PEP 484) sempre que possível.
 - **Modularity**: Crie scripts modulares e reutilizáveis.
+- **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in English.
+- **Literal Texts**: Comments and literal strings (e.g., for printing, logging, or user messages) must be in Brazilian Portuguese.
 
 ## 5. Standard Script Header
 
@@ -74,18 +76,24 @@ When creating a new script or feature:
 3.  **Implement**: Write the code following the conventions above.
 4.  **Verify**: Add logs or simple tests to verify correctness.
 
-## 8. Testing
-
-For any new feature or modification, you must create or, at a minimum, suggest the creation of tests to ensure the quality and stability of the codebase. The `pytest` library is preferred for testing.
-
-## 9. Language Conventions
-
-- **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in English.
-- **Literal Texts**: Comments and literal strings (e.g., for printing, logging, or user messages) must be in Brazilian Portuguese.
-
-## 10. Communication
+## 8. Communication
 
 - **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
 - **Prompts for Jules**: When asked to generate prompts for Jules, you **must** follow this specific structure for the generated text:
   1.  **Opening:** The prompt must begin **directly** with a short, descriptive title (up to 5 words) that summarizes the task. Do not use a prefix like "Title:".
   2.  **First Actionable Step:** The first numbered or bulleted step in the task list must be: "Review Guiding Principles: Your top priority is to read and strictly adhere to all rules and guidelines defined in `JULES.md`..."
+
+## 9. General Rules
+
+- **Conciseness**: Be concise and to the point. Avoid unnecessary introductions or conclusions.
+- **Error Handling**: Wrap operations that can fail (e.g., file I/O, data parsing) in `try...except` blocks. Always catch specific exceptions (e.g., `FileNotFoundError`, `json.JSONDecodeError`) instead of a generic `Exception` where possible.
+- **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
+- **Type Hints**: Use **type hints** for all function signatures.
+
+## 10. Environment
+
+- **Operating System**: Assume the user, and therefore you aswell, is using **Windows 11**.
+
+## 11. Learning from Mistakes
+
+- After every interaction, if I have made a mistake, I will update the `GEMINI_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help me learn and improve over time.
