@@ -22,7 +22,12 @@ def test_get_data_loader_json():
     with pytest.raises(ValueError):
         get_data_loader("data.json")
 
+from src.connectors.xlsx_connector import XlsxConnector
+
 def test_get_data_loader_xlsx():
-    """Testa se get_data_loader levanta um ValueError para .xlsx (ainda não implementado)."""
-    with pytest.raises(ValueError):
-        get_data_loader("data.xlsx")
+    """Testa se get_data_loader retorna XlsxConnector para arquivos .xlsx."""
+    # Act
+    loader = get_data_loader("data.xlsx")
+
+    # Assert
+    assert isinstance(loader, XlsxConnector)

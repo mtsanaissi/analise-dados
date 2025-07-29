@@ -36,8 +36,9 @@ class XlsxConnector:
             pd.DataFrame: O DataFrame lido do arquivo.
         """
         try:
-            # Se sheet_name for None, pd.read_excel lê a primeira planilha por padrão.
-            return pd.read_excel(self.file_path, sheet_name=self.sheet_name)
+            # Modificado para ler a primeira planilha por índice (0) se sheet_name não for especificado.
+            sheet_to_read = self.sheet_name if self.sheet_name is not None else 0
+            return pd.read_excel(self.file_path, sheet_name=sheet_to_read)
         except FileNotFoundError:
             raise
         except Exception as e:
