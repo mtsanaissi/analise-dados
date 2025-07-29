@@ -1,0 +1,156 @@
+
+    <html>
+    <head>
+        <title>Relatório de Descoberta de Dados</title>
+        <style>
+            body { font-family: sans-serif; }
+            h1, h2 { color: #333; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+        </style>
+    </head>
+    <body>
+        <h1>Relatório de Descoberta de Dados</h1>
+    <h2>Encoding Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>file</th>
+      <th>status</th>
+      <th>reason</th>
+      <th>message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>/app/data/sample/discovery_report.json</td>
+      <td>skipped</td>
+      <td>already_utf8</td>
+      <td>O arquivo já está no formato UTF-8. Nenhuma ação necessária.</td>
+    </tr>
+    <tr>
+      <td>/app/data/sample/consumidorgovbr_2025-02.csv</td>
+      <td>skipped</td>
+      <td>already_utf8</td>
+      <td>O arquivo já está no formato UTF-8. Nenhuma ação necessária.</td>
+    </tr>
+    <tr>
+      <td>/app/data/sample/consumidorgovbr_2025-01.csv</td>
+      <td>skipped</td>
+      <td>already_utf8</td>
+      <td>O arquivo já está no formato UTF-8. Nenhuma ação necessária.</td>
+    </tr>
+  </tbody>
+</table><h2>Data Volume Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Métrica</th>
+      <th>Valor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>summary_by_extension</td>
+      <td>[{'extensao': 'csv', 'total_arquivos': 2, 'total_registros': 302379, 'total_tamanho_bytes': 99570714, 'media_registros_por_arquivo': 151189.5, 'media_tamanho_por_arquivo': 49785357.0}, {'extensao': 'json', 'total_arquivos': 1, 'total_registros': 1, 'total_tamanho_bytes': 4907, 'media_registros_por_arquivo': 1.0, 'media_tamanho_por_arquivo': 4907.0}]</td>
+    </tr>
+    <tr>
+      <td>overall_summary</td>
+      <td>{'total_arquivos_geral': 3, 'total_registros_geral': 302380, 'total_tamanho_geral_bytes': 99575621, 'total_tamanho_geral_formatado': '94.96 MB'}</td>
+    </tr>
+    <tr>
+      <td>files_with_errors</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <td>message</td>
+      <td>Resumo de volume e tamanho gerado com sucesso.</td>
+    </tr>
+  </tbody>
+</table><h2>Data Integrity Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Métrica</th>
+      <th>Valor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>status</td>
+      <td>success</td>
+    </tr>
+    <tr>
+      <td>message</td>
+      <td>Verificação de integridade concluída.</td>
+    </tr>
+    <tr>
+      <td>reports</td>
+      <td>[{'file_path': '/app/data/sample/consumidorgovbr_2025-02.csv', 'file_type': 'CSV', 'status': 'OK', 'details': {'encoding': 'UTF-8-SIG', 'delimiter': ';', 'has_header': True, 'num_columns_header': 19, 'column_consistency_issue': False, 'is_empty': False, 'problematic_chars_found': False, 'problematic_char_samples': [], 'error_message': None}}, {'file_path': '/app/data/sample/consumidorgovbr_2025-01.csv', 'file_type': 'CSV', 'status': 'OK', 'details': {'encoding': 'UTF-8-SIG', 'delimiter': ';', 'has_header': True, 'num_columns_header': 19, 'column_consistency_issue': False, 'is_empty': False, 'problematic_chars_found': False, 'problematic_char_samples': [], 'error_message': None}}]</td>
+    </tr>
+  </tbody>
+</table><h2>Csv Delimiter Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>file</th>
+      <th>result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>consumidorgovbr_2025-01.csv</td>
+      <td>{'delimiter': ';', 'has_header': True, 'encoding_used': 'UTF-8-SIG', 'confidence': 0.9}</td>
+    </tr>
+    <tr>
+      <td>consumidorgovbr_2025-02.csv</td>
+      <td>{'delimiter': ';', 'has_header': True, 'encoding_used': 'UTF-8-SIG', 'confidence': 0.9}</td>
+    </tr>
+  </tbody>
+</table><h2>Csv Column Consistency Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>file</th>
+      <th>status</th>
+      <th>details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>consumidorgovbr_2025-01.csv</td>
+      <td>Referência</td>
+      <td>{'message': 'Definido como arquivo de referência.'}</td>
+    </tr>
+    <tr>
+      <td>consumidorgovbr_2025-02.csv</td>
+      <td>OK</td>
+      <td>{'message': 'Estrutura consistente com o arquivo de referência.'}</td>
+    </tr>
+  </tbody>
+</table><h2>Json Schema Validation</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>file</th>
+      <th>result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>discovery_report.json</td>
+      <td>{'status': 'schema_inferred', 'errors': None, 'inferred_schema': {'type': 'object', 'properties': {'status': {'type': 'string'}, 'message': {'type': 'string'}, 'detailed_results': {'type': 'object', 'properties': {'encoding_analysis': {'type': 'array', 'items': {'type': 'object', 'properties': {'file': {'type': 'string'}, 'status': {'type': 'string'}, 'reason': {'type': 'string'}, 'message': {'type': 'string'}}}}, 'data_volume_analysis': {'type': 'object', 'properties': {'summary_by_extension': {'type': 'array', 'items': {'type': 'object', 'properties': {'extensao': {'type': 'string'}, 'total_arquivos': {'type': 'integer'}, 'total_registros': {'type': 'integer'}, 'total_tamanho_bytes': {'type': 'integer'}, 'media_registros_por_arquivo': {'type': 'number'}, 'media_tamanho_por_arquivo': {'type': 'number'}}}}, 'overall_summary': {'type': 'object', 'properties': {'total_arquivos_geral': {'type': 'integer'}, 'total_registros_geral': {'type': 'integer'}, 'total_tamanho_geral_bytes': {'type': 'integer'}, 'total_tamanho_geral_formatado': {'type': 'string'}}}, 'files_with_errors': {'type': 'array', 'items': {}}, 'message': {'type': 'string'}}}, 'data_integrity_analysis': {'type': 'object', 'properties': {'status': {'type': 'string'}, 'message': {'type': 'string'}, 'reports': {'type': 'array', 'items': {'type': 'object', 'properties': {'file_path': {'type': 'string'}, 'file_type': {'type': 'string'}, 'status': {'type': 'string'}, 'details': {'type': 'object', 'properties': {'encoding': {'type': 'string'}, 'encoding_confidence': {'type': 'number'}, 'delimiter': {'type': 'string'}, 'has_header': {'type': 'integer'}, 'num_columns_header': {'type': 'integer'}, 'column_consistency_issue': {'type': 'integer'}, 'is_empty': {'type': 'integer'}, 'problematic_chars_found': {'type': 'integer'}, 'problematic_char_samples': {'type': 'array', 'items': {}}, 'error_message': {'type': 'null'}}}}}}}}, 'csv_delimiter_analysis': {'type': 'array', 'items': {'type': 'object', 'properties': {'file': {'type': 'string'}, 'result': {'type': 'object', 'properties': {'delimiter': {'type': 'string'}, 'has_header': {'type': 'integer'}, 'encoding_used': {'type': 'string'}, 'confidence': {'type': 'number'}}}}}}, 'csv_column_consistency_analysis': {'type': 'array', 'items': {'type': 'object', 'properties': {'file': {'type': 'string'}, 'status': {'type': 'string'}, 'details': {'type': 'object', 'properties': {'message': {'type': 'string'}}}}}}, 'json_schema_validation': {'type': 'array', 'items': {}}, 'excel_sheet_analysis': {'type': 'array', 'items': {}}, 'field_comparison_analysis': {'type': 'array', 'items': {'type': 'object', 'properties': {'file': {'type': 'string'}, 'status': {'type': 'string'}}}}}}}}}</td>
+    </tr>
+  </tbody>
+</table><h2>Excel Sheet Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table><h2>Field Comparison Analysis</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+    </body>
+    </html>

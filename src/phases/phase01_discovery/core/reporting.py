@@ -29,14 +29,28 @@ def generate_html_report(report_data, output_path):
         if isinstance(data, dict):
             if not data:
                 html_content += "<p>Nenhum dado disponível.</p>"
+            elif section == 'Data Volume Analysis':
+                # Custom handling for Data Volume Analysis
+                rows = []
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        for item in value:
+                            rows.append([key, item])
+                    elif isinstance(value, dict):
+                        for sub_key, sub_value in value.items():
+                            rows.append([f"{key} - {sub_key}", sub_value])
+                    else:
+                        rows.append([key, value])
+                df = pd.DataFrame(rows, columns=['Métrica', 'Valor'])
+                html_content += df.to_html(index=False)
             # Check if the dictionary values are also dictionaries (nested dict)
             elif isinstance(list(data.values())[0], dict):
                 df = pd.DataFrame.from_dict(data, orient='index')
                 html_content += df.to_html()
             else:
                 # Simple key-value dictionary
-                df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
-                html_content += df.to_html()
+                df = pd.DataFrame(list(data.items()), columns=['Métrica', 'Valor'])
+                html_content += df.to_html(index=False)
         elif isinstance(data, list):
              # Convert list of dicts to DataFrame
             df = pd.DataFrame(data)
