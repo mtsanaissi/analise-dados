@@ -22,10 +22,12 @@ import chardet
 import csv
 import fnmatch
 
-def find_files(root_path: str, extensions: list[str], recursive: bool = True, exclude_patterns: list[str] = None) -> list[str]:
+METADATA_DIR = "fad-metadados"
+
+def find_files(root_path: str, extensions: list[str], recursive: bool = True, exclude_patterns: list[str] = None, exclude_dirs: list[str] = None) -> list[str]:
     """
     Encontra arquivos em um diretório com base em uma lista de extensões,
-    com a opção de excluir arquivos que correspondem a determinados padrões.
+    com a opção de excluir arquivos que correspondem a determinados padrões e diretórios.
 
     Args:
         root_path (str): O diretório raiz para a busca.
@@ -33,6 +35,7 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
         recursive (bool): Se True, busca recursivamente em subdiretórios.
         exclude_patterns (list[str], optional): Uma lista de padrões de nome de arquivo
                                                   a serem excluídos (ex: ['*_report.json', 'temp_*']).
+        exclude_dirs (list[str], optional): Uma lista de nomes de diretório a serem ignorados.
 
     Returns:
         list[str]: Uma lista de caminhos absolutos para os arquivos encontrados.
@@ -40,13 +43,17 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     found_files = []
     normalized_extensions = [ext.lower().lstrip('.') for ext in extensions]
     exclude_patterns = exclude_patterns or []
+    exclude_dirs = exclude_dirs or []
 
     if not os.path.isdir(root_path):
         print(f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
         return found_files
 
     if recursive:
-        for dirpath, _, filenames in os.walk(root_path):
+        for dirpath, dirnames, filenames in os.walk(root_path):
+            # Excluir diretórios da busca
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+
             for filename in filenames:
                 # Verifica se o arquivo deve ser excluído
                 if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns):
