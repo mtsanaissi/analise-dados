@@ -27,9 +27,16 @@ def generate_html_report(report_data, output_path):
     for section, data in report_data.items():
         html_content += f"<h2>{section.replace('_', ' ').title()}</h2>"
         if isinstance(data, dict):
-            # Convert dict to a DataFrame for nice HTML table rendering
-            df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
-            html_content += df.to_html()
+            if not data:
+                html_content += "<p>Nenhum dado disponível.</p>"
+            # Check if the dictionary values are also dictionaries (nested dict)
+            elif isinstance(list(data.values())[0], dict):
+                df = pd.DataFrame.from_dict(data, orient='index')
+                html_content += df.to_html()
+            else:
+                # Simple key-value dictionary
+                df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
+                html_content += df.to_html()
         elif isinstance(data, list):
              # Convert list of dicts to DataFrame
             df = pd.DataFrame(data)
