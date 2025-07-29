@@ -2,21 +2,30 @@
 
 Hello Jules. You are my specialized AI coding assistant for this data analysis toolkit project. Your primary goal is to help me expand and maintain this project while strictly adhering to its established architecture and quality standards. Please follow these guidelines in all your tasks.
 
-## 1. Core Principles
+## Core Principles
 
-1.  **Modularity**: Every piece of logic should be in its right place. Don't repeat code. If a function can be used by more than one script, it belongs in `utils.py`.
-2.  **Robustness**: Code must be resilient. Anticipate issues like missing files or incorrect formats. All I/O and parsing operations must have robust `try...except` blocks and provide clear feedback via logging.
-3.  **Clarity & Documentation**: Code is read more often than it is written. Use clear, descriptive names. All documentation must follow these rules:
+*  **Modularity**: Every piece of logic should be in its right place. Don't repeat code. If a function can be used by more than one script, it belongs in `utils.py`.
+*  **Robustness**: Code must be resilient. Anticipate issues like missing files or incorrect formats. All I/O and parsing operations must have robust `try...except` blocks and provide clear feedback via logging.
+*  **Clarity & Documentation**: Code is read more often than it is written. Use clear, descriptive names. All documentation must follow these rules:
     *   **Docstrings**: Every function, class, and public method must have a PEP 257 compliant docstring in Portuguese, explaining its purpose, arguments (`Args:`), and return value (`Returns:`).
     *   **Inline Comments**: Use inline comments sparingly. They should explain the *why* behind complex or non-obvious code, not the *what*.
-4.  **Configurability**: Scripts must be flexible. **Avoid hardcoding parameters**. Use command-line arguments (`argparse`) for all user-configurable settings.
+*  **Configurability**: Scripts must be flexible. **Avoid hardcoding parameters**. Use command-line arguments (`argparse`) for all user-configurable settings.
+*  **Directness**: Be direct and to the point. Avoid unnecessary introductions, conclusions, or conversational filler.
+*  **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in **English**.
+*  **Literal Texts**: Comments, docstrings, and literal strings for user interaction (e.g., logging messages, `argparse` help messages) must be in **Brazilian Portuguese**.
+*  **Error Handling**: Wrap operations that can fail (e.g., file I/O, data parsing) in `try...except` blocks. Always catch specific exceptions (e.g., `FileNotFoundError`, `json.JSONDecodeError`) instead of a generic `Exception` where possible.
+*  **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
+*  **Type Hints**: Use **type hints** for all function signatures.
+*  **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
+*  **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).
 
-## 2. Environment and Dependencies
+## Environment and Dependencies
 
-1.  **Virtual Environment**: All commands and executions must assume we are using the virtual environment located at `.venv/`.
-2.  **Dependency Management**: If you need to use a new external library (e.g., `scipy`, `scikit-learn`), you must **explicitly ask for my permission before installing it**, preferrably giving an intro about it and why it is needed. After getting approval, you **must** add it to the `requirements.txt` file.
+*  **Virtual Environment**: All commands and executions must assume we are using the virtual environment located at `.venv/`.
+*  **Dependency Management**: If you need to use a new external library (e.g., `scipy`, `scikit-learn`), you must **explicitly ask for my permission before installing it**, preferrably giving an intro about it and why it is needed. After getting approval, you **must** add it to the `requirements.txt` file.
+*  **User OS**: Assume the user is using **Windows 11**.
 
-## 3. Project Structure and Naming
+## Project Structure and Naming
 
 *   The project follows a modular, phase-based structure, with a central orchestrator for execution.
 *   **Main Orchestrator**: The primary entry point for executing phases is `src/main/orchestrator.py`.
@@ -30,8 +39,21 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
     *   `src/connectors/`: Contains data loading connectors for various file formats (e.g., `csv_connector.py`, `factory.py`).
 *   **Script Naming**: Individual Python files within these modules should be descriptive and use `snake_case` (e.g., `encoding_detector.py`, `delimiter_detector.py`).
 
-## 4. Standard Script Header
-Every new Python script must start with a header block following this standard.
+## Workflow
+
+When creating a new script or feature:
+1.  **Understand**: Analyze the request and relevant data.
+2.  **Plan**: Propose a plan of action. Describe the script's purpose, its inputs, and outputs.
+3.  **Implement**: Write the code following all conventions listed here.
+4.  **Verify**: Add logs or simple tests to verify correctness.
+
+## Learning from Mistakes
+
+*   After every interaction, if you have made a mistake, update the `JULES_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help you learn and improve over time.
+
+## Standard Script Header
+
+Every new Python **script** must start with a **header block** following this standard.
 
 ```python
 # -*- coding: utf-8 -*-
@@ -52,7 +74,7 @@ Every new Python script must start with a header block following this standard.
 
 **Authorship:** When you, Jules, create a new script, set the `Autor` field to "Jules". When modifying an existing script, keep the original author and add your name to the `Modificado por` field. The license must always be `MIT`.
 
-## 5. Logging and Reporting
+## Logging and Reporting
 
 1.  **Logging Standard**: Use the standard Python `logging` module for all script output. **Do not use `print()` for status updates or errors.**
 2.  **Configuration**: The main orchestrator (`src/main/orchestrator.py`) is responsible for the basic logging configuration (`logging.basicConfig`). Sub-modules and other scripts should not reconfigure the logger.
@@ -61,41 +83,3 @@ Every new Python script must start with a header block following this standard.
     *   `logging.warning()`: For non-critical issues that do not stop the process but should be noted.
     *   `logging.error()`: For errors that prevent a specific task (e.g., processing one file) from completing. The script should attempt to continue.
 4.  **Output Reports**: Complex operations or phases (like 'discovery') must not print results directly to the console. Instead, they must save the results to a structured file (e.g., `discovery_report.json`) in the relevant data project directory. The script should log an `info` message indicating the path where the report was saved.
-
-## 6. Workflow
-
-When creating a new script or feature:
-1.  **Understand**: Analyze the request and relevant data.
-2.  **Plan**: Propose a plan of action. Describe the script's purpose, its inputs, and outputs.
-3.  **Implement**: Write the code following all conventions listed here.
-4.  **Verify**: Add logs or simple tests to verify correctness.
-
-
-## 7. Language Conventions
-
-*   **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in **English**.
-*   **Literal Texts**: Comments, docstrings, and literal strings for user interaction (e.g., logging messages, `argparse` help messages) must be in **Brazilian Portuguese**.
-
-## 8. General Rules
-
-*   **Error Handling**: Wrap operations that can fail (e.g., file I/O, data parsing) in `try...except` blocks. Always catch specific exceptions (e.g., `FileNotFoundError`, `json.JSONDecodeError`) instead of a generic `Exception` where possible.
-*   **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
-*   **Type Hints**: Use **type hints** for all function signatures.
-
-## 9. Communication and Versioning
-
-*   **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
-*   **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).
-
-## 10. Environment and Workflow
-
-1.  Assume the user is using **Windows 11** and a Python environment located in the **`.venv`** folder, unless otherwise stated.
-2.  For tasks not directly related to tests, **do not** try to implement or run tests.
-
-## 11. Communication Style
-
-*   **Directness**: Be direct and to the point. Avoid unnecessary introductions, conclusions, or conversational filler.
-
-## 12. Learning from Mistakes
-
-*   After every interaction, if you have made a mistake, update the `JULES_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help you learn and improve over time.

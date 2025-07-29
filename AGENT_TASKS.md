@@ -2,28 +2,41 @@
 
 ## Backlog
 
-*   **ID:** T001
-    **Título:** Revisar e Implementar Testes para a Fase 1
-    **Descrição:** Revisar os módulos existentes em `src/phases/phase01_discovery/` e seus subdiretórios. Implementar testes unitários e de integração para garantir a robustez e a correção das funcionalidades de descoberta de dados.
+*   **ID:** T003
+    **Título:** Implementar Testes para Componentes Principais
+    **Descrição:** Criar testes unitários para os módulos centrais do projeto, garantindo a robustez das funcionalidades de base.
     **Critérios de Aceitação:**
-    - [ ] Cobertura de testes para os módulos em `src/phases/phase01_discovery/core/`.
-    - [ ] Cobertura de testes para os módulos em `src/phases/phase01_discovery/file_type_specific/`.
-    - [ ] Testes para o orquestrador `src/phases/phase01_discovery/phase01_orchestrator.py`.
+    - [ ] Cobertura de testes para `src/utils.py`.
+    - [ ] Cobertura de testes para os conectores em `src/connectors/`.
+    - [ ] Cobertura de testes para o orquestrador principal `src/main/orchestrator.py`.
+
+*   **ID:** T004
+    **Título:** Implementar Testes para a Fase 2 (Tratamento)
+    **Descrição:** Desenvolver testes para todos os módulos do núcleo da fase de tratamento de dados.
+    **Critérios de Aceitação:**
+    - [ ] Cobertura de testes para `src/phases/phase02_treatment/core/column_transformer.py`.
+    - [ ] Cobertura de testes para `src/phases/phase02_treatment/core/data_enricher.py`.
+    - [ ] Cobertura de testes para `src/phases/phase02_treatment/core/problematic_value_extractor.py`.
+    - [ ] Cobertura de testes para `src/phases/phase02_treatment/core/value_corrector.py`.
+    - [ ] Testes para o orquestrador `src/phases/phase02_treatment/phase02_orchestrator.py`.
+
+*   **ID:** T005
+    **Título:** Implementar Testes para a Fase 3 (Exploratória)
+    **Descrição:** Criar testes para os scripts da fase de análise exploratória.
+    **Critérios de Aceitação:**
+    - [ ] Cobertura de testes para `src/phases/phase03_exploratory/p3_01_explore_distinct_values.py`.
+    - [ ] Cobertura de testes para `src/phases/phase03_exploratory/p3_02_preprocess_filter_batch.py`.
+    - [ ] Cobertura de testes para `src/phases/phase03_exploratory/p3_03_transform_denormalize_rows.py`.
+
+*   **ID:** T006
+    **Título:** Implementar Testes para a Fase 4 (Visualização)
+    **Descrição:** Desenvolver testes para as aplicações de visualização e ferramentas de geração de relatórios.
+    **Critérios de Aceitação:**
+    - [ ] Cobertura de testes para `src/phases/phase04_visualization/app_explore_aggregated_profiles.py`.
+    - [ ] Cobertura de testes para `src/phases/phase04_visualization/app_explore_single_profile.py`.
+    - [ ] Cobertura de testes para `src/phases/phase04_visualization/app_generic_data_analyzer.py`.
+    - [ ] Cobertura de testes para `src/phases/phase04_visualization/tool_generate_html_profiles.py`.
 
 ## Em Andamento
 
-*   **ID:** T002
-    **Título:** Implementar Funcionalidade de Concatenação de Arquivos
-    **Descrição:** Criar uma nova ferramenta para consolidar dados de múltiplos arquivos (CSV e XLSX) de uma pasta de entrada em um único arquivo de saída, mantendo o formato original e unindo todas as colunas.
-    **Critérios de Aceitação:**
-    - [ ] Criar o arquivo `src/phases/phase02_treatment/core/data_concatenator.py`.
-    - [ ] Implementar a classe `DataConcatenator` (ou função `concatenate_files`) que recebe um dicionário de configuração.
-    - [ ] A configuração deve incluir `input_folder`, `output_file` e `file_type`.
-    - [ ] A ferramenta deve validar a configuração e listar os arquivos do tipo especificado.
-    - [ ] Ler arquivos CSV usando `CsvConnector` e arquivos XLSX usando `pd.read_excel`.
-    - [ ] Concatenar os DataFrames lidos em um único DataFrame mestre.
-    - [ ] Escrever o DataFrame mestre no arquivo de saída, mantendo o formato original.
-    - [ ] Adicionar logs informativos sobre o progresso da concatenação.
-    - [ ] Modificar `src/phases/phase02_treatment/phase02_orchestrator.py` para aceitar um novo argumento `--concatenate-data` que aponta para um arquivo de configuração JSON.
-    - [ ] Implementar tratamento de erros para `FileNotFoundError`, `json.JSONDecodeError`, etc.
-    - [ ] Adicionar docstrings completas e comentários conforme as convenções do projeto.
+## Concluído
