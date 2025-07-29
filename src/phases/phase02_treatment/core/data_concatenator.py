@@ -46,7 +46,7 @@ class DataConcatenator:
         """
         logging.info("Starting concatenation process...")
         try:
-            files_to_process = find_files(self.config['input_folder'], self.config['file_type'])
+            files_to_process = find_files(self.config['input_folder'], [self.config['file_type']])
             if not files_to_process:
                 logging.warning("No files found to concatenate.")
                 return
