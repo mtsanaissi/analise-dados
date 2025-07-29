@@ -10,6 +10,7 @@ from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector impo
 from src.phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
 from src.phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
 from src.phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
+from src.phases.phase01_discovery.core.reporting import generate_html_report
 
 import argparse
 import json
@@ -46,6 +47,11 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         help="Formato da saída para a fase de descoberta (text, interactive)."
     )
     parser.add_argument(
+        "--report-output", type=str, default="json",
+        choices=['json', 'html'],
+        help="Formato do arquivo de relatório (json, html)."
+    )
+    parser.add_argument(
         "--compare-fields",
         action="store_true",
         help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
@@ -61,7 +67,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         f"Iniciando Fase 1: Descoberta e Diagnóstico para {data_project_path}")
 
     discovered_files = find_files(
-        data_project_path, extensions, recursive, exclude_patterns=['*_report.json'])
+        data_project_path, extensions, recursive, exclude_patterns=['*_report.json', '*_report.html'])
 
     if not discovered_files:
         logging.warning("Nenhum arquivo encontrado para análise.")
@@ -203,13 +209,17 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     if args.output_format == 'interactive':
         display_interactive_report(results_wrapper)
 
-    output_filename = "discovery_report.json"
-    output_path = os.path.join(data_project_path, output_filename)
-
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(results_wrapper, f, indent=4,
-                  ensure_ascii=False, cls=NpEncoder)
-
-    logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
+    if args.report_output == 'json':
+        output_filename = "discovery_report.json"
+        output_path = os.path.join(data_project_path, output_filename)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(results_wrapper, f, indent=4,
+                      ensure_ascii=False, cls=NpEncoder)
+        logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
+    elif args.report_output == 'html':
+        output_filename = "discovery_report.html"
+        output_path = os.path.join(data_project_path, output_filename)
+        generate_html_report(results_wrapper['detailed_results'], output_path)
+        logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
 
     return results_wrapper
