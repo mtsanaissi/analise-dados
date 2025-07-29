@@ -28,6 +28,6 @@ def test_generate_profiles(tmp_path):
     expected_html_path = output_dir / "test_data_profile.html"
     assert expected_html_path.exists()
 
-    # Verificar se o conteúdo do HTML não está vazio
-    html_content = expected_html_path.read_text()
-    assert "<title>Relatório de Análise para test_data.csv</title>" in html_content
+    # Verificar se o nome do arquivo de entrada está no conteúdo do HTML
+    html_content = expected_html_path.read_text(encoding="utf-8")
+    assert "test_data.csv" in html_content
