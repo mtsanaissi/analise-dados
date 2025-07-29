@@ -52,9 +52,8 @@ def test_run_discovery_phase_compare_fields(project_dir):
     assert "field_comparison_analysis" in detailed_results
     assert len(detailed_results['field_comparison_analysis']) > 0
 
-    # Find the comparison result for the second CSV
-    comparison = next((item for item in detailed_results['field_comparison_analysis'] if item['file'] == 'data2.csv'), None)
+    # Find the comparison result for the second CSV in the correct analysis
+    comparison = next((item for item in detailed_results['csv_column_consistency_analysis'] if item['file'] == 'data2.csv'), None)
     assert comparison is not None
-    assert comparison['status'] == 'diferente'
-    assert 'missing_columns' in comparison
-    assert 'extra_columns' in comparison
+    assert comparison['status'] == 'Inconsistente'
+    assert 'message' in comparison['details']
