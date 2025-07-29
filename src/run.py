@@ -13,7 +13,13 @@
 # Licença: MIT
 # --------------------------------------------------------------------------------
 
-from main.orchestrator import main
+import sys
+import os
+
+# Adiciona o diretório 'src' ao sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.main.orchestrator import main
 
 if __name__ == "__main__":
     """

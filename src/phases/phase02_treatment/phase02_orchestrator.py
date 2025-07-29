@@ -3,6 +3,8 @@ import pandas as pd
 import argparse
 import json
 import logging
+import datetime
+import shutil
 from src.utils import find_files, save_df_to_csv, METADATA_DIR
 from src.connectors.factory import get_data_loader
 from .core.problematic_value_extractor import extract_values
@@ -109,14 +111,19 @@ def run_treatment_phase(data_project_path, extra_args):
     metadata_path = os.path.join(data_project_path, METADATA_DIR)
     os.makedirs(metadata_path, exist_ok=True)
 
-    files_to_process = find_files(data_project_path, supported_extensions, exclude_dirs=[METADATA_DIR])
+    # Gerar timestamp e criar diretório de backup
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    backup_dir_name = f"fad-bkp-treatment-{timestamp}"
+    backup_dir_path = os.path.join(data_project_path, backup_dir_name)
+    os.makedirs(backup_dir_path, exist_ok=True)
+    logging.info(f"Diretório de backup criado em: {backup_dir_path}")
+
+    files_to_process = find_files(data_project_path, supported_extensions, exclude_dirs=[METADATA_DIR, backup_dir_name])
 
     if not files_to_process:
         logging.warning("Nenhum arquivo de dados encontrado para tratamento.")
         return
 
-    # Diretório para salvar os arquivos tratados e relatórios
-    treated_dir = metadata_path
 
     # Estrutura de dados para o relatório
     report_data = {
@@ -172,13 +179,25 @@ def run_treatment_phase(data_project_path, extra_args):
             # 4. Transformar colunas
             df = transform_columns(df)
 
-            # 5. Salvar o DataFrame tratado como CSV
-            output_filename = os.path.splitext(os.path.basename(file_path))[
-                0] + "_treated.csv"
-            output_path = os.path.join(treated_dir, output_filename)
-            save_df_to_csv(df, output_path)
+            # 5. Mover arquivo original para backup e salvar tratado
+            relative_path = os.path.relpath(file_path, data_project_path)
+            backup_file_path = os.path.join(backup_dir_path, relative_path)
 
-            logging.info(f"  -> Arquivo tratado salvo em: {output_path}")
+            # Garantir que o subdiretório de backup exista
+            os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
+
+            # Mover o arquivo original para o backup
+            shutil.move(file_path, backup_file_path)
+            logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
+
+            # Salvar o arquivo tratado no local original
+            file_extension = os.path.splitext(file_path)[1].lower()
+            if file_extension == '.csv':
+                df.to_csv(file_path, index=False, sep=';', encoding='utf-8-sig')
+            elif file_extension == '.xlsx':
+                df.to_excel(file_path, index=False)
+
+            logging.info(f"  -> Arquivo tratado salvo em: {file_path}")
             file_details["status"] = "Success"
             report_data["summary"]["processed_successfully"] += 1
 

@@ -1,0 +1,27 @@
+{
+    "summary": {
+        "total_files": 3,
+        "processed_successfully": 0,
+        "failed": 3
+    },
+    "details": [
+        {
+            "file_name": "consumidorgovbr_2025-01.csv",
+            "status": "Failed",
+            "problematic_values": {},
+            "applied_corrections": {}
+        },
+        {
+            "file_name": "discovery_report.json",
+            "status": "Failed",
+            "problematic_values": {},
+            "applied_corrections": {}
+        },
+        {
+            "file_name": "consumidorgovbr_2025-02.csv",
+            "status": "Failed",
+            "problematic_values": {},
+            "applied_corrections": {}
+        }
+    ]
+}
