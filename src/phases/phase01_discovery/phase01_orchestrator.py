@@ -142,13 +142,22 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         if "results" in consistency_results:
             results["csv_column_consistency_analysis"] = consistency_results["results"]
 
-        # Overwrite field comparison if consistency check already found differences
+        # Mesclar resultados da verificação de consistência com a comparação de campos
         if "results" in consistency_results:
-            for res in consistency_results["results"]:
+            for res in consistency_results.get("results", []):
+                # Encontrar a comparação de campo correspondente
+                comp_found = False
                 for comp in results["field_comparison_analysis"]:
-                    if comp["file"] == res["file"] and res["status"] != "OK":
-                        comp["status"] = res["status"]
-                        comp["details"] = res["details"]
+                    if comp.get("file") == res.get("file"):
+                        comp_found = True
+                        # Se a verificação de consistência encontrou um problema, atualize o status
+                        if res.get("status") != "OK":
+                            comp["status"] = res.get("status", comp.get("status"))
+                            comp["details"] = res.get("details", comp.get("details"))
+                        break
+                # Se não houver uma entrada de comparação de campo (improvável), adicione-a
+                if not comp_found:
+                    results["field_comparison_analysis"].append(res)
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")
