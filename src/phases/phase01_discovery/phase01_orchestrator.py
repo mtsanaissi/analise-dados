@@ -129,8 +129,17 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                         "extra_columns": extra_columns
                     }
                 results["field_comparison_analysis"].append(comparison_result)
-        results["csv_column_consistency_analysis"] = check_csv_structures(
-            data_project_path, detected_delimiters_map=detected_delimiters).get("results", [])
+        consistency_results = check_csv_structures(data_project_path, detected_delimiters_map=detected_delimiters)
+        if "results" in consistency_results:
+            results["csv_column_consistency_analysis"] = consistency_results["results"]
+
+        # Overwrite field comparison if consistency check already found differences
+        if "results" in consistency_results:
+            for res in consistency_results["results"]:
+                for comp in results["field_comparison_analysis"]:
+                    if comp["file"] == res["file"] and res["status"] != "OK":
+                        comp["status"] = res["status"]
+                        comp["details"] = res["details"]
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")

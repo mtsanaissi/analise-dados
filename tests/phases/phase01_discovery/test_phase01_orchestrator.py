@@ -1,7 +1,9 @@
+from pathlib import Path
 import os
 import json
 import pytest
 from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
+
 
 @pytest.fixture
 def project_dir(tmp_path):
@@ -10,6 +12,7 @@ def project_dir(tmp_path):
     (d / "data.csv").write_text("id,name\n1,test")
     (d / "schema.json").write_text('{"key": "value"}')
     return str(d)
+
 
 def test_run_discovery_phase(project_dir):
     # We pass an empty list for extra_args to use default behavior
@@ -35,7 +38,6 @@ def test_run_discovery_phase(project_dir):
         report_data = json.load(f)
     assert report_data['status'] == 'success'
 
-from pathlib import Path
 
 def test_run_discovery_phase_compare_fields(project_dir):
     project_path = Path(project_dir)
@@ -43,7 +45,8 @@ def test_run_discovery_phase_compare_fields(project_dir):
     (project_path / "data2.csv").write_text("id,age\n2,30")
 
     # Pass '--compare-fields' to enable the feature
-    results_wrapper = run_discovery_phase(str(project_path), ['--compare-fields'])
+    results_wrapper = run_discovery_phase(
+        str(project_path), ['--compare-fields'])
 
     assert results_wrapper['status'] == 'success'
     detailed_results = results_wrapper['detailed_results']
@@ -53,7 +56,9 @@ def test_run_discovery_phase_compare_fields(project_dir):
     assert len(detailed_results['field_comparison_analysis']) > 0
 
     # Find the comparison result for the second CSV in the correct analysis
-    comparison = next((item for item in detailed_results['csv_column_consistency_analysis'] if item['file'] == 'data2.csv'), None)
+    comparison = next(
+        (item for item in detailed_results['csv_column_consistency_analysis'] if item['file'] == 'data2.csv'), None)
     assert comparison is not None
     assert comparison['status'] == 'Inconsistente'
-    assert 'message' in comparison['details']
+    assert 'details' in comparison
+    assert "Diferença na coluna 2" in comparison['details']['message']
