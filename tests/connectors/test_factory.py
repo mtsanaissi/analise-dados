@@ -19,10 +19,11 @@ def test_get_data_loader_unsupported_extension():
 
 def test_get_data_loader_json():
     """Testa se get_data_loader levanta um ValueError para .json (ainda não implementado)."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Extensão de arquivo não suportada"):
         get_data_loader("data.json")
 
 def test_get_data_loader_xlsx():
-    """Testa se get_data_loader levanta um ValueError para .xlsx (ainda não implementado)."""
-    with pytest.raises(ValueError):
-        get_data_loader("data.xlsx")
+    """Testa se get_data_loader retorna XlsxConnector para arquivos .xlsx."""
+    from src.connectors.xlsx_connector import XlsxConnector
+    loader = get_data_loader("data.xlsx")
+    assert isinstance(loader, XlsxConnector)

@@ -10,6 +10,7 @@ from .core.value_corrector import apply_corrections
 from .core.column_transformer import transform_columns
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
+from .core.reporting import generate_json_report, generate_html_report
 
 
 def run_treatment_phase(data_project_path, extra_args):
@@ -26,6 +27,10 @@ def run_treatment_phase(data_project_path, extra_args):
                         dest="concatenate_config_path",
                         metavar="PATH",
                         help="Caminho para o arquivo de configuração JSON para a concatenação de dados. Se especificado, apenas a tarefa de concatenação será executada.")
+    parser.add_argument("--report-output",
+                        choices=['json', 'html'],
+                        default='json',
+                        help="Formato do relatório de saída (padrão: json).")
     args = parser.parse_args(extra_args)
 
     logging.info("--- Iniciando Fase 02: Tratamento ---")
@@ -100,7 +105,13 @@ def run_treatment_phase(data_project_path, extra_args):
 
     # Encontrar todos os arquivos de dados suportados
     supported_extensions = ["csv", "json", "xlsx"]
-    files_to_process = find_files(data_project_path, supported_extensions)
+    all_files = find_files(data_project_path, supported_extensions)
+
+    # Ignorar arquivos de relatório
+    files_to_process = [
+        f for f in all_files
+        if not (f.endswith('_report.json') or f.endswith('_report.html'))
+    ]
 
     if not files_to_process:
         logging.warning("Nenhum arquivo de dados encontrado para tratamento.")
@@ -110,6 +121,12 @@ def run_treatment_phase(data_project_path, extra_args):
     treated_dir = os.path.join(data_project_path, "treated")
     os.makedirs(treated_dir, exist_ok=True)
 
+    # Estrutura de dados para o relatório
+    report_data = {
+        "summary": {"total_files": 0, "processed_successfully": 0, "failed": 0},
+        "details": []
+    }
+
     # Mapa de correções (exemplo, pode ser carregado de um arquivo)
     # TODO: Externalizar o mapa de correções
     corrections_map = {
@@ -117,7 +134,16 @@ def run_treatment_phase(data_project_path, extra_args):
         "valor_problematico_2": "valor_corrigido_2"
     }
 
+    report_data["summary"]["total_files"] = len(files_to_process)
+
     for file_path in files_to_process:
+        file_details = {
+            "file_name": os.path.basename(file_path),
+            "status": "Failed",
+            "problematic_values": {},
+            "applied_corrections": {}
+        }
+
         try:
             logging.info(f"Processando arquivo: {os.path.basename(file_path)}")
 
@@ -127,18 +153,26 @@ def run_treatment_phase(data_project_path, extra_args):
 
             if df is None:
                 logging.warning(f"  -> Falha ao carregar o arquivo.")
+                report_data["summary"]["failed"] += 1
+                report_data["details"].append(file_details)
                 continue
 
-            # 2. Extrair valores problemáticos (opcional, pode ser usado para gerar um relatório)
+            # 2. Extrair valores problemáticos
             problematic_values = extract_values(df)
+            file_details["problematic_values"] = problematic_values
             if problematic_values:
                 logging.info(
                     f"  -> Valores problemáticos encontrados: {problematic_values}")
 
             # 3. Aplicar correções de valor
             df = apply_corrections(df, corrections_map)
+            # Simplificação: assumindo que todas as correções no mapa são aplicadas
+            file_details["applied_corrections"] = {
+                k: v for k, v in corrections_map.items() if k in problematic_values
+            }
 
-            # 4. Transformar colunas (ex: remover coluna 'Total')
+
+            # 4. Transformar colunas
             df = transform_columns(df)
 
             # 5. Salvar o DataFrame tratado como CSV
@@ -148,9 +182,22 @@ def run_treatment_phase(data_project_path, extra_args):
             save_df_to_csv(df, output_path)
 
             logging.info(f"  -> Arquivo tratado salvo em: {output_path}")
+            file_details["status"] = "Success"
+            report_data["summary"]["processed_successfully"] += 1
 
         except Exception as e:
             logging.error(
                 f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
+            report_data["summary"]["failed"] += 1
+
+        report_data["details"].append(file_details)
+
+    # Gerar relatório no final
+    if args.report_output == 'json':
+        report_path = os.path.join(treated_dir, "treatment_report.json")
+        generate_json_report(report_data, report_path)
+    elif args.report_output == 'html':
+        report_path = os.path.join(treated_dir, "treatment_report.html")
+        generate_html_report(report_data, report_path)
 
     logging.info("--- Fase 02: Tratamento Concluída ---")
