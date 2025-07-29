@@ -116,8 +116,9 @@ def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None
 def has_problematic_char(text_value: any) -> bool:
     """
     Verifica se uma string contém caracteres problemáticos.
-    Problemáticos: Unicode Replacement Character (U+FFFD) ou caracteres de controle
-                   não padrão (diferentes de tab, newline, carriage return).
+    Problemáticos: Unicode Replacement Character (U+FFFD), o caractere '¬'
+                   ou caracteres de controle não padrão (diferentes de tab,
+                   newline, carriage return).
     
     Args:
         text_value (any): O valor a ser verificado.
@@ -128,13 +129,16 @@ def has_problematic_char(text_value: any) -> bool:
     if not isinstance(text_value, str):
         return False
 
+    problematic_chars = {'\ufffd', '¬'}
     control_chars_allowed = {'\t', '\n', '\r'}
+
     for char_read in text_value:
-        if char_read == '\ufffd':  # Caractere de substituição Unicode
+        if char_read in problematic_chars:
             return True
         # Verifica caracteres de controle não permitidos
         if not char_read.isprintable() and char_read not in control_chars_allowed:
             return True
+
     return False
 
 def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> bool:

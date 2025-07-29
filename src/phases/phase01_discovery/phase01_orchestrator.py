@@ -97,7 +97,8 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     if csv_files:
         logging.info("--- Executando Análises de CSV ---")
         detected_delimiters = {}
-        for fp in csv_files:
+        sorted_csv_files = sorted(csv_files)
+        for fp in sorted_csv_files:
             delimiter_result = detect_csv_delimiter(fp)
             results["csv_delimiter_analysis"].append(
                 {"file": os.path.basename(fp), "result": delimiter_result})
