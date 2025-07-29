@@ -158,7 +158,7 @@ def run_treatment_phase(data_project_path, extra_args):
                 continue
 
             # 2. Extrair valores problemáticos
-            problematic_values = extract_values(df)
+            problematic_values = extract_values(df) or {}
             file_details["problematic_values"] = problematic_values
             if problematic_values:
                 logging.info(
