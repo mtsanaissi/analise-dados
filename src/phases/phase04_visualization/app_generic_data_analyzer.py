@@ -15,83 +15,81 @@
 import pandas as pd
 from ydata_profiling import ProfileReport
 import streamlit as st
-from utils import read_csv_robust
+from src.utils import read_csv_robust
 
+# --- Funções de Lógica de Dados ---
 
-def load_data(file_path):
+def load_data(file_path, delimiter=';'):
+    """
+    Carrega dados de um arquivo CSV ou Excel.
+    """
+    if not isinstance(file_path, str) or not file_path:
+        raise ValueError("Caminho do arquivo inválido.")
+
     if file_path.endswith('.xlsx'):
-        data = pd.read_excel(file_path)
+        return pd.read_excel(file_path)
     elif file_path.endswith('.csv'):
-        data = read_csv_robust(file_path, delimiter=';')
+        return read_csv_robust(file_path, delimiter=delimiter)
     else:
-        raise ValueError(
-            "File format not supported. Only XLSX and CSV formats are allowed.")
-    return data
+        raise ValueError("Formato de arquivo não suportado. Apenas os formatos XLSX e CSV são permitidos.")
 
+def get_data_summary(data):
+    """
+    Retorna um resumo estatístico do DataFrame.
+    """
+    return data.describe(include='all')
 
-def first_rows(data):
-    # Show first 5 rows of the data
-    st.subheader("First 5 rows:")
+# --- Funções de Interface do Usuário ---
+
+def show_first_rows(data):
+    st.subheader("Primeiras 5 linhas:")
     st.write(data.head())
     rows_total = "{:,}".format(data.shape[0])
-    st.write(f"Rows: {rows_total} | Columns: {data.shape[1]}")
+    st.write(f"Linhas: {rows_total} | Colunas: {data.shape[1]}")
 
-
-def data_types(data):
-    # Show data types of each column
-    st.subheader("Data types:")
+def show_data_types(data):
+    st.subheader("Tipos de Dados:")
     st.write(data.dtypes)
 
+def show_column_data_summary(data):
+    st.subheader("Resumo dos Dados por Coluna:")
+    st.info("top = valor mais frequente, freq = número de ocorrências do valor mais frequente", icon="ℹ️")
+    st.write(get_data_summary(data))
 
-def column_data_summary(data):
-    # Summary statistics for each column
-    st.subheader("Column-wise Data Summary:")
-    st.info("top = most frequent value, freq = number of occurrences of most frequent value", icon="ℹ️")
-    st.write(data.describe(include='all'))
-
-
-def missing_values(data):
-    # Check for missing values
-    st.subheader("Missing Values:")
+def show_missing_values(data):
+    st.subheader("Valores Ausentes:")
     st.write(data.isnull().sum())
 
-
-def correlation_matrix(data):
-    # Correlation matrix
-    st.subheader("Correlation Matrix:")
+def show_correlation_matrix(data):
+    st.subheader("Matriz de Correlação:")
     st.write(data.corr())
 
+def show_profile_report(data):
+    profile = ProfileReport(data, title="Relatório de Perfil do Pandas")
+    with st.expander("Perfil:"):
+        st.write(profile)
 
-def show_profile(data):
-    profile = ProfileReport(data, title="Pandas Profiling Report")
-    with st.expander("Profile:"):
-        profile
+def run_app():
+    """
+    Executa a aplicação Streamlit.
+    """
+    st.title("Análise de Dados com Streamlit")
 
-
-def main():
-    st.title("Data Analysis with Streamlit")
-
-    file_path = st.text_input("Enter the path to your file (XLSX or CSV):")
+    file_path = st.text_input("Digite o caminho para o seu arquivo (XLSX ou CSV):")
     if file_path:
         try:
             data = load_data(file_path)
-            # Convert columns to datetime format
-            # data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y')
-            # Fix float values
-            # data['ColumnName'] = data['ColumnName'].str.replace(',', '.').astype(float)
-            first_rows(data)
-            data_types(data)
-            column_data_summary(data)
-            missing_values(data)
-            # correlation_matrix(data)
-
-            show_profile(data)
+            show_first_rows(data)
+            show_data_types(data)
+            show_column_data_summary(data)
+            show_missing_values(data)
+            # show_correlation_matrix(data) # Comentado por padrão
+            show_profile_report(data)
 
         except FileNotFoundError:
-            st.error("File not found. Please check the file path.")
+            st.error("Arquivo não encontrado. Por favor, verifique o caminho do arquivo.")
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
+            st.error(f"Ocorreu um erro: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    run_app()

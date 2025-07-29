@@ -19,10 +19,63 @@ import argparse
 import sys
 import pandas as pd
 from ydata_profiling import ProfileReport
-from utils import find_files, read_csv_robust
+from src.utils import find_files, read_csv_robust
+
+
+def generate_profiles(root_dir, output_dir, extensions, recursive, delimiter):
+    """
+    Gera relatórios de perfil de dados para arquivos em um diretório.
+
+    Args:
+        root_dir (str): O diretório raiz para procurar arquivos.
+        output_dir (str): O diretório para salvar os relatórios HTML.
+        extensions (list): Uma lista de extensões de arquivo a serem incluídas.
+        recursive (bool): Se a busca por arquivos deve ser recursiva.
+        delimiter (str): O delimitador a ser usado ao ler arquivos CSV.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    if root_dir == output_dir:
+        print("Erro: Diretório de entrada e saída não podem ser os mesmos.", file=sys.stderr)
+        sys.exit(1)
+
+    files_to_profile = find_files(root_dir, extensions, recursive)
+    if not files_to_profile:
+        print("Nenhum arquivo encontrado.")
+        return
+
+    print(f"Encontrados {len(files_to_profile)} arquivos. Gerando relatórios...")
+
+    for file_path in files_to_profile:
+        filename = os.path.basename(file_path)
+        print(f"  -> Processando: {filename}")
+
+        try:
+            df = None
+            if file_path.lower().endswith('.csv'):
+                df = read_csv_robust(file_path, delimiter=delimiter.replace('\\t', '\t'))
+            elif file_path.lower().endswith(('.xlsx', '.xls')):
+                df = pd.read_excel(file_path, sheet_name=0)
+            elif file_path.lower().endswith('.json'):
+                df = pd.read_json(file_path)
+
+            if df is not None:
+                profile = ProfileReport(df, title=f"Relatório de Análise para {filename}")
+                output_filename = f"{os.path.splitext(filename)[0]}_profile.html"
+                output_path = os.path.join(output_dir, output_filename)
+                profile.to_file(output_path)
+                print(f"     Relatório salvo em: {output_path}")
+
+        except Exception as e:
+            print(f"     ERRO ao processar {filename}: {e}", file=sys.stderr)
+
+    print("\nProcesso concluído.")
 
 
 def main():
+    """
+    Função principal para executar a ferramenta a partir da linha de comando.
+    """
     parser = argparse.ArgumentParser(
         description="Gera relatórios HTML de perfilamento de dados para múltiplos arquivos.",
         formatter_class=argparse.RawTextHelpFormatter
@@ -48,54 +101,13 @@ def main():
 
     args = parser.parse_args()
 
-    # Validação de diretórios
-    root_dir = os.path.abspath(args.root_directory)
-    output_dir = os.path.abspath(args.output_directory)
-    os.makedirs(output_dir, exist_ok=True)
-
-    if root_dir == output_dir:
-        print(
-            "Erro: Diretório de entrada e saída não podem ser os mesmos.", file=sys.stderr)
-        sys.exit(1)
-
-    files_to_profile = find_files(
-        root_dir, args.extensions, args.recursive)
-    if not files_to_profile:
-        print("Nenhum arquivo encontrado.")
-        return
-
-    print(
-        f"Encontrados {len(files_to_profile)} arquivos. Gerando relatórios...")
-
-    for file_path in files_to_profile:
-        filename = os.path.basename(file_path)
-        print(f"  -> Processando: {filename}")
-
-        try:
-            df = None
-            if file_path.lower().endswith('.csv'):
-                df = read_csv_robust(
-                    file_path, delimiter=args.delimiter.replace('\t', '\t'))
-            elif file_path.lower().endswith(('.xlsx', '.xls')):
-                # Para simplificar, vamos gerar um relatório apenas para a primeira planilha
-                df = pd.read_excel(file_path, sheet_name=0)
-            elif file_path.lower().endswith('.json'):
-                df = pd.read_json(file_path)
-
-            if df is not None:
-                profile = ProfileReport(
-                    df, title=f"Relatório de Análise para {filename}")
-
-                output_filename = f"{os.path.splitext(filename)[0]}_profile.html"
-                output_path = os.path.join(output_dir, output_filename)
-
-                profile.to_file(output_path)
-                print(f"     Relatório salvo em: {output_path}")
-
-        except Exception as e:
-            print(f"     ERRO ao processar {filename}: {e}", file=sys.stderr)
-
-    print("\nProcesso concluído.")
+    generate_profiles(
+        root_dir=os.path.abspath(args.root_directory),
+        output_dir=os.path.abspath(args.output_directory),
+        extensions=args.extensions,
+        recursive=args.recursive,
+        delimiter=args.delimiter
+    )
 
 
 if __name__ == "__main__":
