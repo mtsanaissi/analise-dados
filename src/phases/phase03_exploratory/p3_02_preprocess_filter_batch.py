@@ -105,6 +105,77 @@ def filter_random_rows(df, num_rows):
     return df.sample(n=num_rows, random_state=42)
 
 
+def preprocess_filter_batch(root_directory, output_directory, extensions, recursive, delimiter):
+    """
+    Processa arquivos de dados em lote, aplicando filtros e salvando
+    os resultados em um diretório de saída.
+    """
+    root_dir = os.path.abspath(root_directory)
+    output_dir = os.path.abspath(output_directory)
+
+    if not os.path.isdir(root_dir):
+        print(f"Erro: O diretório raiz '{root_dir}' não existe.", file=sys.stderr)
+        sys.exit(1)
+
+    if root_dir == output_dir:
+        print("Erro Crítico: O diretório de saída não pode ser o mesmo que o diretório raiz.", file=sys.stderr)
+        sys.exit(1)
+
+    os.makedirs(output_dir, exist_ok=True)
+    actual_delimiter = delimiter.replace('\\t', '\t')
+
+    files_to_process = find_data_files(root_dir, extensions, recursive)
+    if not files_to_process:
+        print("Nenhum arquivo encontrado com os critérios especificados.")
+        return
+
+    print(f"Encontrados {len(files_to_process)} arquivos. Iniciando filtragem...\n")
+    processed_count = 0
+    failed_count = 0
+
+    for file_path in files_to_process:
+        relative_path = os.path.relpath(file_path, root_dir)
+        print(f"Processando: {relative_path}")
+
+        try:
+            df = pd.read_csv(file_path, sep=actual_delimiter, low_memory=False)
+            original_row_count = len(df)
+
+            if original_row_count == 0:
+                print("  -> Arquivo vazio, pulando.")
+                continue
+
+            filtered_df = apply_user_filters(df)
+            filtered_row_count = len(filtered_df)
+
+            print(f"  -> {original_row_count:,} linhas originais -> {filtered_row_count:,} linhas filtradas.")
+
+            output_file_path = os.path.join(output_dir, relative_path)
+            output_file_dir = os.path.dirname(output_file_path)
+            os.makedirs(output_file_dir, exist_ok=True)
+
+            filtered_df.to_csv(
+                output_file_path, sep=actual_delimiter, index=False, encoding='utf-8-sig')
+            print(f"  -> Arquivo filtrado salvo em: {output_file_path}")
+            processed_count += 1
+
+        except FileNotFoundError:
+            print(f"  ERRO: Arquivo não encontrado no caminho: {file_path}", file=sys.stderr)
+            failed_count += 1
+        except KeyError as e:
+            print(f"  ERRO: Coluna não encontrada para o filtro: {e}. Verifique se a coluna existe em '{relative_path}'.", file=sys.stderr)
+            failed_count += 1
+        except Exception as e:
+            print(f"  ERRO ao processar o arquivo {relative_path}: {e}", file=sys.stderr)
+            failed_count += 1
+
+        print("-" * 50)
+
+    print("\nProcesso de filtragem concluído.")
+    print(f"Total de arquivos processados com sucesso: {processed_count}")
+    print(f"Total de arquivos com falha: {failed_count}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Filtra arquivos de dados em lote com base em regras personalizadas.",
@@ -137,77 +208,13 @@ def main():
 
     args = parser.parse_args()
 
-    root_dir = os.path.abspath(args.root_directory)
-    output_dir = os.path.abspath(args.output_directory)
-
-    if not os.path.isdir(root_dir):
-        print(
-            f"Erro: O diretório raiz '{root_dir}' não existe.", file=sys.stderr)
-        sys.exit(1)
-
-    if root_dir == output_dir:
-        print("Erro Crítico: O diretório de saída não pode ser o mesmo que o diretório raiz.", file=sys.stderr)
-        sys.exit(1)
-
-    os.makedirs(output_dir, exist_ok=True)
-    actual_delimiter = args.delimiter.replace('\\t', '\t')
-
-    files_to_process = find_data_files(
-        root_dir, args.extensions, args.recursive)
-    if not files_to_process:
-        print("Nenhum arquivo encontrado com os critérios especificados.")
-        return
-
-    print(
-        f"Encontrados {len(files_to_process)} arquivos. Iniciando filtragem...\n")
-    processed_count = 0
-    failed_count = 0
-
-    for file_path in files_to_process:
-        relative_path = os.path.relpath(file_path, root_dir)
-        print(f"Processando: {relative_path}")
-
-        try:
-            df = pd.read_csv(file_path, sep=actual_delimiter, low_memory=False)
-            original_row_count = len(df)
-
-            if original_row_count == 0:
-                print("  -> Arquivo vazio, pulando.")
-                continue
-
-            filtered_df = apply_user_filters(df)
-            filtered_row_count = len(filtered_df)
-
-            print(
-                f"  -> {original_row_count:,} linhas originais -> {filtered_row_count:,} linhas filtradas.")
-
-            output_file_path = os.path.join(output_dir, relative_path)
-            output_file_dir = os.path.dirname(output_file_path)
-            os.makedirs(output_file_dir, exist_ok=True)
-
-            filtered_df.to_csv(
-                output_file_path, sep=actual_delimiter, index=False, encoding='utf-8-sig')
-            print(f"  -> Arquivo filtrado salvo em: {output_file_path}")
-            processed_count += 1
-
-        except FileNotFoundError:
-            print(
-                f"  ERRO: Arquivo não encontrado no caminho: {file_path}", file=sys.stderr)
-            failed_count += 1
-        except KeyError as e:
-            print(
-                f"  ERRO: Coluna não encontrada para o filtro: {e}. Verifique se a coluna existe em '{relative_path}'.", file=sys.stderr)
-            failed_count += 1
-        except Exception as e:
-            print(
-                f"  ERRO ao processar o arquivo {relative_path}: {e}", file=sys.stderr)
-            failed_count += 1
-
-        print("-" * 50)
-
-    print("\nProcesso de filtragem concluído.")
-    print(f"Total de arquivos processados com sucesso: {processed_count}")
-    print(f"Total de arquivos com falha: {failed_count}")
+    preprocess_filter_batch(
+        root_directory=args.root_directory,
+        output_directory=args.output_directory,
+        extensions=args.extensions,
+        recursive=args.recursive,
+        delimiter=args.delimiter
+    )
 
 
 if __name__ == "__main__":
