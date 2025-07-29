@@ -31,7 +31,7 @@ def test_run_discovery_phase(project_dir):
     assert "json_schema_validation" in detailed_results
 
     # Check if the report was generated
-    report_path = os.path.join(project_dir, "discovery_report.json")
+    report_path = os.path.join(project_dir, "fad-metadados", "discovery_report.json")
     assert os.path.exists(report_path)
 
     with open(report_path, 'r') as f:

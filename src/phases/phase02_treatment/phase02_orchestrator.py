@@ -3,7 +3,7 @@ import pandas as pd
 import argparse
 import json
 import logging
-from src.utils import find_files, save_df_to_csv
+from src.utils import find_files, save_df_to_csv, METADATA_DIR
 from src.connectors.factory import get_data_loader
 from .core.problematic_value_extractor import extract_values
 from .core.value_corrector import apply_corrections
@@ -105,21 +105,18 @@ def run_treatment_phase(data_project_path, extra_args):
 
     # Encontrar todos os arquivos de dados suportados
     supported_extensions = ["csv", "json", "xlsx"]
-    all_files = find_files(data_project_path, supported_extensions)
 
-    # Ignorar arquivos de relatório
-    files_to_process = [
-        f for f in all_files
-        if not (f.endswith('_report.json') or f.endswith('_report.html'))
-    ]
+    metadata_path = os.path.join(data_project_path, METADATA_DIR)
+    os.makedirs(metadata_path, exist_ok=True)
+
+    files_to_process = find_files(data_project_path, supported_extensions, exclude_dirs=[METADATA_DIR])
 
     if not files_to_process:
         logging.warning("Nenhum arquivo de dados encontrado para tratamento.")
         return
 
-    # Diretório para salvar os arquivos tratados
-    treated_dir = os.path.join(data_project_path, "treated")
-    os.makedirs(treated_dir, exist_ok=True)
+    # Diretório para salvar os arquivos tratados e relatórios
+    treated_dir = metadata_path
 
     # Estrutura de dados para o relatório
     report_data = {
@@ -194,10 +191,10 @@ def run_treatment_phase(data_project_path, extra_args):
 
     # Gerar relatório no final
     if args.report_output == 'json':
-        report_path = os.path.join(treated_dir, "treatment_report.json")
+        report_path = os.path.join(metadata_path, "treatment_report.json")
         generate_json_report(report_data, report_path)
     elif args.report_output == 'html':
-        report_path = os.path.join(treated_dir, "treatment_report.html")
+        report_path = os.path.join(metadata_path, "treatment_report.html")
         generate_html_report(report_data, report_path)
 
     logging.info("--- Fase 02: Tratamento Concluída ---")

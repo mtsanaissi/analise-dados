@@ -2,7 +2,7 @@
 
 import logging
 import os
-from src.utils import find_files
+from src.utils import find_files, METADATA_DIR
 from src.phases.phase01_discovery.core.encoding_detector import process_file_encoding
 from src.phases.phase01_discovery.core.data_volume_analyzer import analyze_data_volume
 from src.phases.phase01_discovery.core.data_integrity_checker import analyze_data_integrity
@@ -66,8 +66,11 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     logging.info(
         f"Iniciando Fase 1: Descoberta e Diagnóstico para {data_project_path}")
 
+    metadata_path = os.path.join(data_project_path, METADATA_DIR)
+    os.makedirs(metadata_path, exist_ok=True)
+
     discovered_files = find_files(
-        data_project_path, extensions, recursive, exclude_patterns=['*_report.json', '*_report.html'])
+        data_project_path, extensions, recursive, exclude_dirs=[METADATA_DIR])
 
     if not discovered_files:
         logging.warning("Nenhum arquivo encontrado para análise.")
@@ -211,14 +214,14 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
     if args.report_output == 'json':
         output_filename = "discovery_report.json"
-        output_path = os.path.join(data_project_path, output_filename)
+        output_path = os.path.join(metadata_path, output_filename)
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results_wrapper, f, indent=4,
                       ensure_ascii=False, cls=NpEncoder)
         logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
     elif args.report_output == 'html':
         output_filename = "discovery_report.html"
-        output_path = os.path.join(data_project_path, output_filename)
+        output_path = os.path.join(metadata_path, output_filename)
         generate_html_report(results_wrapper['detailed_results'], output_path)
         logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
 
