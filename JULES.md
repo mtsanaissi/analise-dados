@@ -17,7 +17,6 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 *  **Resilience**: A failure in processing a single file or a sub-task should not crash the entire script. The error must be logged, and the process should attempt to continue with the next items.
 *  **Type Hints**: Use **type hints** for all function signatures.
 *  **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
-*  **Branching**: When creating a new branch, use a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`).
 
 ## Environment and Dependencies
 

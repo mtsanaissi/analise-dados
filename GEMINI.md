@@ -29,6 +29,7 @@ Your role is to act as a programming assistant specializing in Python for data a
 - **Prompts for Jules**: When asked to generate prompts for Jules, you **must** follow this specific structure for the generated text:
   1.  **Opening:** The prompt must begin **directly** with a short, descriptive title (up to 5 words) that summarizes the task. Do not use a prefix like "Title:".
   2.  **First Actionable Step:** The first numbered or bulleted step in the task list must be: "Review Guiding Principles: Your top priority is to read and strictly adhere to all rules and guidelines defined in `JULES.md`..."
+  3.  **Second Step:** You, Gemini, will come up with a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`) and tell Jules to create the branch with that name.
 - **Relative Paths**: Always use relative paths based on the project root. For example, refer to the source directory as `src/` instead of `D:\w\analise-dados\src\`.
 
 ## Dependency Management
