@@ -77,14 +77,12 @@ Junta múltiplos arquivos de um diretório em um único arquivo de saída.
 
 #### Configuração
 
-Esta operação requer um arquivo de configuração JSON. Crie um arquivo (ex: `config_concat.json`) com a seguinte estrutura:
+Esta operação requer um arquivo de configuração YAML. Crie um arquivo (ex: `config_concat.yaml`) com a seguinte estrutura:
 
-```json
-{
-  "input_folder": "caminho/para/pasta/com/arquivos",
-  "output_file": "caminho/para/arquivo_final.csv",
-  "file_format": "csv"
-}
+```yaml
+input_folder: "caminho/para/pasta/com/arquivos"
+output_file: "caminho/para/arquivo_final.csv"
+file_format: "csv"
 ```
 
 *   `input_folder`: O diretório contendo os arquivos a serem concatenados.
@@ -94,7 +92,7 @@ Esta operação requer um arquivo de configuração JSON. Crie um arquivo (ex: `
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --concatenate-data caminho/para/config_concat.json
+python src/run.py -d data/meu_projeto -p treatment --concatenate-data caminho/para/config_concat.yaml
 ```
 
 ### Operação 3: Enriquecer Dados (`--enrich-data`)
@@ -103,17 +101,17 @@ Adiciona informações a um arquivo principal (main) com base em um arquivo de c
 
 #### Configuração
 
-Requer um arquivo de configuração JSON (ex: `config_enrich.json`):
+Requer um arquivo de configuração YAML (ex: `config_enrich.yaml`):
 
-```json
-{
-  "main_file": "caminho/para/arquivo_principal.csv",
-  "lookup_file": "caminho/para/arquivo_consulta.csv",
-  "output_file": "caminho/para/arquivo_enriquecido.csv",
-  "main_key": "coluna_chave_principal",
-  "lookup_key": "coluna_chave_consulta",
-  "columns_to_add": ["coluna1_da_consulta", "coluna2_da_consulta"]
-}
+```yaml
+main_file: "caminho/para/arquivo_principal.csv"
+lookup_file: "caminho/para/arquivo_consulta.csv"
+output_file: "caminho/para/arquivo_enriquecido.csv"
+main_key: "coluna_chave_principal"
+lookup_key: "coluna_chave_consulta"
+columns_to_add:
+  - "coluna1_da_consulta"
+  - "coluna2_da_consulta"
 ```
 
 *   `main_file`: O arquivo que receberá as novas informações.
@@ -125,7 +123,7 @@ Requer um arquivo de configuração JSON (ex: `config_enrich.json`):
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --enrich-data caminho/para/config_enrich.json
+python src/run.py -d data/meu_projeto -p treatment --enrich-data caminho/para/config_enrich.yaml
 ```
 
 ---
