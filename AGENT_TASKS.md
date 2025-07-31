@@ -2,18 +2,56 @@
 
 ## Backlog
 
-*   **ID:** T014
-    **Título:** Delegar Comando de Ajuda para Parsers Específicos da Fase
-    **Descrição:** Ao executar o script com a flag de ajuda (`-h` ou `--help`) junto com uma fase específica (ex: `python src/run.py -p treatment -h`), a mensagem de ajuda principal é exibida em vez da ajuda para a fase especificada. O script deve ser modificado para detectar essa situação e exibir a mensagem de ajuda do sub-parser da fase selecionada.
+*   **ID:** T016
+    **Título:** Aprimorar Fase 1 para Gerar Configuração de Limpeza de Caracteres
+    **Descrição:** A detecção de caracteres problemáticos na Fase 1 é apenas informativa. Esta tarefa visa transformar essa detecção em uma ferramenta acionável, refatorando a funcionalidade para que ela gere, sob demanda, um arquivo de configuração YAML pronto para ser usado pela Fase 2 e limpando o fluxo de execução padrão.
     **Critérios de Aceitação:**
-    - [ ] Modificar `src/run.py`.
-    - [ ] Quando `python src/run.py -p <phase_name> -h` for executado, a mensagem de ajuda para `<phase_name>` deve ser exibida.
-    - [ ] A mensagem de ajuda principal ainda deve ser exibida quando `python src/run.py -h` for executado sem especificar uma fase.
-    - [ ] O comportamento deve funcionar para todas as fases que possuem argumentos específicos (ex: `discovery`, `treatment`).
+    - [ ] **Refatorar `detect_problematic_chars`:**
+        - A função em `src/phases/phase01_discovery/core/data_integrity_checker.py` deve ser modificada para retornar um `set` de caracteres problemáticos únicos, em vez de uma lista de amostras.
+    - [ ] **Desacoplar do Fluxo Padrão:**
+        - A chamada a `detect_problematic_chars` deve ser removida da execução normal da Fase 1 (da função `check_csv_file`, `check_json_file`, etc.).
+        - A seção de caracteres problemáticos deve ser removida dos relatórios `json` e `html` padrão da Fase 1.
+    - [ ] **Novo Argumento na Fase 1:**
+        - Adicionar um novo argumento ao `phase01_orchestrator.py`: `--generate-char-cleanup-config <caminho_do_arquivo.yaml>`.
+        - A execução da detecção de caracteres e a geração do YAML só devem ocorrer quando este argumento for fornecido.
+    - [ ] **Geração do YAML:**
+        - Ao usar a nova flag, o orquestrador deve consolidar os caracteres problemáticos de todos os arquivos em um conjunto único.
+        - Um arquivo YAML deve ser gerado no caminho especificado.
+        - No YAML, cada `existing_value` deve ser a representação textual segura do caractere (ex: `'\uFFFD'`, `'\x07'`), usando PyYAML para garantir a escrita correta como escape literal.
+        - O `new_value` padrão deve ser uma string vazia (`''`).
+        - A regra não deve conter a chave `column`.
+    - [ ] **Atualização da Documentação e Ajuda:**
+        - O texto de ajuda (`-h`) da Fase 1 deve ser atualizado para incluir o novo argumento.
+        - O arquivo `COMO_USAR.md` deve ser atualizado para remover a menção da detecção de caracteres do fluxo padrão e adicionar uma nova seção explicando como usar `--generate-char-cleanup-config` para criar um arquivo de limpeza para a Fase 2.
+
+*   **ID:** T015
+    **Título:** Refatorar Tratamento Padrão para Substituição de Valores Baseada em Configuração
+    **Descrição:** A operação `--apply-standard-treatment` é vaga e mistura responsabilidades. Esta tarefa visa refatorá-la para uma operação focada e configurável de substituição de valores, melhorando a clareza e o controle do usuário.
+    **Critérios de Aceitação:**
+    - [ ] Em `src/phases/phase02_treatment/phase02_orchestrator.py`, renomear o argumento `--apply-standard-treatment` para `--replace-values`.
+    - [ ] O novo argumento `--replace-values` deve aceitar um caminho para um arquivo de configuração YAML como seu valor.
+    - [ ] A funcionalidade de `transform_columns` deve ser removida desta operação. O foco deve ser exclusivamente na substituição de valores.
+    - [ ] A lógica de substituição deve ser guiada por um arquivo de configuração YAML (ex: `replace_config.yaml`) que contém uma lista de regras na chave `replacements`.
+    - [ ] Cada regra na lista deve conter `existing_value` e `new_value`. A chave `column` será opcional.
+        - Se `column` for especificada, a substituição ocorrerá apenas na coluna indicada.
+        - Se `column` for omitida, a substituição será aplicada a todas as colunas do DataFrame.
+    - [ ] A lógica deve ser capaz de interpretar um valor `null` no YAML como `None` no pandas, permitindo a substituição para valores nulos.
+    - [ ] A funcionalidade de backup dos arquivos originais em um diretório `fad-bkp-treatment-[timestamp]` deve ser mantida.
+    - [ ] A geração de um relatório (`json` ou `html`) deve ser mantida e adaptada para detalhar, para cada arquivo, quais regras foram aplicadas e quantas substituições foram feitas por regra.
+    - [ ] Se o arquivo de configuração YAML não for encontrado ou for inválido, o script deve falhar com uma mensagem de erro clara.
 
 ## Em Andamento
 
 ## Concluído
+
+*   **ID:** T014
+    **Título:** Delegar Comando de Ajuda para Parsers Específicos da Fase
+    **Descrição:** Ao executar o script com a flag de ajuda (`-h` ou `--help`) junto com uma fase específica (ex: `python src/run.py -p treatment -h`), a mensagem de ajuda principal é exibida em vez da ajuda para a fase especificada. O script deve ser modificado para detectar essa situação e exibir a mensagem de ajuda do sub-parser da fase selecionada.
+    **Critérios de Aceitação:**
+    - [x] Modificar `src/run.py`.
+    - [x] Quando `python src/run.py -p <phase_name> -h` for executado, a mensagem de ajuda para `<phase_name>` deve ser exibida.
+    - [x] A mensagem de ajuda principal ainda deve ser exibida quando `python src/run.py -h` for executado sem especificar uma fase.
+    - [x] O comportamento deve funcionar para todas as fases que possuem argumentos específicos (ex: `discovery`, `treatment`).
 
 *   **ID:** T013
     **Título:** Melhorar Usabilidade e Interatividade da Fase 2 (Tratamento)
