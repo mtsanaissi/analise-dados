@@ -69,7 +69,7 @@ def test_orchestrator_default_routing(mock_transform, mock_apply, mock_extract, 
     mock_get_loader.return_value.read.return_value = mock_df_initial
     mock_apply.return_value = mock_df_after_corrections
     mock_transform.return_value = mock_df_after_transform
-    args = []
+    args = ['--apply-standard-treatment']
 
     # Act
     run_treatment_phase(str(tmp_path), args)

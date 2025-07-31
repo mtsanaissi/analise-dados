@@ -27,5 +27,5 @@ def test_generate_html_report(tmp_path):
     assert "<h2>Data Volume Analysis</h2>" in html_content
     assert "<td>test.csv</td>" in html_content
     assert "<td>utf-8</td>" in html_content
-    assert "<th>total_files</th>" in html_content
+    assert "<td>total_files</td>" in html_content
     assert "<td>1.00</td>" in html_content
