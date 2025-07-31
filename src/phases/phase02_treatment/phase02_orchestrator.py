@@ -5,17 +5,15 @@ import json
 import logging
 import datetime
 import shutil
-from src.utils import find_files, save_df_to_csv, METADATA_DIR
+import yaml
+from src.utils import find_files, METADATA_DIR
 from src.connectors.factory import get_data_loader
-from .core.problematic_value_extractor import extract_values
-from .core.value_corrector import apply_corrections
-from .core.column_transformer import transform_columns
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
 from .core.reporting import generate_json_report, generate_html_report
 
 
-def run_treatment_phase(data_project_path, extra_args):
+def run_treatment_phase(data_project_path: str, extra_args: list):
     """
     Orquestra a fase de tratamento dos dados.
     """
@@ -32,9 +30,10 @@ def run_treatment_phase(data_project_path, extra_args):
                                  dest="concatenate_config_path",
                                  metavar="PATH",
                                  help="Caminho para o arquivo de configuração JSON para a concatenação de dados.")
-    operation_group.add_argument("--apply-standard-treatment",
-                                 action='store_true',
-                                 help="Aplica o tratamento padrão aos arquivos (limpeza de texto, correção de valores) e os substitui, mantendo um backup dos originais.")
+    operation_group.add_argument("--replace-values",
+                                 dest="replace_config_path",
+                                 metavar="PATH",
+                                 help="Caminho para o arquivo de configuração YAML para substituição de valores.")
 
     parser.add_argument("--report-output",
                         choices=['json', 'html'],
@@ -101,7 +100,20 @@ def run_treatment_phase(data_project_path, extra_args):
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
 
-    elif args.apply_standard_treatment:
+    elif args.replace_config_path:
+        try:
+            with open(args.replace_config_path, 'r', encoding='utf-8') as f:
+                replace_config = yaml.safe_load(f)
+                if not isinstance(replace_config, dict) or 'replacements' not in replace_config:
+                    logging.error("Arquivo de configuração YAML é inválido. A chave 'replacements' não foi encontrada.")
+                    return
+        except FileNotFoundError:
+            logging.error(f"Arquivo de configuração de substituição não encontrado em: {args.replace_config_path}")
+            return
+        except yaml.YAMLError as e:
+            logging.error(f"Erro ao processar o arquivo YAML: {e}")
+            return
+
         supported_extensions = ["csv", "json", "xlsx"]
         metadata_path = os.path.join(data_project_path, METADATA_DIR)
         os.makedirs(metadata_path, exist_ok=True)
@@ -120,25 +132,20 @@ def run_treatment_phase(data_project_path, extra_args):
             return
 
         report_data = {
-            "summary": {"total_files": 0, "processed_successfully": 0, "failed": 0},
+            "summary": {"total_files": len(files_to_process), "processed_successfully": 0, "failed": 0},
             "details": []
         }
-        corrections_map = {
-            "valor_problematico_1": "valor_corrigido_1",
-            "valor_problematico_2": "valor_corrigido_2"
-        }
-        report_data["summary"]["total_files"] = len(files_to_process)
+
+        replacement_rules = replace_config.get('replacements', [])
 
         for file_path in files_to_process:
             file_details = {
                 "file_name": os.path.basename(file_path),
                 "status": "Failed",
-                "problematic_values": {},
-                "applied_corrections": {}
+                "replacements_applied": []
             }
             try:
-                logging.info(
-                    f"Processando arquivo: {os.path.basename(file_path)}")
+                logging.info(f"Processando arquivo: {os.path.basename(file_path)}")
                 connector = get_data_loader(file_path)
                 df = connector.read()
                 if df is None:
@@ -146,45 +153,59 @@ def run_treatment_phase(data_project_path, extra_args):
                     report_data["summary"]["failed"] += 1
                     report_data["details"].append(file_details)
                     continue
-                problematic_values = extract_values(df) or {}
-                file_details["problematic_values"] = problematic_values
-                if problematic_values:
-                    logging.info(
-                        f"  -> Valores problemáticos encontrados: {problematic_values}")
-                df = apply_corrections(df, corrections_map)
-                file_details["applied_corrections"] = {
-                    k: v for k, v in corrections_map.items() if k in problematic_values
-                }
-                df = transform_columns(df)
+
+                for rule in replacement_rules:
+                    existing_value = rule.get('existing_value')
+                    new_value = rule.get('new_value')
+                    column = rule.get('column')
+
+                    count = 0
+                    if column:
+                        if column in df.columns:
+                            count = (df[column] == existing_value).sum()
+                            if count > 0:
+                                df[column] = df[column].replace(existing_value, new_value)
+                        else:
+                            logging.warning(f"  -> A coluna '{column}' especificada na regra não existe no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
+                            continue
+                    else: # Global replacement
+                        count = df.apply(lambda x: (x == existing_value).sum()).sum()
+                        if count > 0:
+                            df.replace(existing_value, new_value, inplace=True)
+
+                    if count > 0:
+                        file_details["replacements_applied"].append({
+                            "rule": rule,
+                            "count": int(count)
+                        })
+
                 relative_path = os.path.relpath(file_path, data_project_path)
-                backup_file_path = os.path.join(
-                    backup_dir_path, relative_path)
+                backup_file_path = os.path.join(backup_dir_path, relative_path)
                 os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
                 shutil.move(file_path, backup_file_path)
-                logging.info(
-                    f"  -> Arquivo original movido para: {backup_file_path}")
+                logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
+
                 file_extension = os.path.splitext(file_path)[1].lower()
                 if file_extension == '.csv':
-                    df.to_csv(file_path, index=False,
-                              sep=';', encoding='utf-8-sig')
+                    df.to_csv(file_path, index=False, sep=';', encoding='utf-8-sig')
                 elif file_extension == '.xlsx':
                     df.to_excel(file_path, index=False)
+                elif file_extension == '.json':
+                    df.to_json(file_path, orient='records', indent=4)
+
                 logging.info(f"  -> Arquivo tratado salvo em: {file_path}")
                 file_details["status"] = "Success"
                 report_data["summary"]["processed_successfully"] += 1
             except Exception as e:
-                logging.error(
-                    f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
+                logging.error(f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
                 report_data["summary"]["failed"] += 1
             report_data["details"].append(file_details)
 
         if args.report_output == 'json':
-            report_path = os.path.join(
-                metadata_path, "treatment_report.json")
+            report_path = os.path.join(metadata_path, "treatment_report.json")
             generate_json_report(report_data, report_path)
         elif args.report_output == 'html':
-            report_path = os.path.join(
-                metadata_path, "treatment_report.html")
+            report_path = os.path.join(metadata_path, "treatment_report.html")
             generate_html_report(report_data, report_path)
 
     logging.info("--- Fase 02: Tratamento Concluída ---")

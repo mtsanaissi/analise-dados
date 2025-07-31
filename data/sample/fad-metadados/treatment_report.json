@@ -6,22 +6,19 @@
     },
     "details": [
         {
-            "file_name": "discovery_report.json",
-            "status": "Failed",
-            "problematic_values": {},
-            "applied_corrections": {}
-        },
-        {
             "file_name": "consumidorgovbr_2025-01.csv",
             "status": "Failed",
-            "problematic_values": {},
-            "applied_corrections": {}
+            "replacements_applied": []
+        },
+        {
+            "file_name": "discovery_report.json",
+            "status": "Failed",
+            "replacements_applied": []
         },
         {
             "file_name": "consumidorgovbr_2025-02.csv",
             "status": "Failed",
-            "problematic_values": {},
-            "applied_corrections": {}
+            "replacements_applied": []
         }
     ]
 }

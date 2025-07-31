@@ -1,0 +1,8 @@
+replacements:
+  - column: "Status"
+    existing_value": "Inativo"
+    new_value: "Desativado"
+  - existing_value: "N/D"
+    new_value: null
+  - existing_value: "sem dados"
+    new_value: "informação ausente"

@@ -5,3 +5,4 @@ ydata-profiling
 streamlit
 openpyxl
 pytest
+PyYAML

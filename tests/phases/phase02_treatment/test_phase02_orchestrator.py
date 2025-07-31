@@ -52,33 +52,60 @@ def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path)
 @patch('src.phases.phase02_treatment.phase02_orchestrator.shutil.move')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.find_files')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.get_data_loader')
-@patch('src.phases.phase02_treatment.phase02_orchestrator.extract_values')
-@patch('src.phases.phase02_treatment.phase02_orchestrator.apply_corrections')
-@patch('src.phases.phase02_treatment.phase02_orchestrator.transform_columns')
-def test_orchestrator_default_routing(mock_transform, mock_apply, mock_extract, mock_get_loader, mock_find_files, mock_shutil_move, tmp_path):
+@patch('src.phases.phase02_treatment.phase02_orchestrator.yaml.safe_load')
+def test_orchestrator_replace_values_routing(mock_yaml_load, mock_get_loader, mock_find_files, mock_shutil_move, tmp_path):
     # Arrange
-    dummy_file = tmp_path / "file1.csv"
-    dummy_file.touch()
+    # Setup paths
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    dummy_file = data_dir / "file1.csv"
+    config_path = tmp_path / "replace_config.yaml"
+
+    # Create dummy data and config
+    input_df = pd.DataFrame({
+        'Status': ['Old', 'Active', 'Old'],
+        'Data': [1, 2, 'N/A']
+    })
+    input_df.to_csv(dummy_file, index=False, sep=';')
+
+    config = {
+        'replacements': [
+            {'column': 'Status', 'existing_value': 'Old', 'new_value': 'New'},
+            {'existing_value': 'N/A', 'new_value': None}
+        ]
+    }
+    with open(config_path, 'w') as f:
+        json.dump(config, f)
+
+    # Mock the components that interact with the file system or external libraries
     mock_find_files.return_value = [str(dummy_file)]
+    mock_yaml_load.return_value = config
+    # The get_data_loader will now read the actual temp file
+    mock_get_loader.return_value.read.return_value = pd.read_csv(dummy_file, sep=';')
 
-    # Mock the chain of DataFrame transformations
-    mock_df_initial = MagicMock(spec=pd.DataFrame)
-    mock_df_after_corrections = MagicMock(spec=pd.DataFrame)
-    mock_df_after_transform = MagicMock(spec=pd.DataFrame)
 
-    mock_get_loader.return_value.read.return_value = mock_df_initial
-    mock_apply.return_value = mock_df_after_corrections
-    mock_transform.return_value = mock_df_after_transform
-    args = ['--apply-standard-treatment']
+    args = ['--replace-values', str(config_path), '--report-output', 'json']
 
     # Act
-    run_treatment_phase(str(tmp_path), args)
+    run_treatment_phase(str(data_dir), args)
 
     # Assert
     mock_find_files.assert_called_once()
-    mock_get_loader.assert_called_with(str(dummy_file))
-    mock_extract.assert_called_with(mock_df_initial)
-    mock_apply.assert_called_with(mock_df_initial, ANY)
-    mock_transform.assert_called_with(mock_df_after_corrections)
+    mock_yaml_load.assert_called_once()
     mock_shutil_move.assert_called_once()
-    mock_df_after_transform.to_csv.assert_called_with(str(dummy_file), index=False, sep=';', encoding='utf-8-sig')
+
+    # Read the modified file and verify its contents
+    result_df = pd.read_csv(dummy_file, sep=';')
+    expected_df = pd.DataFrame({
+        'Status': ['New', 'Active', 'New'],
+        'Data': [1.0, 2.0, pd.NA]
+    }).astype({'Data': 'object'})
+    # Convert 'N/A' to NaN, then to object to match pandas behavior
+    result_df['Data'] = pd.to_numeric(result_df['Data'], errors='coerce')
+    expected_df['Data'] = pd.to_numeric(expected_df['Data'], errors='coerce')
+
+    # Fill NA/NaN with a placeholder for comparison
+    pd.testing.assert_frame_equal(
+        result_df.fillna(-1),
+        expected_df.fillna(-1)
+    )
