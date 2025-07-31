@@ -105,12 +105,12 @@ Esta operação requer um arquivo de configuração YAML. Crie um arquivo (ex: `
 ```yaml
 input_folder: "caminho/para/pasta/com/arquivos"
 output_file: "caminho/para/arquivo_final.csv"
-file_format: "csv"
+file_type: "csv"
 ```
 
 *   `input_folder`: O diretório contendo os arquivos a serem concatenados.
 *   `output_file`: O nome e caminho do arquivo de saída.
-*   `file_format`: O formato dos arquivos de entrada (`csv`, `xlsx`, etc.).
+*   `file_type`: O formato dos arquivos de entrada (`csv`, `xlsx`, etc.).
 
 #### Comando
 
