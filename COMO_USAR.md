@@ -23,7 +23,7 @@ python src/run.py -d <caminho_para_dados> -p <fase> [argumentos_da_fase...]
 
 ## Fase 1: Descoberta (`discovery`)
 
-Esta fase ajuda a diagnosticar seus dados brutos. Ela gera relatórios sobre o volume, integridade, codificação e estrutura dos arquivos.
+Esta fase ajuda a diagnosticar seus dados brutos. Ela gera relatórios sobre o volume, integridade, codificação e estrutura dos arquivos, sem alterar os dados originais.
 
 ### Comando Básico
 
@@ -45,6 +45,12 @@ python src/run.py -d data/meu_projeto -p discovery
     *   **Exemplo:**
         ```bash
         python src/run.py -d data/meu_projeto -p discovery --compare-fields
+        ```
+
+*   `--generate-char-cleanup-config <caminho_saida.yaml>`: Realiza uma verificação específica por caracteres problemáticos (como caracteres de controle invisíveis ou de substituição) em todos os arquivos. Se encontrados, gera um arquivo de configuração YAML no caminho especificado. Este arquivo pode ser usado pela Fase 2 para realizar a limpeza.
+    *   **Exemplo:**
+        ```bash
+        python src/run.py -d data/meu_projeto -p discovery --generate-char-cleanup-config configs/limpeza_chars.yaml
         ```
 
 ---
