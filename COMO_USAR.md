@@ -59,6 +59,8 @@ python src/run.py -d data/meu_projeto -p discovery
 
 Esta fase é usada para modificar os dados. **Você deve escolher apenas uma das operações abaixo por execução.**
 
+**Nota sobre Arquivos de Configuração:** Por padrão, a ferramenta espera que os arquivos de configuração YAML para esta fase estejam localizados em um diretório chamado `fad-config` dentro da pasta do seu projeto de dados (`--data-project-path`). Se você fornecer apenas o nome do arquivo (ex: `correcoes.yaml`), ele será procurado nesse local. Caminhos absolutos para arquivos de configuração ainda são suportados.
+
 ### Operação 1: Substituir Valores (`--replace-values`)
 
 Aplica um conjunto de substituições de valores em múltiplos arquivos, com base em um arquivo de configuração YAML. É ideal para corrigir erros de digitação, padronizar termos ou remover caracteres indesejados de forma controlada.
@@ -89,7 +91,7 @@ replacements:
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --replace-values configs/correcoes.yaml
+python src/run.py -d data/meu_projeto -p treatment --replace-values correcoes.yaml
 ```
 
 ### Operação 2: Concatenar Dados (`--concatenate-data`)
@@ -113,7 +115,7 @@ file_format: "csv"
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --concatenate-data caminho/para/config_concat.yaml
+python src/run.py -d data/meu_projeto -p treatment --concatenate-data config_concat.yaml
 ```
 
 ### Operação 3: Enriquecer Dados (`--enrich-data`)
@@ -144,7 +146,7 @@ columns_to_add:
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --enrich-data caminho/para/config_enrich.yaml
+python src/run.py -d data/meu_projeto -p treatment --enrich-data config_enrich.yaml
 ```
 
 ---

@@ -8,6 +8,32 @@ from src.phases.phase02_treatment.phase02_orchestrator import run_treatment_phas
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataEnricher')
 def test_orchestrator_enrich_data_routing(mock_data_enricher, tmp_path):
     # Arrange
+    config_dir = tmp_path / "fad-config"
+    config_dir.mkdir()
+    config_path = config_dir / "enrich_config.yaml"
+    config = {
+        'main_file': 'main.csv',
+        'lookup_file': 'lookup.csv',
+        'main_key': 'key',
+        'lookup_key': 'key',
+        'columns_to_add': ['extra_data'],
+        'output_file': 'output.csv'
+    }
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f)
+
+    args = ['--enrich-data', 'enrich_config.yaml']
+
+    # Act
+    run_treatment_phase(str(tmp_path), args)
+
+    # Assert
+    mock_data_enricher.assert_called_once()
+    mock_data_enricher.return_value.enrich_data.assert_called_once()
+
+@patch('src.phases.phase02_treatment.phase02_orchestrator.DataEnricher')
+def test_orchestrator_enrich_data_routing_absolute_path(mock_data_enricher, tmp_path):
+    # Arrange
     config = {
         'main_file': 'main.csv',
         'lookup_file': 'lookup.csv',
@@ -32,16 +58,18 @@ def test_orchestrator_enrich_data_routing(mock_data_enricher, tmp_path):
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataConcatenator')
 def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path):
     # Arrange
+    config_dir = tmp_path / "fad-config"
+    config_dir.mkdir()
+    config_path = config_dir / "concat_config.yaml"
     config = {
         'input_folder': 'data/',
         'output_file': 'output.csv',
         'file_type': 'csv'
     }
-    config_path = tmp_path / "concat_config.yaml"
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
 
-    args = ['--concatenate-data', str(config_path)]
+    args = ['--concatenate-data', 'concat_config.yaml']
 
     # Act
     run_treatment_phase(str(tmp_path), args)
@@ -53,14 +81,13 @@ def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path)
 @patch('src.phases.phase02_treatment.phase02_orchestrator.shutil.move')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.find_files')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.get_data_loader')
-@patch('src.phases.phase02_treatment.phase02_orchestrator.yaml.safe_load')
-def test_orchestrator_replace_values_routing(mock_yaml_load, mock_get_loader, mock_find_files, mock_shutil_move, tmp_path):
+def test_orchestrator_replace_values_routing(mock_get_loader, mock_find_files, mock_shutil_move, tmp_path):
     # Arrange
     # Setup paths
-    data_dir = tmp_path / "data"
-    data_dir.mkdir()
-    dummy_file = data_dir / "file1.csv"
-    config_path = tmp_path / "replace_config.yaml"
+    config_dir = tmp_path / "fad-config"
+    config_dir.mkdir()
+    dummy_file = tmp_path / "file1.csv"
+    config_path = config_dir / "replace_config.yaml"
 
     # Create dummy data and config
     input_df = pd.DataFrame({
@@ -80,19 +107,16 @@ def test_orchestrator_replace_values_routing(mock_yaml_load, mock_get_loader, mo
 
     # Mock the components that interact with the file system or external libraries
     mock_find_files.return_value = [str(dummy_file)]
-    mock_yaml_load.return_value = config
-    # The get_data_loader will now read the actual temp file
     mock_get_loader.return_value.read.return_value = pd.read_csv(dummy_file, sep=';')
 
 
-    args = ['--replace-values', str(config_path), '--report-output', 'json']
+    args = ['--replace-values', 'replace_config.yaml', '--report-output', 'json']
 
     # Act
-    run_treatment_phase(str(data_dir), args)
+    run_treatment_phase(str(tmp_path), args)
 
     # Assert
     mock_find_files.assert_called_once()
-    mock_yaml_load.assert_called_once()
     mock_shutil_move.assert_called_once()
 
     # Read the modified file and verify its contents

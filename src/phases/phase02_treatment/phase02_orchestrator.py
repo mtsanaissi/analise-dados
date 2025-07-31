@@ -47,7 +47,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         logging.info(
             f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
         try:
-            config_path = os.path.abspath(args.enrich_config_path)
+            config_path = args.enrich_config_path
+            if not os.path.isabs(config_path):
+                config_path = os.path.join(data_project_path, "fad-config", config_path)
+
             config_dir = os.path.dirname(config_path)
 
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -64,10 +67,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                 f"Enriquecimento de dados concluído com sucesso. Status: {status}")
         except FileNotFoundError:
             logging.error(
-                f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
+                f"Arquivo de configuração de enriquecimento não encontrado em: {config_path}")
         except yaml.YAMLError:
             logging.error(
-                f"Erro ao decodificar o arquivo YAML de configuração: {args.enrich_config_path}")
+                f"Erro ao decodificar o arquivo YAML de configuração: {config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
@@ -76,7 +79,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         logging.info(
             f"Modo de concatenação de dados ativado. Carregando configuração de: {args.concatenate_config_path}")
         try:
-            config_path = os.path.abspath(args.concatenate_config_path)
+            config_path = args.concatenate_config_path
+            if not os.path.isabs(config_path):
+                config_path = os.path.join(data_project_path, "fad-config", config_path)
+
             config_dir = os.path.dirname(config_path)
 
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -92,23 +98,27 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             logging.info("Concatenação de dados concluída com sucesso.")
         except FileNotFoundError:
             logging.error(
-                f"Arquivo de configuração de concatenação não encontrado em: {args.concatenate_config_path}")
+                f"Arquivo de configuração de concatenação não encontrado em: {config_path}")
         except yaml.YAMLError:
             logging.error(
-                f"Erro ao decodificar o arquivo YAML de configuração: {args.concatenate_config_path}")
+                f"Erro ao decodificar o arquivo YAML de configuração: {config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
 
     elif args.replace_config_path:
         try:
-            with open(args.replace_config_path, 'r', encoding='utf-8') as f:
+            config_path = args.replace_config_path
+            if not os.path.isabs(config_path):
+                config_path = os.path.join(data_project_path, "fad-config", config_path)
+
+            with open(config_path, 'r', encoding='utf-8') as f:
                 replace_config = yaml.safe_load(f)
                 if not isinstance(replace_config, dict) or 'replacements' not in replace_config:
                     logging.error("Arquivo de configuração YAML é inválido. A chave 'replacements' não foi encontrada.")
                     return
         except FileNotFoundError:
-            logging.error(f"Arquivo de configuração de substituição não encontrado em: {args.replace_config_path}")
+            logging.error(f"Arquivo de configuração de substituição não encontrado em: {config_path}")
             return
         except yaml.YAMLError as e:
             logging.error(f"Erro ao processar o arquivo YAML: {e}")
