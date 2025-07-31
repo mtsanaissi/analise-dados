@@ -6,6 +6,7 @@ import chardet
 import csv
 import json
 import codecs  # Para leitura com tratamento de erros de encoding
+import logging
 from typing import Set
 from src.utils import find_files  # Importa a função centralizada
 
@@ -42,11 +43,11 @@ def detect_problematic_chars(file_path: str, encoding_to_try: str, sample_size_b
                 if not char_read.isprintable() and char_read not in control_chars_allowed:
                     problematic_chars.add(char_read)
 
-    except Exception:
+    except Exception as e:
         # Em caso de erro na leitura (que pode ser um erro de encoding não tratável pelo 'replace'),
         # não podemos determinar os caracteres. A função retornará o que encontrou até agora.
         # O ideal é que o encoding já tenha sido validado antes.
-        pass
+        logging.error(f"Erro ao ler o arquivo {file_path} para verificar caracteres: {e}")
 
     return problematic_chars
 

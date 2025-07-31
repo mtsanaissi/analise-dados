@@ -22,14 +22,14 @@ def detect_encoding(file_path):
             confidence = result.get('confidence', 0)
 
             if encoding:
-                return {"encoding": encoding, "confidence": confidence}
+                return {"file_path": file_path, "encoding": encoding, "confidence": confidence}
             else:
-                return {"encoding": None, "confidence": 0, "error": "Não foi possível detectar o encoding."}
+                return {"file_path": file_path, "encoding": None, "confidence": 0, "error": "Não foi possível detectar o encoding."}
 
     except FileNotFoundError:
-        return {"encoding": None, "confidence": 0, "error": "Arquivo não encontrado durante a detecção de encoding."}
+        return {"file_path": file_path, "encoding": None, "confidence": 0, "error": "Arquivo não encontrado durante a detecção de encoding."}
     except Exception as e:
-        return {"encoding": None, "confidence": 0, "error": f"Erro ao ler o arquivo para detecção: {e}"}
+        return {"file_path": file_path, "encoding": None, "confidence": 0, "error": f"Erro ao ler o arquivo para detecção: {e}"}
 
 
 def convert_file_to_utf8(file_path, source_encoding):

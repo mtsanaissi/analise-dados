@@ -3,7 +3,7 @@
 import logging
 import os
 from src.utils import find_files, METADATA_DIR
-from src.phases.phase01_discovery.core.encoding_detector import process_file_encoding
+from src.phases.phase01_discovery.core.encoding_detector import detect_encoding
 from src.phases.phase01_discovery.core.data_volume_analyzer import analyze_data_volume
 from src.phases.phase01_discovery.core.data_integrity_checker import analyze_data_integrity, detect_problematic_chars
 from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
@@ -98,7 +98,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     # --- Análises Gerais ---
     logging.info("--- Executando Análises Gerais ---")
     results["encoding_analysis"] = [
-        process_file_encoding(fp) for fp in discovered_files]
+        detect_encoding(fp) for fp in discovered_files]
     results["data_volume_analysis"] = analyze_data_volume(discovered_files)
     results["data_integrity_analysis"] = analyze_data_integrity(
         data_project_path, extensions, recursive)
@@ -245,14 +245,24 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
         # Mapeia o encoding de cada arquivo para fácil acesso
         encoding_map = {
-            os.path.basename(item['file_path']): item.get('encoding', 'utf-8')
+            os.path.basename(item['file_path']): {
+                'encoding': item.get('encoding', 'utf-8'),
+                'confidence': item.get('confidence', 0.0)
+            }
             for item in results.get('encoding_analysis', [])
         }
 
         master_problematic_chars = set()
         for file_path in discovered_files:
             file_name = os.path.basename(file_path)
-            encoding = encoding_map.get(file_name, 'utf-8')
+            encoding_info = encoding_map.get(file_name, {'encoding': 'utf-8', 'confidence': 1.0})
+
+            confidence = encoding_info.get('confidence')
+            if confidence < 0.9:
+                logging.warning(f"A verificação de caracteres para o arquivo '{os.path.basename(file_path)}' foi pulada devido à baixa confiança na detecção de encoding ({confidence:.2f}). Valide o encoding manualmente.")
+                continue
+
+            encoding = encoding_info.get('encoding', 'utf-8')
 
             # Garante que o encoding não seja None
             if not encoding:
