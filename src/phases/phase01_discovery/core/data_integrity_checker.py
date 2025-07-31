@@ -6,46 +6,49 @@ import chardet
 import csv
 import json
 import codecs  # Para leitura com tratamento de erros de encoding
+from typing import Set
 from src.utils import find_files  # Importa a função centralizada
 
 
 # Amostra de 1MB
-def detect_problematic_chars(file_path, encoding_to_try, sample_size_bytes=1024*1024):
+def detect_problematic_chars(file_path: str, encoding_to_try: str, sample_size_bytes: int = 1024*1024) -> Set[str]:
     """
     Verifica uma amostra do arquivo por caracteres de controle não padrão ou
-    caracteres de substituição Unicode (U+FFFD).
+    caracteres de substituição Unicode (U+FFFD) e retorna um conjunto de
+    caracteres problemáticos únicos.
+
+    Args:
+        file_path (str): O caminho para o arquivo a ser verificado.
+        encoding_to_try (str): O encoding a ser usado para ler o arquivo.
+        sample_size_bytes (int): O tamanho da amostra a ser lida em bytes.
+
+    Returns:
+        Set[str]: Um conjunto contendo as strings dos caracteres problemáticos únicos.
     """
-    problematic_chars_found = False
-    problematic_char_samples = []
+    problematic_chars = set()
     control_chars_allowed = {'\t', '\n', '\r'}  # Tab, Newline, Carriage Return
 
     try:
         with codecs.open(file_path, 'r', encoding=encoding_to_try, errors='replace') as f:
-            sample_content = f.read(sample_size_bytes // 2)
+            sample_content = f.read(sample_size_bytes)
 
-            for i, char_read in enumerate(sample_content):
-                if char_read == '\ufffd':  # Caractere de substituição Unicode
-                    problematic_chars_found = True
-                    if len(problematic_char_samples) < 5:
-                        problematic_char_samples.append(
-                            f"U+FFFD na posição ~{i} (decodificação falhou)")
-                    if len(problematic_char_samples) >= 5:
-                        break
+            for char_read in sample_content:
+                # Se um caractere de substituição é encontrado, o caractere original é desconhecido.
+                # Adicionamos a representação do caractere de substituição para indicar o problema.
+                if char_read == '\ufffd':
+                    problematic_chars.add(char_read)
 
+                # Adiciona caracteres de controle não permitidos
                 if not char_read.isprintable() and char_read not in control_chars_allowed:
-                    problematic_chars_found = True
-                    if len(problematic_char_samples) < 5:
-                        problematic_char_samples.append(
-                            f"Caractere de controle não imprimível '{repr(char_read)}' (U+{ord(char_read):04X}) na posição ~{i}")
-                    if len(problematic_char_samples) >= 5:
-                        break
+                    problematic_chars.add(char_read)
 
-    except Exception as e:
-        problematic_chars_found = True
-        problematic_char_samples.append(
-            f"Erro ao ler para verificar caracteres: {str(e)}")
+    except Exception:
+        # Em caso de erro na leitura (que pode ser um erro de encoding não tratável pelo 'replace'),
+        # não podemos determinar os caracteres. A função retornará o que encontrou até agora.
+        # O ideal é que o encoding já tenha sido validado antes.
+        pass
 
-    return problematic_chars_found, problematic_char_samples
+    return problematic_chars
 
 
 from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
@@ -65,8 +68,6 @@ def check_csv_file(file_path):
             "num_columns_header": None,
             "column_consistency_issue": False,
             "is_empty": False,
-            "problematic_chars_found": False,
-            "problematic_char_samples": [],
             "error_message": None
         }
     }
@@ -123,13 +124,6 @@ def check_csv_file(file_path):
         report["status"] = "Erro"
         report["details"]["error_message"] = f"Pandas: Erro ao ler amostra do CSV: {str(e)}"
 
-    if report["status"] != "Erro":
-        prob_chars, prob_samples = detect_problematic_chars(file_path, detected_encoding)
-        report["details"]["problematic_chars_found"] = prob_chars
-        report["details"]["problematic_char_samples"] = prob_samples
-        if prob_chars and report["status"] == "OK":
-            report["status"] = "Atenção"
-
     if report["status"] == "Pendente":
         report["status"] = "Atenção" if report["details"]["error_message"] else "OK"
 
@@ -147,8 +141,6 @@ def check_excel_file(file_path):
         "details": {
             "is_empty": False,
             "sheets_info": [],
-            "problematic_chars_found": False,
-            "problematic_char_samples": [],
             "error_message": None
         }
     }
@@ -212,8 +204,6 @@ def check_json_file(file_path):
             "encoding_confidence": None,
             "json_type": "Indeterminado",
             "is_empty": False,
-            "problematic_chars_found": False,
-            "problematic_char_samples": [],
             "error_message": None
         }
     }
@@ -288,14 +278,6 @@ def check_json_file(file_path):
         report["status"] = "Erro"
         report["details"]["json_type"] = "Inválido"
         report["details"]["error_message"] = f"Erro ao processar JSON: {str(e_gen)}"
-
-    if report["status"] != "Erro" or "Encoding" not in report["details"].get("error_message", ""):
-        prob_chars, prob_samples = detect_problematic_chars(
-            file_path, detected_encoding)
-        report["details"]["problematic_chars_found"] = prob_chars
-        report["details"]["problematic_char_samples"] = prob_samples
-        if prob_chars and report["status"] == "OK":
-            report["status"] = "Atenção"
 
     if report["status"] == "Pendente":
         report["status"] = "OK" if not report["details"]["error_message"] else "Atenção"

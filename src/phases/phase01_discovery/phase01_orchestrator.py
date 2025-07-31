@@ -5,7 +5,7 @@ import os
 from src.utils import find_files, METADATA_DIR
 from src.phases.phase01_discovery.core.encoding_detector import process_file_encoding
 from src.phases.phase01_discovery.core.data_volume_analyzer import analyze_data_volume
-from src.phases.phase01_discovery.core.data_integrity_checker import analyze_data_integrity
+from src.phases.phase01_discovery.core.data_integrity_checker import analyze_data_integrity, detect_problematic_chars
 from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
 from src.phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
 from src.phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
@@ -14,6 +14,7 @@ from src.phases.phase01_discovery.core.reporting import generate_html_report
 
 import argparse
 import json
+import yaml
 import numpy as np
 from .interactive_visualizer import display_interactive_report
 
@@ -55,6 +56,11 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         "--compare-fields",
         action="store_true",
         help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
+    )
+    parser.add_argument(
+        "--generate-char-cleanup-config",
+        metavar="OUTPUT_PATH",
+        help="Verifica todos os arquivos em busca de caracteres problemáticos (ex: de controle, de substituição) e gera um arquivo de configuração YAML no caminho especificado, que pode ser usado na Fase 2 para limpeza."
     )
     args = parser.parse_args(extra_args)
 
@@ -233,5 +239,56 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         output_path = os.path.join(metadata_path, output_filename)
         generate_html_report(results_wrapper['detailed_results'], output_path)
         logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
+
+    if args.generate_char_cleanup_config:
+        logging.info("--- Gerando Configuração de Limpeza de Caracteres ---")
+
+        # Mapeia o encoding de cada arquivo para fácil acesso
+        encoding_map = {
+            os.path.basename(item['file_path']): item.get('encoding', 'utf-8')
+            for item in results.get('encoding_analysis', [])
+        }
+
+        master_problematic_chars = set()
+        for file_path in discovered_files:
+            file_name = os.path.basename(file_path)
+            encoding = encoding_map.get(file_name, 'utf-8')
+
+            # Garante que o encoding não seja None
+            if not encoding:
+                encoding = 'utf-8'
+
+            try:
+                # Usa o encoding detectado para verificar os caracteres
+                found_chars = detect_problematic_chars(file_path, encoding)
+                master_problematic_chars.update(found_chars)
+            except Exception as e:
+                logging.error(f"Não foi possível verificar o arquivo {file_path} para caracteres problemáticos: {e}")
+
+        if master_problematic_chars:
+            logging.info(f"Caracteres problemáticos encontrados: {master_problematic_chars}")
+
+            # Estrutura de dados para o arquivo YAML
+            cleanup_config = {
+                'replacements': [
+                    {'existing_value': char, 'new_value': ''}
+                    for char in sorted(list(master_problematic_chars)) # Ordena para consistência
+                ]
+            }
+
+            output_path = args.generate_char_cleanup_config
+            try:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    # Adiciona comentário no topo do arquivo
+                    f.write("# Arquivo de configuração gerado automaticamente para limpeza de caracteres.\n")
+                    # Usa allow_unicode para preservar caracteres e default_flow_style=False para o formato de bloco
+                    yaml.dump(cleanup_config, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
+
+                logging.info(f"Arquivo de configuração para limpeza de caracteres salvo em: {output_path}")
+
+            except Exception as e:
+                logging.error(f"Falha ao salvar o arquivo de configuração YAML em {output_path}: {e}")
+        else:
+            logging.info("Nenhum caractere problemático foi encontrado nos arquivos analisados.")
 
     return results_wrapper
