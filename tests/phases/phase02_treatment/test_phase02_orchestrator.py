@@ -1,4 +1,5 @@
 import pytest
+import yaml
 import json
 import pandas as pd
 from unittest.mock import patch, MagicMock, ANY
@@ -15,9 +16,9 @@ def test_orchestrator_enrich_data_routing(mock_data_enricher, tmp_path):
         'columns_to_add': ['extra_data'],
         'output_file': 'output.csv'
     }
-    config_path = tmp_path / "enrich_config.json"
+    config_path = tmp_path / "enrich_config.yaml"
     with open(config_path, 'w') as f:
-        json.dump(config, f)
+        yaml.dump(config, f)
 
     args = ['--enrich-data', str(config_path)]
 
@@ -36,9 +37,9 @@ def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path)
         'output_file': 'output.csv',
         'file_type': 'csv'
     }
-    config_path = tmp_path / "concat_config.json"
+    config_path = tmp_path / "concat_config.yaml"
     with open(config_path, 'w') as f:
-        json.dump(config, f)
+        yaml.dump(config, f)
 
     args = ['--concatenate-data', str(config_path)]
 
@@ -75,7 +76,7 @@ def test_orchestrator_replace_values_routing(mock_yaml_load, mock_get_loader, mo
         ]
     }
     with open(config_path, 'w') as f:
-        json.dump(config, f)
+        yaml.dump(config, f)
 
     # Mock the components that interact with the file system or external libraries
     mock_find_files.return_value = [str(dummy_file)]

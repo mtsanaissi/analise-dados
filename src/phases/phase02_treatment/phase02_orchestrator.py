@@ -25,11 +25,11 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
     operation_group.add_argument("--enrich-data",
                                  dest="enrich_config_path",
                                  metavar="PATH",
-                                 help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados.")
+                                 help="Caminho para o arquivo de configuração YAML para o enriquecimento de dados.")
     operation_group.add_argument("--concatenate-data",
                                  dest="concatenate_config_path",
                                  metavar="PATH",
-                                 help="Caminho para o arquivo de configuração JSON para a concatenação de dados.")
+                                 help="Caminho para o arquivo de configuração YAML para a concatenação de dados.")
     operation_group.add_argument("--replace-values",
                                  dest="replace_config_path",
                                  metavar="PATH",
@@ -51,7 +51,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             config_dir = os.path.dirname(config_path)
 
             with open(config_path, 'r', encoding='utf-8') as f:
-                enrich_config = json.load(f)
+                enrich_config = yaml.safe_load(f)
 
             for key in ['main_file', 'lookup_file', 'output_file']:
                 if key in enrich_config:
@@ -65,9 +65,9 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         except FileNotFoundError:
             logging.error(
                 f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
-        except json.JSONDecodeError:
+        except yaml.YAMLError:
             logging.error(
-                f"Erro ao decodificar o arquivo JSON de configuração: {args.enrich_config_path}")
+                f"Erro ao decodificar o arquivo YAML de configuração: {args.enrich_config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
@@ -80,7 +80,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             config_dir = os.path.dirname(config_path)
 
             with open(config_path, 'r', encoding='utf-8') as f:
-                concat_config = json.load(f)
+                concat_config = yaml.safe_load(f)
 
             for key in ['input_folder', 'output_file']:
                 if key in concat_config:
@@ -93,9 +93,9 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         except FileNotFoundError:
             logging.error(
                 f"Arquivo de configuração de concatenação não encontrado em: {args.concatenate_config_path}")
-        except json.JSONDecodeError:
+        except yaml.YAMLError:
             logging.error(
-                f"Erro ao decodificar o arquivo JSON de configuração: {args.concatenate_config_path}")
+                f"Erro ao decodificar o arquivo YAML de configuração: {args.concatenate_config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
