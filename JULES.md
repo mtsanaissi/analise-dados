@@ -48,6 +48,7 @@ When creating a new script or feature:
 
 ## Learning from Mistakes
 
+*   Always consider what you previously learned by reading `JULES_MEMORY.md` file.
 *   After every interaction, if you have made a mistake, update the `JULES_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help you learn and improve over time.
 
 ## Standard Script Header
