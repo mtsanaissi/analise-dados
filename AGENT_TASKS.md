@@ -1,48 +1,69 @@
 # Tarefas do Projeto
 
+# Tarefas do Projeto
+
 ## Backlog
+
+*   **ID:** T018
+    **Título:** Padronizar Localização de Arquivos de Configuração
+    **Descrição:** Atualmente, os comandos que dependem de configuração exigem o caminho completo para o arquivo. Esta tarefa visa padronizar a localização desses arquivos em um diretório `fad-config` dentro do projeto de dados, simplificando os comandos e tornando a estrutura do projeto mais previsível.
+    **Critérios de Aceitação:**
+    - [ ] Modificar `src/phases/phase02_treatment/phase02_orchestrator.py`.
+    - [ ] Para os argumentos que aceitam um caminho de configuração (`--replace-values`, `--enrich-data`, `--concatenate-data`), a lógica de resolução de caminho deve ser atualizada.
+    - [ ] Se o caminho fornecido for absoluto, ele deve ser usado diretamente.
+    - [ ] Se o caminho fornecido for relativo (apenas um nome de arquivo), ele deve ser resolvido para `data/[projeto-dados]/fad-config/[nome_do_arquivo]`.
+    - [ ] O arquivo `COMO_USAR.md` deve ser atualizado para refletir a nova maneira simplificada de chamar os comandos, assumindo que os arquivos de configuração estão no diretório `fad-config`.
+
+*   **ID:** T017
+    **Título:** Padronizar Formato de Arquivos de Configuração para YAML
+    **Descrição:** Algumas operações ainda dependem de arquivos de configuração JSON, enquanto as mais novas usam YAML. Esta tarefa visa padronizar todos os arquivos de configuração para o formato YAML, que é mais legível para o usuário.
+    **Critérios de Aceitação:**
+    - [ ] Modificar `src/phases/phase02_treatment/phase02_orchestrator.py`.
+    - [ ] As operações `--enrich-data` e `--concatenate-data` devem ser refatoradas para ler arquivos de configuração `.yaml` em vez de `.json`.
+    - [ ] A lógica de carregamento deve usar `yaml.safe_load()` e incluir tratamento de erro para `yaml.YAMLError`.
+    - [ ] Os textos de ajuda (`help=...`) para esses argumentos devem ser atualizados para indicar que esperam um arquivo YAML.
+    - [ ] O arquivo `COMO_USAR.md` deve ser atualizado, substituindo os exemplos de configuração JSON por seus equivalentes em YAML para as operações de concatenação e enriquecimento.
+
+## Concluído
 
 *   **ID:** T016
     **Título:** Aprimorar Fase 1 para Gerar Configuração de Limpeza de Caracteres
     **Descrição:** A detecção de caracteres problemáticos na Fase 1 é apenas informativa. Esta tarefa visa transformar essa detecção em uma ferramenta acionável, refatorando a funcionalidade para que ela gere, sob demanda, um arquivo de configuração YAML pronto para ser usado pela Fase 2 e limpando o fluxo de execução padrão.
     **Critérios de Aceitação:**
-    - [ ] **Refatorar `detect_problematic_chars`:**
+    - [x] **Refatorar `detect_problematic_chars`:**
         - A função em `src/phases/phase01_discovery/core/data_integrity_checker.py` deve ser modificada para retornar um `set` de caracteres problemáticos únicos, em vez de uma lista de amostras.
-    - [ ] **Desacoplar do Fluxo Padrão:**
+    - [x] **Desacoplar do Fluxo Padrão:**
         - A chamada a `detect_problematic_chars` deve ser removida da execução normal da Fase 1 (da função `check_csv_file`, `check_json_file`, etc.).
         - A seção de caracteres problemáticos deve ser removida dos relatórios `json` e `html` padrão da Fase 1.
-    - [ ] **Novo Argumento na Fase 1:**
+    - [x] **Novo Argumento na Fase 1:**
         - Adicionar um novo argumento ao `phase01_orchestrator.py`: `--generate-char-cleanup-config <caminho_do_arquivo.yaml>`.
         - A execução da detecção de caracteres e a geração do YAML só devem ocorrer quando este argumento for fornecido.
-    - [ ] **Geração do YAML:**
+    - [x] **Geração do YAML:**
         - Ao usar a nova flag, o orquestrador deve consolidar os caracteres problemáticos de todos os arquivos em um conjunto único.
         - Um arquivo YAML deve ser gerado no caminho especificado.
-        - No YAML, cada `existing_value` deve ser a representação textual segura do caractere (ex: `'\uFFFD'`, `'\x07'`), usando PyYAML para garantir a escrita correta como escape literal.
-        - O `new_value` padrão deve ser uma string vazia (`''`).
+        - No YAML, cada `existing_value` deve ser a representação textual segura do caractere (ex: `\'\uFFFD\'`, `\'\x07\'`), usando PyYAML para garantir a escrita correta como escape literal.
+        - O `new_value` padrão deve ser uma string vazia (`\'\'`).
         - A regra não deve conter a chave `column`.
-    - [ ] **Atualização da Documentação e Ajuda:**
+    - [x] **Atualização da Documentação e Ajuda:**
         - O texto de ajuda (`-h`) da Fase 1 deve ser atualizado para incluir o novo argumento.
         - O arquivo `COMO_USAR.md` deve ser atualizado para remover a menção da detecção de caracteres do fluxo padrão e adicionar uma nova seção explicando como usar `--generate-char-cleanup-config` para criar um arquivo de limpeza para a Fase 2.
+
 
 *   **ID:** T015
     **Título:** Refatorar Tratamento Padrão para Substituição de Valores Baseada em Configuração
     **Descrição:** A operação `--apply-standard-treatment` é vaga e mistura responsabilidades. Esta tarefa visa refatorá-la para uma operação focada e configurável de substituição de valores, melhorando a clareza e o controle do usuário.
     **Critérios de Aceitação:**
-    - [ ] Em `src/phases/phase02_treatment/phase02_orchestrator.py`, renomear o argumento `--apply-standard-treatment` para `--replace-values`.
-    - [ ] O novo argumento `--replace-values` deve aceitar um caminho para um arquivo de configuração YAML como seu valor.
-    - [ ] A funcionalidade de `transform_columns` deve ser removida desta operação. O foco deve ser exclusivamente na substituição de valores.
-    - [ ] A lógica de substituição deve ser guiada por um arquivo de configuração YAML (ex: `replace_config.yaml`) que contém uma lista de regras na chave `replacements`.
-    - [ ] Cada regra na lista deve conter `existing_value` e `new_value`. A chave `column` será opcional.
+    - [x] Em `src/phases/phase02_treatment/phase02_orchestrator.py`, renomear o argumento `--apply-standard-treatment` para `--replace-values`.
+    - [x] O novo argumento `--replace-values` deve aceitar um caminho para um arquivo de configuração YAML como seu valor.
+    - [x] A funcionalidade de `transform_columns` deve ser removida desta operação. O foco deve ser exclusivamente na substituição de valores.
+    - [x] A lógica de substituição deve ser guiada por um arquivo de configuração YAML (ex: `replace_config.yaml`) que contém uma lista de regras na chave `replacements`.
+    - [x] Cada regra na lista deve conter `existing_value` e `new_value`. A chave `column` será opcional.
         - Se `column` for especificada, a substituição ocorrerá apenas na coluna indicada.
         - Se `column` for omitida, a substituição será aplicada a todas as colunas do DataFrame.
-    - [ ] A lógica deve ser capaz de interpretar um valor `null` no YAML como `None` no pandas, permitindo a substituição para valores nulos.
-    - [ ] A funcionalidade de backup dos arquivos originais em um diretório `fad-bkp-treatment-[timestamp]` deve ser mantida.
-    - [ ] A geração de um relatório (`json` ou `html`) deve ser mantida e adaptada para detalhar, para cada arquivo, quais regras foram aplicadas e quantas substituições foram feitas por regra.
-    - [ ] Se o arquivo de configuração YAML não for encontrado ou for inválido, o script deve falhar com uma mensagem de erro clara.
-
-## Em Andamento
-
-## Concluído
+    - [x] A lógica deve ser capaz de interpretar um valor `null` no YAML como `None` no pandas, permitindo a substituição para valores nulos.
+    - [x] A funcionalidade de backup dos arquivos originais em um diretório `fad-bkp-treatment-[timestamp]` deve ser mantida.
+    - [x] A geração de um relatório (`json` ou `html`) deve ser mantida e adaptada para detalhar, para cada arquivo, quais regras foram aplicadas e quantas substituições foram feitas por regra.
+    - [x] Se o arquivo de configuração YAML não for encontrado ou for inválido, o script deve falhar com uma mensagem de erro clara.
 
 *   **ID:** T014
     **Título:** Delegar Comando de Ajuda para Parsers Específicos da Fase

@@ -59,16 +59,37 @@ python src/run.py -d data/meu_projeto -p discovery
 
 Esta fase é usada para modificar os dados. **Você deve escolher apenas uma das operações abaixo por execução.**
 
-### Operação 1: Tratamento Padrão (`--apply-standard-treatment`)
+### Operação 1: Substituir Valores (`--replace-values`)
 
-Aplica um conjunto de limpezas padrão (correção de valores, transformação de colunas) nos arquivos.
+Aplica um conjunto de substituições de valores em múltiplos arquivos, com base em um arquivo de configuração YAML. É ideal para corrigir erros de digitação, padronizar termos ou remover caracteres indesejados de forma controlada.
 
 **Importante:** Esta operação **substitui** os arquivos originais. Um backup dos arquivos originais é criado automaticamente em uma pasta `fad-bkp-treatment-[timestamp]` dentro do seu projeto de dados.
+
+#### Configuração
+
+Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de regras de substituição. Cada regra pode ser global ou específica para uma coluna.
+
+```yaml
+# Lista de regras de substituição a serem aplicadas.
+replacements:
+  # Regra 1: Substituição específica para a coluna "Status".
+  - column: "Status"
+    existing_value: "Inativo"
+    new_value: "Desativado"
+
+  # Regra 2: Substituição global (em todas as colunas) de "N/D" para um valor nulo.
+  - existing_value: "N/D"
+    new_value: null
+
+  # Regra 3: Remoção de um caractere problemático (gerado pela Fase 1).
+  - existing_value: '\uFFFD'
+    new_value: ''
+```
 
 #### Comando
 
 ```bash
-python src/run.py -d data/meu_projeto -p treatment --apply-standard-treatment
+python src/run.py -d data/meu_projeto -p treatment --replace-values configs/correcoes.yaml
 ```
 
 ### Operação 2: Concatenar Dados (`--concatenate-data`)

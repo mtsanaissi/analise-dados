@@ -79,7 +79,7 @@ When creating a new script or feature:
 
 ## Task Management
 
-Our collaboration will follow a structured workflow for managing tasks, where you act as the Project Manager, I act as the Requirements Analyst/Tech Lead, and "Jules" acts as the Senior Developer.
+Our collaboration will follow a structured workflow for managing tasks, where you act as the Project Manager, I act as the Requirements Analyst/Tech Lead, and "Jules" acts as the Senior Developer. You **are not** supposed to initiate execution of tasks listed in `@AGENT_TASKS.md`.
 
 The process is as follows:
 
