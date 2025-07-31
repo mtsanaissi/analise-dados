@@ -6,13 +6,13 @@
     },
     "details": [
         {
-            "file_name": "consumidorgovbr_2025-01.csv",
+            "file_name": "discovery_report.json",
             "status": "Failed",
             "problematic_values": {},
             "applied_corrections": {}
         },
         {
-            "file_name": "discovery_report.json",
+            "file_name": "consumidorgovbr_2025-01.csv",
             "status": "Failed",
             "problematic_values": {},
             "applied_corrections": {}

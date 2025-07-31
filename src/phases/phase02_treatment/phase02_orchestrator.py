@@ -20,15 +20,22 @@ def run_treatment_phase(data_project_path, extra_args):
     Orquestra a fase de tratamento dos dados.
     """
     parser = argparse.ArgumentParser(
-        description="Argumentos para a fase de tratamento.")
-    parser.add_argument("--enrich-data",
-                        dest="enrich_config_path",
-                        metavar="PATH",
-                        help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados. Se especificado, apenas a tarefa de enriquecimento será executada.")
-    parser.add_argument("--concatenate-data",
-                        dest="concatenate_config_path",
-                        metavar="PATH",
-                        help="Caminho para o arquivo de configuração JSON para a concatenação de dados. Se especificado, apenas a tarefa de concatenação será executada.")
+        description="Executa uma operação de tratamento de dados. É obrigatório escolher uma das operações abaixo.")
+
+    operation_group = parser.add_mutually_exclusive_group(required=True)
+
+    operation_group.add_argument("--enrich-data",
+                                 dest="enrich_config_path",
+                                 metavar="PATH",
+                                 help="Caminho para o arquivo de configuração JSON para o enriquecimento de dados.")
+    operation_group.add_argument("--concatenate-data",
+                                 dest="concatenate_config_path",
+                                 metavar="PATH",
+                                 help="Caminho para o arquivo de configuração JSON para a concatenação de dados.")
+    operation_group.add_argument("--apply-standard-treatment",
+                                 action='store_true',
+                                 help="Aplica o tratamento padrão aos arquivos (limpeza de texto, correção de valores) e os substitui, mantendo um backup dos originais.")
+
     parser.add_argument("--report-output",
                         choices=['json', 'html'],
                         default='json',
@@ -47,7 +54,6 @@ def run_treatment_phase(data_project_path, extra_args):
             with open(config_path, 'r', encoding='utf-8') as f:
                 enrich_config = json.load(f)
 
-            # Resolve caminhos relativos para absolutos
             for key in ['main_file', 'lookup_file', 'output_file']:
                 if key in enrich_config:
                     enrich_config[key] = os.path.join(
@@ -67,11 +73,7 @@ def run_treatment_phase(data_project_path, extra_args):
             logging.error(
                 f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
 
-        logging.info(
-            "--- Fase 02: Tratamento (Apenas Enriquecimento) Concluída ---")
-        return
-
-    if args.concatenate_config_path:
+    elif args.concatenate_config_path:
         logging.info(
             f"Modo de concatenação de dados ativado. Carregando configuração de: {args.concatenate_config_path}")
         try:
@@ -81,7 +83,6 @@ def run_treatment_phase(data_project_path, extra_args):
             with open(config_path, 'r', encoding='utf-8') as f:
                 concat_config = json.load(f)
 
-            # Resolve caminhos relativos para absolutos
             for key in ['input_folder', 'output_file']:
                 if key in concat_config:
                     concat_config[key] = os.path.join(
@@ -90,7 +91,6 @@ def run_treatment_phase(data_project_path, extra_args):
             concatenator = DataConcatenator(concat_config)
             concatenator.concatenate_files()
             logging.info("Concatenação de dados concluída com sucesso.")
-
         except FileNotFoundError:
             logging.error(
                 f"Arquivo de configuração de concatenação não encontrado em: {args.concatenate_config_path}")
@@ -101,119 +101,90 @@ def run_treatment_phase(data_project_path, extra_args):
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
 
-        logging.info(
-            "--- Fase 02: Tratamento (Apenas Concatenação) Concluída ---")
-        return
+    elif args.apply_standard_treatment:
+        supported_extensions = ["csv", "json", "xlsx"]
+        metadata_path = os.path.join(data_project_path, METADATA_DIR)
+        os.makedirs(metadata_path, exist_ok=True)
 
-    # Encontrar todos os arquivos de dados suportados
-    supported_extensions = ["csv", "json", "xlsx"]
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        backup_dir_name = f"fad-bkp-treatment-{timestamp}"
+        backup_dir_path = os.path.join(data_project_path, backup_dir_name)
+        os.makedirs(backup_dir_path, exist_ok=True)
+        logging.info(f"Diretório de backup criado em: {backup_dir_path}")
 
-    metadata_path = os.path.join(data_project_path, METADATA_DIR)
-    os.makedirs(metadata_path, exist_ok=True)
+        files_to_process = find_files(
+            data_project_path, supported_extensions, exclude_dirs=[METADATA_DIR, backup_dir_name])
+        if not files_to_process:
+            logging.warning(
+                "Nenhum arquivo de dados encontrado para tratamento.")
+            return
 
-    # Gerar timestamp e criar diretório de backup
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    backup_dir_name = f"fad-bkp-treatment-{timestamp}"
-    backup_dir_path = os.path.join(data_project_path, backup_dir_name)
-    os.makedirs(backup_dir_path, exist_ok=True)
-    logging.info(f"Diretório de backup criado em: {backup_dir_path}")
-
-    files_to_process = find_files(data_project_path, supported_extensions, exclude_dirs=[METADATA_DIR, backup_dir_name])
-
-    if not files_to_process:
-        logging.warning("Nenhum arquivo de dados encontrado para tratamento.")
-        return
-
-
-    # Estrutura de dados para o relatório
-    report_data = {
-        "summary": {"total_files": 0, "processed_successfully": 0, "failed": 0},
-        "details": []
-    }
-
-    # Mapa de correções (exemplo, pode ser carregado de um arquivo)
-    # TODO: Externalizar o mapa de correções
-    corrections_map = {
-        "valor_problematico_1": "valor_corrigido_1",
-        "valor_problematico_2": "valor_corrigido_2"
-    }
-
-    report_data["summary"]["total_files"] = len(files_to_process)
-
-    for file_path in files_to_process:
-        file_details = {
-            "file_name": os.path.basename(file_path),
-            "status": "Failed",
-            "problematic_values": {},
-            "applied_corrections": {}
+        report_data = {
+            "summary": {"total_files": 0, "processed_successfully": 0, "failed": 0},
+            "details": []
         }
+        corrections_map = {
+            "valor_problematico_1": "valor_corrigido_1",
+            "valor_problematico_2": "valor_corrigido_2"
+        }
+        report_data["summary"]["total_files"] = len(files_to_process)
 
-        try:
-            logging.info(f"Processando arquivo: {os.path.basename(file_path)}")
-
-            # 1. Carregar dados usando a fábrica de conectores
-            connector = get_data_loader(file_path)
-            df = connector.read()
-
-            if df is None:
-                logging.warning(f"  -> Falha ao carregar o arquivo.")
-                report_data["summary"]["failed"] += 1
-                report_data["details"].append(file_details)
-                continue
-
-            # 2. Extrair valores problemáticos
-            problematic_values = extract_values(df) or {}
-            file_details["problematic_values"] = problematic_values
-            if problematic_values:
-                logging.info(
-                    f"  -> Valores problemáticos encontrados: {problematic_values}")
-
-            # 3. Aplicar correções de valor
-            df = apply_corrections(df, corrections_map)
-            # Simplificação: assumindo que todas as correções no mapa são aplicadas
-            file_details["applied_corrections"] = {
-                k: v for k, v in corrections_map.items() if k in problematic_values
+        for file_path in files_to_process:
+            file_details = {
+                "file_name": os.path.basename(file_path),
+                "status": "Failed",
+                "problematic_values": {},
+                "applied_corrections": {}
             }
+            try:
+                logging.info(
+                    f"Processando arquivo: {os.path.basename(file_path)}")
+                connector = get_data_loader(file_path)
+                df = connector.read()
+                if df is None:
+                    logging.warning(f"  -> Falha ao carregar o arquivo.")
+                    report_data["summary"]["failed"] += 1
+                    report_data["details"].append(file_details)
+                    continue
+                problematic_values = extract_values(df) or {}
+                file_details["problematic_values"] = problematic_values
+                if problematic_values:
+                    logging.info(
+                        f"  -> Valores problemáticos encontrados: {problematic_values}")
+                df = apply_corrections(df, corrections_map)
+                file_details["applied_corrections"] = {
+                    k: v for k, v in corrections_map.items() if k in problematic_values
+                }
+                df = transform_columns(df)
+                relative_path = os.path.relpath(file_path, data_project_path)
+                backup_file_path = os.path.join(
+                    backup_dir_path, relative_path)
+                os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
+                shutil.move(file_path, backup_file_path)
+                logging.info(
+                    f"  -> Arquivo original movido para: {backup_file_path}")
+                file_extension = os.path.splitext(file_path)[1].lower()
+                if file_extension == '.csv':
+                    df.to_csv(file_path, index=False,
+                              sep=';', encoding='utf-8-sig')
+                elif file_extension == '.xlsx':
+                    df.to_excel(file_path, index=False)
+                logging.info(f"  -> Arquivo tratado salvo em: {file_path}")
+                file_details["status"] = "Success"
+                report_data["summary"]["processed_successfully"] += 1
+            except Exception as e:
+                logging.error(
+                    f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
+                report_data["summary"]["failed"] += 1
+            report_data["details"].append(file_details)
 
-
-            # 4. Transformar colunas
-            df = transform_columns(df)
-
-            # 5. Mover arquivo original para backup e salvar tratado
-            relative_path = os.path.relpath(file_path, data_project_path)
-            backup_file_path = os.path.join(backup_dir_path, relative_path)
-
-            # Garantir que o subdiretório de backup exista
-            os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
-
-            # Mover o arquivo original para o backup
-            shutil.move(file_path, backup_file_path)
-            logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
-
-            # Salvar o arquivo tratado no local original
-            file_extension = os.path.splitext(file_path)[1].lower()
-            if file_extension == '.csv':
-                df.to_csv(file_path, index=False, sep=';', encoding='utf-8-sig')
-            elif file_extension == '.xlsx':
-                df.to_excel(file_path, index=False)
-
-            logging.info(f"  -> Arquivo tratado salvo em: {file_path}")
-            file_details["status"] = "Success"
-            report_data["summary"]["processed_successfully"] += 1
-
-        except Exception as e:
-            logging.error(
-                f"  -> Erro ao processar o arquivo {os.path.basename(file_path)}: {e}", exc_info=True)
-            report_data["summary"]["failed"] += 1
-
-        report_data["details"].append(file_details)
-
-    # Gerar relatório no final
-    if args.report_output == 'json':
-        report_path = os.path.join(metadata_path, "treatment_report.json")
-        generate_json_report(report_data, report_path)
-    elif args.report_output == 'html':
-        report_path = os.path.join(metadata_path, "treatment_report.html")
-        generate_html_report(report_data, report_path)
+        if args.report_output == 'json':
+            report_path = os.path.join(
+                metadata_path, "treatment_report.json")
+            generate_json_report(report_data, report_path)
+        elif args.report_output == 'html':
+            report_path = os.path.join(
+                metadata_path, "treatment_report.html")
+            generate_html_report(report_data, report_path)
 
     logging.info("--- Fase 02: Tratamento Concluída ---")
