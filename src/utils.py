@@ -28,6 +28,7 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     """
     Encontra arquivos em um diretório com base em uma lista de extensões,
     com a opção de excluir arquivos que correspondem a determinados padrões e diretórios.
+    Por padrão, ignora os diretórios 'fad-metadados', 'fad-config' e 'fad-bkp*'.
 
     Args:
         root_path (str): O diretório raiz para a busca.
@@ -36,6 +37,8 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
         exclude_patterns (list[str], optional): Uma lista de padrões de nome de arquivo
                                                   a serem excluídos (ex: ['*_report.json', 'temp_*']).
         exclude_dirs (list[str], optional): Uma lista de nomes de diretório a serem ignorados.
+                                              Se None, usa a lista padrão:
+                                              ['fad-metadados', 'fad-config', 'fad-bkp*'].
 
     Returns:
         list[str]: Uma lista de caminhos absolutos para os arquivos encontrados.
@@ -43,7 +46,10 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     found_files = []
     normalized_extensions = [ext.lower().lstrip('.') for ext in extensions]
     exclude_patterns = exclude_patterns or []
-    exclude_dirs = exclude_dirs or []
+
+    # Se exclude_dirs não for fornecido, usa a lista padrão.
+    if exclude_dirs is None:
+        exclude_dirs = ['fad-metadados', 'fad-config', 'fad-bkp*']
 
     if not os.path.isdir(root_path):
         print(f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
@@ -51,8 +57,12 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
 
     if recursive:
         for dirpath, dirnames, filenames in os.walk(root_path):
-            # Excluir diretórios da busca
-            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            # Excluir diretórios da busca usando fnmatch para suportar wildcards
+            original_dirnames = list(dirnames)
+            dirnames[:] = []
+            for d in original_dirnames:
+                if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_dirs):
+                    dirnames.append(d)
 
             for filename in filenames:
                 # Verifica se o arquivo deve ser excluído
