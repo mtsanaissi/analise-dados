@@ -16,10 +16,10 @@ class CsvConnector:
 
         Args:
             file_path (str): O caminho para o arquivo CSV.
-            delimiter (str, optional): O delimitador a ser usado. Defaults to None.
+            delimiter (str, optional): O delimitador a ser usado. Defaults to ';'.
         """
         self.file_path = file_path
-        self.delimiter = delimiter
+        self.delimiter = delimiter if delimiter is not None else ';'
 
     def read(self, **kwargs: Any) -> pd.DataFrame:
         """
@@ -37,6 +37,11 @@ class CsvConnector:
         """
         if self.delimiter:
             kwargs['sep'] = self.delimiter
+
+        # Garante que valores como "NA" não sejam interpretados como NaN por padrão.
+        kwargs.setdefault('keep_default_na', False)
+        kwargs.setdefault('na_values', [''])
+
         return pd.read_csv(self.file_path, **kwargs)
 
     def write(self, df: pd.DataFrame, **kwargs: Any) -> None:
@@ -53,4 +58,5 @@ class CsvConnector:
                       df.to_csv (por exemplo, sep, encoding, decimal).
         """
         kwargs.setdefault('index', False)
+        kwargs.setdefault('sep', self.delimiter)
         df.to_csv(self.file_path, **kwargs)

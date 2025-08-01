@@ -74,16 +74,19 @@ Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de
 ```yaml
 # Lista de regras de substituição a serem aplicadas.
 replacements:
-  # Regra 1: Substituição específica para a coluna "Status".
+  # Regra 1: Substitui um valor específico na coluna "Status".
   - column: "Status"
     existing_value: "Inativo"
     new_value: "Desativado"
 
-  # Regra 2: Substituição global (em todas as colunas) de "N/D" para um valor nulo.
-  - existing_value: "N/D"
+  # Regra 2: Usa uma lista para padronizar múltiplos valores para um valor nulo,
+  # apenas na coluna "Status".
+  - column: "Status"
+    existing_value: ["N/D", "NA", "Sem Info", "?"]
     new_value: null
 
-  # Regra 3: Remoção de um caractere problemático (gerado pela Fase 1).
+  # Regra 3: Substituição global (em todas as colunas).
+  # Útil para remover caracteres problemáticos ou padronizar valores globalmente.
   - existing_value: '\uFFFD'
     new_value: ''
 ```

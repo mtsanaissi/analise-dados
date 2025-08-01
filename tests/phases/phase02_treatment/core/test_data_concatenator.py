@@ -11,8 +11,8 @@ def test_concatenate_data(tmp_path):
     df1 = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
     df2 = pd.DataFrame({'A': [5, 6], 'B': [7, 8]})
 
-    df1.to_csv(input_folder / "file1.csv", index=False)
-    df2.to_csv(input_folder / "file2.csv", index=False)
+    df1.to_csv(input_folder / "file1.csv", index=False, sep=';')
+    df2.to_csv(input_folder / "file2.csv", index=False, sep=';')
 
     config = {
         'input_folder': str(input_folder),
@@ -26,7 +26,7 @@ def test_concatenate_data(tmp_path):
 
     # Assert
     assert os.path.exists(output_file)
-    concatenated_df = pd.read_csv(output_file).sort_values(by='A').reset_index(drop=True)
+    concatenated_df = pd.read_csv(output_file, sep=';').sort_values(by='A').reset_index(drop=True)
     expected_df = pd.DataFrame({'A': [1, 2, 5, 6], 'B': [3, 4, 7, 8]}).sort_values(by='A').reset_index(drop=True)
     pd.testing.assert_frame_equal(concatenated_df, expected_df)
 

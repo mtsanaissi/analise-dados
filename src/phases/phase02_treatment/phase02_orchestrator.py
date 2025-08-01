@@ -172,14 +172,22 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     count = 0
                     if column:
                         if column in df.columns:
-                            count = (df[column] == existing_value).sum()
+                            if isinstance(existing_value, list):
+                                count = df[column].isin(existing_value).sum()
+                            else:
+                                count = (df[column] == existing_value).sum()
+
                             if count > 0:
                                 df[column] = df[column].replace(existing_value, new_value)
                         else:
                             logging.warning(f"  -> A coluna '{column}' especificada na regra não existe no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
                             continue
                     else: # Global replacement
-                        count = df.apply(lambda x: (x == existing_value).sum()).sum()
+                        if isinstance(existing_value, list):
+                            count = df.apply(lambda x: x.isin(existing_value).sum()).sum()
+                        else:
+                            count = df.apply(lambda x: (x == existing_value).sum()).sum()
+
                         if count > 0:
                             df.replace(existing_value, new_value, inplace=True)
 
