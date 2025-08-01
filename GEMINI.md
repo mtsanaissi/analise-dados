@@ -91,6 +91,6 @@ The process is as follows:
 4.  **Completion Signal:** You inform me when the task has been completed by Jules and the code has been integrated.
 5.  **My Review (Tech Lead):**
     *   I review the implemented work, reading the modified files and running tests to ensure the solution meets the acceptance criteria and follows project conventions.
-6.  **Final Update:** After validation, I update `@AGENT_TASKS.md` to reflect the task's completion.
+6.  **Final Update:** After validation, I update `@AGENT_TASKS.md` to reflect the task's completion. When moving a task to the "Concluído" section, I will keep only its `ID`, `Título`, and `Descrição`, removing the `Critérios de Aceitação` to maintain a concise history.
 
 ```
