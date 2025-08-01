@@ -93,4 +93,12 @@ The process is as follows:
     *   I review the implemented work, reading the modified files and running tests to ensure the solution meets the acceptance criteria and follows project conventions.
 6.  **Final Update:** After validation, I update `@AGENT_TASKS.md` to reflect the task's completion. When moving a task to the "Concluído" section, I will keep only its `ID`, `Título`, and `Descrição`, removing the `Critérios de Aceitação` to maintain a concise history.
 
+#### Definition of Done
+
+To ensure the project's quality and maintainability, any task involving the creation or modification of source code functionality must have an explicit "Definition of Done". When creating the task in `AGENT_TASKS.md` and generating the prompt for Jules, the following items must always be included as acceptance criteria:
+
+1.  **Feature Implementation:** The code that meets the task's requirements.
+2.  **Test Creation/Update:** The new logic must be covered by unit or integration tests in the `tests/` directory.
+3.  **Documentation Update:** The `COMO_USAR.md` file and any other relevant documentation must be updated to reflect the new features or command changes.
+
 ```
