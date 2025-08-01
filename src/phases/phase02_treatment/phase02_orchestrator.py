@@ -172,28 +172,65 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     existing_value = rule.get('existing_value')
                     new_value = rule.get('new_value')
                     column = rule.get('column')
+                    case_sensitive = rule.get('case_sensitive', True)
 
                     count = 0
                     if column:
-                        if column in df.columns:
+                        if column not in df.columns:
+                            logging.warning(f"  -> A coluna '{column}' especificada na regra não existe no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
+                            continue
+
+                        # Apenas aplica a lógica case-insensitive em colunas de texto/objeto
+                        is_object_dtype = pd.api.types.is_object_dtype(df[column])
+
+                        if not case_sensitive and is_object_dtype:
+                            # Lógica Case-Insensitive para coluna específica
+                            if isinstance(existing_value, list):
+                                # Garante que todos os valores na lista sejam strings para lower()
+                                lower_existing = [str(v).lower() for v in existing_value]
+                                mask = df[column].str.lower().isin(lower_existing)
+                            else:
+                                mask = df[column].str.lower() == str(existing_value).lower()
+
+                            count = int(mask.sum())
+                            if count > 0:
+                                df.loc[mask, column] = new_value
+                        else:
+                            # Lógica Case-Sensitive (comportamento original)
                             if isinstance(existing_value, list):
                                 count = df[column].isin(existing_value).sum()
                             else:
                                 count = (df[column] == existing_value).sum()
 
+                            count = int(count)
                             if count > 0:
                                 df[column] = df[column].replace(existing_value, new_value)
-                        else:
-                            logging.warning(f"  -> A coluna '{column}' especificada na regra não existe no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
-                            continue
-                    else: # Global replacement
-                        if isinstance(existing_value, list):
-                            count = df.apply(lambda x: x.isin(existing_value).sum()).sum()
-                        else:
-                            count = df.apply(lambda x: (x == existing_value).sum()).sum()
+                    else: # Substituição Global
+                        if not case_sensitive:
+                            # Lógica Case-Insensitive para substituição global
+                            total_count = 0
+                            for col_name in df.select_dtypes(include=['object']).columns:
+                                if isinstance(existing_value, list):
+                                    lower_existing = [str(v).lower() for v in existing_value]
+                                    mask = df[col_name].str.lower().isin(lower_existing)
+                                else:
+                                    mask = df[col_name].str.lower() == str(existing_value).lower()
 
-                        if count > 0:
-                            df.replace(existing_value, new_value, inplace=True)
+                                col_count = int(mask.sum())
+                                if col_count > 0:
+                                    df.loc[mask, col_name] = new_value
+                                    total_count += col_count
+                            count = total_count
+                        else:
+                            # Lógica Case-Sensitive global (comportamento original)
+                            if isinstance(existing_value, list):
+                                count = df.apply(lambda x: x.isin(existing_value).sum()).sum()
+                            else:
+                                count = df.apply(lambda x: (x == existing_value).sum()).sum()
+
+                            count = int(count)
+                            if count > 0:
+                                df.replace(existing_value, new_value, inplace=True)
 
                     if count > 0:
                         file_details["replacements_applied"].append({
