@@ -16,7 +16,7 @@ class XlsxConnector:
     Conector para interagir com arquivos Excel (.xlsx).
     """
 
-    def __init__(self, file_path: str, sheet_name: Optional[str] = None):
+    def __init__(self, file_path: str, sheet_name: Optional[str] = None, dtype: any = None):
         """
         Inicializa o conector.
 
@@ -27,6 +27,7 @@ class XlsxConnector:
         """
         self.file_path = file_path
         self.sheet_name = sheet_name
+        self.dtype = dtype
 
     def read(self) -> pd.DataFrame:
         """
@@ -38,7 +39,7 @@ class XlsxConnector:
         try:
             # Modificado para ler a primeira planilha por índice (0) se sheet_name não for especificado.
             sheet_to_read = self.sheet_name if self.sheet_name is not None else 0
-            return pd.read_excel(self.file_path, sheet_name=sheet_to_read)
+            return pd.read_excel(self.file_path, sheet_name=sheet_to_read, dtype=self.dtype)
         except FileNotFoundError:
             raise
         except Exception as e:

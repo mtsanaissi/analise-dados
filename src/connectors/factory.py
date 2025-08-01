@@ -2,7 +2,7 @@ from .csv_connector import CsvConnector
 from .xlsx_connector import XlsxConnector
 
 
-def get_data_loader(file_path: str, delimiter: str = None):
+def get_data_loader(file_path: str, delimiter: str = None, dtype = None):
     """
     Fábrica de conectores que retorna o loader apropriado com base na extensão do arquivo.
 
@@ -19,9 +19,9 @@ def get_data_loader(file_path: str, delimiter: str = None):
     file_ext = file_path.lower().split('.')[-1]
 
     if file_ext == 'csv':
-        return CsvConnector(file_path, delimiter=delimiter)
+        return CsvConnector(file_path, delimiter=delimiter, dtype=dtype)
     elif file_ext in ['xlsx', 'xls']:
-        return XlsxConnector(file_path)
+        return XlsxConnector(file_path, dtype=dtype)
     else:
         raise ValueError(
             f"Extensão de arquivo não suportada para: {file_path}")

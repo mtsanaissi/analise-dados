@@ -10,7 +10,7 @@ class CsvConnector:
     abstraindo a interação direta com a biblioteca pandas.
     """
 
-    def __init__(self, file_path: str, delimiter: str = None):
+    def __init__(self, file_path: str, delimiter: str = None, dtype: Any = None):
         """
         Inicializa o CsvConnector.
 
@@ -20,6 +20,7 @@ class CsvConnector:
         """
         self.file_path = file_path
         self.delimiter = delimiter if delimiter is not None else ';'
+        self.dtype = dtype
 
     def read(self, **kwargs: Any) -> pd.DataFrame:
         """
@@ -41,6 +42,8 @@ class CsvConnector:
         # Garante que valores como "NA" não sejam interpretados como NaN por padrão.
         kwargs.setdefault('keep_default_na', False)
         kwargs.setdefault('na_values', [''])
+        if self.dtype:
+            kwargs['dtype'] = self.dtype
 
         return pd.read_csv(self.file_path, **kwargs)
 

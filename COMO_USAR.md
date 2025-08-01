@@ -234,6 +234,24 @@ text_replacements:
 python src/run.py -d data/meu_projeto -p treatment --find-and-replace-text substituicoes_texto.yaml
 ```
 
+### Operação 5: Remover Espaços em Branco (`--strip-whitespace`)
+
+Esta operação remove todos os espaços em branco (espaços, tabulações, quebras de linha) do início e do fim de todos os valores em todas as colunas de todos os arquivos de dados do projeto. É uma operação de limpeza rápida e global que não requer um arquivo de configuração.
+
+**Importante:** Esta operação também **substitui** os arquivos originais e cria um backup automático.
+
+#### Principais Características:
+
+- **Global:** Aplica-se a todos os arquivos e todas as colunas.
+- **Segura:** Para garantir que a operação funcione em colunas de qualquer tipo (números, datas, etc.) sem erros, todos os dados são lidos como texto (`string`) antes da limpeza.
+- **Sem Configuração:** Basta ativar a flag no comando.
+
+#### Comando
+
+```bash
+python src/run.py -d data/meu_projeto -p treatment --strip-whitespace
+```
+
 ---
 
 ## Fase 4: Visualização (`visualization`)
