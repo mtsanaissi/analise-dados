@@ -6,6 +6,7 @@ import logging
 import datetime
 import shutil
 import yaml
+import re
 from src.utils import find_files, METADATA_DIR
 from src.connectors.factory import get_data_loader
 from .core.data_enricher import DataEnricher
@@ -330,6 +331,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     new_value = rule.get('new_value')
                     column = rule.get('column')
                     is_regex = rule.get('is_regex', False)
+                    case_sensitive = rule.get('case_sensitive', True)
 
                     if not all([pattern, new_value, column]):
                         logging.warning(f"Regra de substituição de texto incompleta: {rule}. Pulando.")
@@ -338,9 +340,18 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     count = 0
                     if column in df.columns:
                         if pd.api.types.is_object_dtype(df[column]):
-                            count = df[column].str.contains(pattern, regex=is_regex, na=False).sum()
-                            if count > 0:
-                                df[column] = df[column].str.replace(pattern, new_value, regex=is_regex)
+                            # Define os parâmetros com base na sensibilidade ao caso e se é regex
+                            if is_regex:
+                                flags = re.IGNORECASE if not case_sensitive else 0
+                                # O parâmetro 'case' é ignorado pelo pandas quando regex=True, então usamos 'flags'
+                                count = df[column].str.contains(pattern, regex=True, flags=flags, na=False).sum()
+                                if count > 0:
+                                    df[column] = df[column].str.replace(pattern, new_value, regex=True, flags=flags)
+                            else:
+                                # Para não-regex, o parâmetro 'case' controla a sensibilidade
+                                count = df[column].str.contains(pattern, regex=False, case=case_sensitive, na=False).sum()
+                                if count > 0:
+                                    df[column] = df[column].str.replace(pattern, new_value, regex=False, case=case_sensitive)
                         else:
                             logging.warning(f"  -> A coluna '{column}' não é do tipo texto/objeto no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
                             continue

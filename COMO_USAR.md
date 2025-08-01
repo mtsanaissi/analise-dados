@@ -69,26 +69,39 @@ Aplica um conjunto de substituições de valores em múltiplos arquivos, com bas
 
 #### Configuração
 
-Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de regras de substituição. Cada regra pode ser global ou específica para uma coluna.
+Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de regras de substituição.
+
+*   `column`: (Opcional) A coluna onde a substituição deve ser aplicada. Se omitido, a regra será aplicada a todas as colunas.
+*   `existing_value`: O valor (ou lista de valores) a ser substituído.
+*   `new_value`: O novo valor que substituirá o valor antigo.
+*   `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca por `existing_value` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
 
 ```yaml
 # Lista de regras de substituição a serem aplicadas.
 replacements:
-  # Regra 1: Substitui um valor específico na coluna "Status".
+  # Regra 1: Substitui "Inativo" por "Desativado" na coluna "Status" (sensível ao caso).
   - column: "Status"
     existing_value: "Inativo"
     new_value: "Desativado"
+    case_sensitive: true # Comportamento padrão
 
-  # Regra 2: Usa uma lista para padronizar múltiplos valores para um valor nulo,
-  # apenas na coluna "Status".
+  # Regra 2: Padroniza múltiplos valores para um valor nulo na coluna "Status".
   - column: "Status"
     existing_value: ["N/D", "NA", "Sem Info", "?"]
     new_value: null
 
-  # Regra 3: Substituição global (em todas as colunas).
-  # Útil para remover caracteres problemáticos ou padronizar valores globalmente.
-  - existing_value: '\uFFFD'
-    new_value: ''
+  # Regra 3: Substitui "pendente" (e suas variações como "Pendente" ou "PENDENTE")
+  # por "Em Andamento" na coluna "Status", de forma insensível ao caso.
+  - column: "Status"
+    existing_value: "pendente"
+    new_value: "Em Andamento"
+    case_sensitive: false
+
+  # Regra 4: Substituição global insensível ao caso.
+  # Troca "BR" e "br" por "Brasil" em todas as colunas.
+  - existing_value: 'br'
+    new_value: 'Brasil'
+    case_sensitive: false
 ```
 
 #### Comando
@@ -171,24 +184,42 @@ Requer um arquivo de configuração YAML (ex: `substituicoes_texto.yaml`) com um
 *   `column`: A coluna onde a substituição deve ser aplicada.
 *   `pattern`: O texto ou a expressão regular a ser encontrada.
 *   `new_value`: O novo valor que substituirá o padrão encontrado.
-*   `is_regex`: Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular.
+*   `is_regex`: (Opcional) Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular. Padrão: `false`.
+*   `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca pelo `pattern` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
 
 ```yaml
 # Lista de regras para encontrar e substituir texto.
 text_replacements:
-  # Regra 1: Substituição de substring simples na coluna 'description'.
-  # Transforma "Produto A-123" em "SKU-A-123".
+  # Regra 1: Substituição de substring simples e sensível ao caso (padrão).
+  # Transforma "Produto A-123" em "SKU-A-123", mas não afetaria "produto a-123".
   - column: "description"
     pattern: "Produto A"
     new_value: "SKU-A"
     is_regex: false
+    case_sensitive: true
 
-  # Regra 2: Substituição com expressão regular na coluna 'category'.
-  # Remove hífens de categorias como "Eletronicos-Info".
+  # Regra 2: Substituição de substring insensível ao caso.
+  # Transforma "REF:" (e "ref:", "Ref:", etc.) em "ID-".
+  - column: "code"
+    pattern: "REF:"
+    new_value: "ID-"
+    is_regex: false
+    case_sensitive: false
+
+  # Regra 3: Substituição com regex sensível ao caso.
+  # Remove hífens apenas de categorias que começam com "Eletronicos-".
   - column: "category"
-    pattern: "(\\w+)-(\\w+)"
+    pattern: "(Eletronicos)-(\\w+)"
     new_value: "\\1 \\2"
     is_regex: true
+
+  # Regra 4: Substituição com regex insensível ao caso.
+  # Padroniza "user email" ou "User Email" para "email" em uma coluna de logs.
+  - column: "log_entry"
+    pattern: "user email"
+    new_value: "email"
+    is_regex: true
+    case_sensitive: false
 ```
 
 #### Comando
