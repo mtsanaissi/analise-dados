@@ -127,12 +127,10 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
             delimiter_result = detect_csv_delimiter(fp)
             results["csv_delimiter_analysis"].append(
                 {"file": os.path.basename(fp), "result": delimiter_result})
-            # CUSTOMIZAR: Adicionar verificação para o caso de erro na detecção
             if "delimiter" in delimiter_result:
                 detected_delimiters[fp] = delimiter_result["delimiter"]
 
             if args.compare_fields:
-                # Importa a função aqui para evitar dependência circular
                 from .file_type_specific.csv.column_consistency_checker import get_csv_headers
                 delimiter = detected_delimiters.get(fp)
                 current_headers = get_csv_headers(fp, delimiter=delimiter)
@@ -155,76 +153,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
 
-        if args.compare_types:
-            sorted_excel_files_for_types = sorted(excel_files)
-            for fp in sorted_excel_files_for_types:
-                base_name = os.path.basename(fp)
-                df = None
-                try:
-                    # Por padrão, o conector lê a primeira planilha.
-                    # A comparação de tipos entre diferentes planilhas no mesmo arquivo não está no escopo.
-                    connector = XlsxConnector(file_path=fp)
-                    df = connector.read()
-
-                    if df is None or df.empty:
-                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
-                        continue
-
-                    profile = profile_dataframe(df)
-                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
-
-                    if reference_types['excel'] is None:
-                        reference_types['excel'] = current_types
-                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
-                    else:
-                        reference = reference_types['excel']
-                        inconsistencies = []
-                        common_columns = set(reference.keys()) & set(current_types.keys())
-
-                        for col in common_columns:
-                            if reference[col] != current_types[col]:
-                                inconsistencies.append({
-                                    "column": col,
-                                    "reference_type": reference[col],
-                                    "current_type": current_types[col]
-                                })
-
-                        if inconsistencies:
-                            results["type_consistency_analysis"].append({
-                                "file": base_name,
-                                "status": "inconsistente",
-                                "inconsistencies": inconsistencies
-                            })
-                        else:
-                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
-
-                except Exception as e:
-                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
-                    results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
-        consistency_results = check_csv_structures(data_project_path, detected_delimiters_map=detected_delimiters)
-        if "results" in consistency_results:
-            results["csv_column_consistency_analysis"] = consistency_results["results"]
-
-        # Mesclar resultados da verificação de consistência com a comparação de campos
-        if "results" in consistency_results:
-            for res in consistency_results.get("results", []):
-                # Encontrar a comparação de campo correspondente
-                comp_found = False
-                for comp in results["field_comparison_analysis"]:
-                    if comp.get("file") == res.get("file"):
-                        comp_found = True
-                        # Se a verificação de consistência encontrou um problema, atualize o status
-                        if res.get("status") != "OK":
-                            comp["status"] = res.get("status", comp.get("status"))
-                            comp["details"] = res.get("details", comp.get("details"))
-                        break
-                # Se não houver uma entrada de comparação de campo (improvável), adicione-a
-                if not comp_found:
-                    results["field_comparison_analysis"].append(res)
-
-        if args.compare_types:
-            sorted_csv_files_for_types = sorted(csv_files)
-            for fp in sorted_csv_files_for_types:
+            if args.compare_types:
                 base_name = os.path.basename(fp)
                 df = None
                 try:
@@ -273,6 +202,23 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
                     results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
 
+        consistency_results = check_csv_structures(data_project_path, detected_delimiters_map=detected_delimiters)
+        if "results" in consistency_results:
+            results["csv_column_consistency_analysis"] = consistency_results["results"]
+
+        if "results" in consistency_results:
+            for res in consistency_results.get("results", []):
+                comp_found = False
+                for comp in results["field_comparison_analysis"]:
+                    if comp.get("file") == res.get("file"):
+                        comp_found = True
+                        if res.get("status") != "OK":
+                            comp["status"] = res.get("status", comp.get("status"))
+                            comp["details"] = res.get("details", comp.get("details"))
+                        break
+                if not comp_found:
+                    results["field_comparison_analysis"].append(res)
+
     if json_files:
         logging.info("--- Executando Análises de JSON ---")
         for fp in json_files:
@@ -300,9 +246,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
 
-        if args.compare_types:
-            sorted_json_files_for_types = sorted(json_files)
-            for fp in sorted_json_files_for_types:
+            if args.compare_types:
                 base_name = os.path.basename(fp)
                 df = None
                 try:
@@ -374,6 +318,49 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
 
+            if args.compare_types:
+                base_name = os.path.basename(fp)
+                df = None
+                try:
+                    connector = XlsxConnector(file_path=fp)
+                    df = connector.read()
+
+                    if df is None or df.empty:
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
+                        continue
+
+                    profile = profile_dataframe(df)
+                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
+
+                    if reference_types['excel'] is None:
+                        reference_types['excel'] = current_types
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
+                    else:
+                        reference = reference_types['excel']
+                        inconsistencies = []
+                        common_columns = set(reference.keys()) & set(current_types.keys())
+
+                        for col in common_columns:
+                            if reference[col] != current_types[col]:
+                                inconsistencies.append({
+                                    "column": col,
+                                    "reference_type": reference[col],
+                                    "current_type": current_types[col]
+                                })
+
+                        if inconsistencies:
+                            results["type_consistency_analysis"].append({
+                                "file": base_name,
+                                "status": "inconsistente",
+                                "inconsistencies": inconsistencies
+                            })
+                        else:
+                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+
+                except Exception as e:
+                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
+                    results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
+
     logging.info("Fase 1: Descoberta e Diagnóstico concluída.")
 
     results_wrapper = {"status": "success",
@@ -398,7 +385,6 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     if args.generate_char_cleanup_config:
         logging.info("--- Gerando Configuração de Limpeza de Caracteres ---")
 
-        # Mapeia o encoding de cada arquivo para fácil acesso
         encoding_map = {
             os.path.basename(item['file_path']): {
                 'encoding': item.get('encoding', 'utf-8'),
@@ -419,12 +405,10 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
             encoding = encoding_info.get('encoding', 'utf-8')
 
-            # Garante que o encoding não seja None
             if not encoding:
                 encoding = 'utf-8'
 
             try:
-                # Usa o encoding detectado para verificar os caracteres
                 found_chars = detect_problematic_chars(file_path, encoding)
                 master_problematic_chars.update(found_chars)
             except Exception as e:
@@ -433,20 +417,17 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         if master_problematic_chars:
             logging.info(f"Caracteres problemáticos encontrados: {master_problematic_chars}")
 
-            # Estrutura de dados para o arquivo YAML
             cleanup_config = {
                 'replacements': [
                     {'existing_value': char, 'new_value': ''}
-                    for char in sorted(list(master_problematic_chars)) # Ordena para consistência
+                    for char in sorted(list(master_problematic_chars))
                 ]
             }
 
             output_path = args.generate_char_cleanup_config
             try:
                 with open(output_path, 'w', encoding='utf-8') as f:
-                    # Adiciona comentário no topo do arquivo
                     f.write("# Arquivo de configuração gerado automaticamente para limpeza de caracteres.\n")
-                    # Usa allow_unicode para preservar caracteres e default_flow_style=False para o formato de bloco
                     yaml.dump(cleanup_config, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
                 logging.info(f"Arquivo de configuração para limpeza de caracteres salvo em: {output_path}")
