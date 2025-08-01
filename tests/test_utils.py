@@ -94,36 +94,45 @@ def test_find_files_with_default_excluded_dirs(tmp_path):
     assert len(found_files) == 1
     assert str(f_valid) in found_files
 
-def test_find_files_with_custom_excluded_dirs(tmp_path):
-    """Testa se a passagem de uma lista de exclusão personalizada sobrepõe a padrão."""
+def test_find_files_combines_excluded_dirs(tmp_path):
+    """
+    Testa se a função find_files combina a lista de exclusão padrão
+    com uma lista personalizada, em vez de substituí-la.
+    """
     # Arrange
-    # Diretório que seria ignorado por padrão, mas não deve ser com a lista personalizada
+    # Diretórios que devem ser ignorados pela regra padrão
     (tmp_path / "fad-metadados").mkdir()
-    f_meta = tmp_path / "fad-metadados" / "meta.csv"
-    f_meta.write_text("metadata")
+    (tmp_path / "fad-metadados" / "meta.csv").write_text("metadata")
+    (tmp_path / "fad-bkp-old-123").mkdir()
+    (tmp_path / "fad-bkp-old-123" / "backup1.csv").write_text("backup")
 
-    # Diretório que deve ser ignorado pela lista personalizada
+    # Diretório que deve ser ignorado pela regra personalizada
     (tmp_path / "custom-ignore").mkdir()
     (tmp_path / "custom-ignore" / "ignored.csv").write_text("ignored")
 
-    f_valid = tmp_path / "data.csv"
-    f_valid.write_text("content")
+    # Diretório de backup da execução atual, também a ser ignorado
+    (tmp_path / "fad-bkp-new-456").mkdir()
+    (tmp_path / "fad-bkp-new-456" / "backup2.csv").write_text("backup")
+
+    # Arquivo válido que deve ser encontrado
+    f_valid = tmp_path / "data"
+    f_valid.mkdir()
+    valid_file = f_valid / "valid_data.csv"
+    valid_file.write_text("valid_content")
 
     # Act
-    # Passa uma lista de exclusão vazia, esperando que NADA seja ignorado
-    found_files_custom_empty = utils.find_files(str(tmp_path), ["csv"], exclude_dirs=[])
-
-    # Passa uma lista de exclusão personalizada
-    found_files_custom = utils.find_files(str(tmp_path), ["csv"], exclude_dirs=['custom-ignore'])
+    # Chama a função passando a pasta de backup da execução atual e uma pasta customizada
+    # A função deve ignorar as pastas padrão (fad-metadados, fad-bkp-*) E as personalizadas
+    found_files = utils.find_files(
+        str(tmp_path),
+        ["csv"],
+        exclude_dirs=['custom-ignore', 'fad-bkp-new-456']
+    )
 
     # Assert
-    assert len(found_files_custom_empty) == 3
-    assert str(f_meta) in found_files_custom_empty
-    assert str(f_valid) in found_files_custom_empty
-
-    assert len(found_files_custom) == 2
-    assert str(f_meta) in found_files_custom
-    assert str(f_valid) in found_files_custom
+    # Apenas o arquivo 'valid_data.csv' deve ser encontrado
+    assert len(found_files) == 1
+    assert str(valid_file) in found_files
 
 def test_read_csv_robust(tmp_path):
     """Testa a leitura de um arquivo CSV válido."""

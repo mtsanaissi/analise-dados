@@ -1,0 +1,14 @@
+{
+    "summary": {
+        "total_files": 1,
+        "processed_successfully": 1,
+        "failed": 0
+    },
+    "details": [
+        {
+            "file_name": "whitespace_test.csv",
+            "status": "Success",
+            "changes_made": true
+        }
+    ]
+}
