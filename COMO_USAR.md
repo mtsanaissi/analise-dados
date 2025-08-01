@@ -154,6 +154,51 @@ python src/run.py -d data/meu_projeto -p treatment --enrich-data config_enrich.y
 
 ---
 
+### Operação 4: Encontrar e Substituir Texto (`--find-and-replace-text`)
+
+Esta operação é ideal para fazer substituições parciais dentro de células de texto, como corrigir parte de uma palavra, remover ou alterar um padrão específico usando texto simples ou expressões regulares (regex).
+
+**Diferença para `--replace-values`**:
+*   `--replace-values`: Substitui o **valor inteiro** de uma célula. Ex: `Status: "Inativo"` se torna `Status: "Desativado"`.
+*   `--find-and-replace-text`: Substitui uma **parte do texto** dentro de uma célula. Ex: `Descrição: "REF-123-PROD"` pode se tornar `Descrição: "ID-123-PROD"` ao substituir apenas "REF".
+
+**Importante:** Esta operação também **substitui** os arquivos originais e cria um backup automático.
+
+#### Configuração
+
+Requer um arquivo de configuração YAML (ex: `substituicoes_texto.yaml`) com uma lista de regras na chave `text_replacements`.
+
+*   `column`: A coluna onde a substituição deve ser aplicada.
+*   `pattern`: O texto ou a expressão regular a ser encontrada.
+*   `new_value`: O novo valor que substituirá o padrão encontrado.
+*   `is_regex`: Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular.
+
+```yaml
+# Lista de regras para encontrar e substituir texto.
+text_replacements:
+  # Regra 1: Substituição de substring simples na coluna 'description'.
+  # Transforma "Produto A-123" em "SKU-A-123".
+  - column: "description"
+    pattern: "Produto A"
+    new_value: "SKU-A"
+    is_regex: false
+
+  # Regra 2: Substituição com expressão regular na coluna 'category'.
+  # Remove hífens de categorias como "Eletronicos-Info".
+  - column: "category"
+    pattern: "(\\w+)-(\\w+)"
+    new_value: "\\1 \\2"
+    is_regex: true
+```
+
+#### Comando
+
+```bash
+python src/run.py -d data/meu_projeto -p treatment --find-and-replace-text substituicoes_texto.yaml
+```
+
+---
+
 ## Fase 4: Visualização (`visualization`)
 
 Esta fase lança aplicações interativas para explorar os dados.
