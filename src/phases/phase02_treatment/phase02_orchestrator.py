@@ -136,7 +136,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         metadata_path = os.path.join(data_project_path, METADATA_DIR)
         os.makedirs(metadata_path, exist_ok=True)
 
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_dir_name = f"fad-bkp-treatment-{timestamp}"
         backup_dir_path = os.path.join(data_project_path, backup_dir_name)
         os.makedirs(backup_dir_path, exist_ok=True)
@@ -293,7 +293,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         metadata_path = os.path.join(data_project_path, METADATA_DIR)
         os.makedirs(metadata_path, exist_ok=True)
 
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_dir_name = f"fad-bkp-treatment-{timestamp}"
         backup_dir_path = os.path.join(data_project_path, backup_dir_name)
         os.makedirs(backup_dir_path, exist_ok=True)
@@ -410,7 +410,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         metadata_path = os.path.join(data_project_path, METADATA_DIR)
         os.makedirs(metadata_path, exist_ok=True)
 
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_dir_name = f"fad-bkp-treatment-{timestamp}"
         backup_dir_path = os.path.join(data_project_path, backup_dir_name)
         os.makedirs(backup_dir_path, exist_ok=True)
