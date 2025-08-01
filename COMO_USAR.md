@@ -47,6 +47,12 @@ python src/run.py -d data/meu_projeto -p discovery
         python src/run.py -d data/meu_projeto -p discovery --compare-fields
         ```
 
+*   `--compare-types`: Compara os tipos de dados inferidos para colunas de mesmo nome entre arquivos do mesmo tipo (ex: CSVs em um mesmo diretório). Ajuda a identificar inconsistências, como uma coluna que é numérica em um arquivo e texto em outro.
+    *   **Exemplo:**
+        ```bash
+        python src/run.py -d data/meu_projeto -p discovery --compare-types
+        ```
+
 *   `--generate-char-cleanup-config <caminho_saida.yaml>`: Realiza uma verificação específica por caracteres problemáticos (como caracteres de controle invisíveis ou de substituição) em todos os arquivos. Se encontrados, gera um arquivo de configuração YAML no caminho especificado. Este arquivo pode ser usado pela Fase 2 para realizar a limpeza.
     *   **Exemplo:**
         ```bash

@@ -11,6 +11,9 @@ from src.phases.phase01_discovery.file_type_specific.csv.column_consistency_chec
 from src.phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
 from src.phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
 from src.phases.phase01_discovery.core.reporting import generate_html_report
+from src.phases.phase01_discovery.core.data_profiler import profile_dataframe
+from src.connectors.factory import CsvConnector, XlsxConnector
+import pandas as pd
 
 import argparse
 import json
@@ -58,6 +61,11 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
     )
     parser.add_argument(
+        "--compare-types",
+        action="store_true",
+        help="Habilita a comparação de tipos de dados entre colunas de mesmo nome em arquivos do mesmo tipo."
+    )
+    parser.add_argument(
         "--generate-char-cleanup-config",
         metavar="OUTPUT_PATH",
         help="Verifica todos os arquivos em busca de caracteres problemáticos (ex: de controle, de substituição) e gera um arquivo de configuração YAML no caminho especificado, que pode ser usado na Fase 2 para limpeza."
@@ -90,10 +98,12 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         "csv_column_consistency_analysis": {},
         "json_schema_validation": [],
         "excel_sheet_analysis": [],
-        "field_comparison_analysis": []
+        "field_comparison_analysis": [],
+        "type_consistency_analysis": []
     }
 
     reference_columns = {'csv': None, 'json': None, 'excel': None}
+    reference_types = {'csv': None, 'json': None, 'excel': None}
 
     # --- Análises Gerais ---
     logging.info("--- Executando Análises Gerais ---")
@@ -144,6 +154,53 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                         "extra_columns": extra_columns
                     }
                 results["field_comparison_analysis"].append(comparison_result)
+
+        if args.compare_types:
+            sorted_excel_files_for_types = sorted(excel_files)
+            for fp in sorted_excel_files_for_types:
+                base_name = os.path.basename(fp)
+                df = None
+                try:
+                    # Por padrão, o conector lê a primeira planilha.
+                    # A comparação de tipos entre diferentes planilhas no mesmo arquivo não está no escopo.
+                    connector = XlsxConnector(file_path=fp)
+                    df = connector.read()
+
+                    if df is None or df.empty:
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
+                        continue
+
+                    profile = profile_dataframe(df)
+                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
+
+                    if reference_types['excel'] is None:
+                        reference_types['excel'] = current_types
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
+                    else:
+                        reference = reference_types['excel']
+                        inconsistencies = []
+                        common_columns = set(reference.keys()) & set(current_types.keys())
+
+                        for col in common_columns:
+                            if reference[col] != current_types[col]:
+                                inconsistencies.append({
+                                    "column": col,
+                                    "reference_type": reference[col],
+                                    "current_type": current_types[col]
+                                })
+
+                        if inconsistencies:
+                            results["type_consistency_analysis"].append({
+                                "file": base_name,
+                                "status": "inconsistente",
+                                "inconsistencies": inconsistencies
+                            })
+                        else:
+                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+
+                except Exception as e:
+                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
+                    results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
         consistency_results = check_csv_structures(data_project_path, detected_delimiters_map=detected_delimiters)
         if "results" in consistency_results:
             results["csv_column_consistency_analysis"] = consistency_results["results"]
@@ -164,6 +221,57 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                 # Se não houver uma entrada de comparação de campo (improvável), adicione-a
                 if not comp_found:
                     results["field_comparison_analysis"].append(res)
+
+        if args.compare_types:
+            sorted_csv_files_for_types = sorted(csv_files)
+            for fp in sorted_csv_files_for_types:
+                base_name = os.path.basename(fp)
+                df = None
+                try:
+                    delimiter = detected_delimiters.get(fp)
+                    if not delimiter:
+                        logging.warning(f"Não foi possível determinar o delimitador para {base_name}. Pulando comparação de tipos.")
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "erro_delimitador"})
+                        continue
+
+                    connector = CsvConnector(file_path=fp, delimiter=delimiter)
+                    df = connector.read()
+
+                    if df is None or df.empty:
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
+                        continue
+
+                    profile = profile_dataframe(df)
+                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
+
+                    if reference_types['csv'] is None:
+                        reference_types['csv'] = current_types
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
+                    else:
+                        reference = reference_types['csv']
+                        inconsistencies = []
+                        common_columns = set(reference.keys()) & set(current_types.keys())
+
+                        for col in common_columns:
+                            if reference[col] != current_types[col]:
+                                inconsistencies.append({
+                                    "column": col,
+                                    "reference_type": reference[col],
+                                    "current_type": current_types[col]
+                                })
+
+                        if inconsistencies:
+                            results["type_consistency_analysis"].append({
+                                "file": base_name,
+                                "status": "inconsistente",
+                                "inconsistencies": inconsistencies
+                            })
+                        else:
+                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+
+                except Exception as e:
+                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
+                    results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")
@@ -191,6 +299,53 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                         "extra_fields": extra_fields
                     }
                 results["field_comparison_analysis"].append(comparison_result)
+
+        if args.compare_types:
+            sorted_json_files_for_types = sorted(json_files)
+            for fp in sorted_json_files_for_types:
+                base_name = os.path.basename(fp)
+                df = None
+                try:
+                    try:
+                        df = pd.read_json(fp, lines=True)
+                    except (ValueError, TypeError):
+                        df = pd.read_json(fp)
+
+                    if df is None or df.empty:
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
+                        continue
+
+                    profile = profile_dataframe(df)
+                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
+
+                    if reference_types['json'] is None:
+                        reference_types['json'] = current_types
+                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
+                    else:
+                        reference = reference_types['json']
+                        inconsistencies = []
+                        common_columns = set(reference.keys()) & set(current_types.keys())
+
+                        for col in common_columns:
+                            if reference[col] != current_types[col]:
+                                inconsistencies.append({
+                                    "column": col,
+                                    "reference_type": reference[col],
+                                    "current_type": current_types[col]
+                                })
+
+                        if inconsistencies:
+                            results["type_consistency_analysis"].append({
+                                "file": base_name,
+                                "status": "inconsistente",
+                                "inconsistencies": inconsistencies
+                            })
+                        else:
+                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+
+                except Exception as e:
+                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
+                    results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
 
     if excel_files:
         logging.info("--- Executando Análises de Excel ---")
