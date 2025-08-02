@@ -2,16 +2,70 @@
 
 ## Backlog
 
-*   **ID:** T028
-    **Título:** Corrigir Lógica de Exclusão de Diretórios na Busca de Arquivos
-    **Descrição:** A função `find_files` foi criada para ignorar diretórios padrão como `fad-metadados`, `fad-config` e `fad-bkp*`, mas os scripts orquestradores estão sobrescrevendo essa lista padrão ao passar seus próprios diretórios de exclusão (como o diretório de backup da execução atual). Isso faz com que as pastas `fad-bkp*` de execuções anteriores sejam processadas incorretamente. A lógica precisa ser ajustada para adicionar exclusões em vez de sobrescrevê-las.
+*   **ID:** T033
+    **Título:** Adicionar Teste para a Função `build_command` da UI
+    **Descrição:** Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso.
     **Critérios de Aceitação:**
-    - [ ] A função `find_files` em `src/utils.py` deve ser modificada para sempre usar sua lista de exclusão padrão (`fad-metadados`, `fad-config`, `fad-bkp*`) e adicionar a ela quaisquer diretórios extras passados através do argumento `exclude_dirs`.
-    - [ ] Todas as chamadas para `find_files` nos arquivos orquestradores (ex: `phase01_orchestrator.py`, `phase02_orchestrator.py`) devem ser revisadas e, se necessário, ajustadas para garantir que não sobrescrevam mais a lista padrão.
-    - [ ] **Testes:** Um teste de integração deve ser criado ou atualizado para validar este cenário. O teste deve:
-        1. Criar uma estrutura de diretórios que inclua uma pasta de backup de uma execução anterior (ex: `fad-bkp-treatment-123`).
-        2. Executar uma fase (como a Fase 2) que também cria seu próprio diretório de backup.
-        3. Verificar se a função `find_files` ignora corretamente AMBOS os diretórios de backup (o antigo e o novo).
+    - [ ] Um novo arquivo de teste, `tests/test_app_main_interface.py` (ou similar), deve ser criado.
+    - [ ] O teste deve importar a função `build_command`.
+    - [ ] O teste deve verificar se, para diferentes combinações de `project_path` e `phase`, a função `build_command` retorna a lista de argumentos esperada (incluindo o executável Python e o caminho do `run.py`).
+
+*   **ID:** T032
+    **Título:** Corrigir Lógica de Exclusão de Diretórios em `find_files` e Adicionar Teste de Integração
+    **Descrição:** A função `find_files` em `src/utils.py` não está adicionando corretamente os diretórios de exclusão passados como argumento à sua lista padrão, resultando na não exclusão de pastas de backup antigas. Além disso, falta um teste de integração robusto para validar este comportamento.
+    **Critérios de Aceitação:**
+    - [ ] A função `find_files` em `src/utils.py` deve ser modificada para que, se o argumento `exclude_dirs` for fornecido, seus valores sejam *adicionados* à lista de exclusão padrão (`fad-metadados`, `fad-config`, `fad-bkp*`), e não a sobrescrevam.
+    - [ ] Todas as chamadas para `find_files` nos arquivos orquestradores (ex: `phase01_orchestrator.py`, `phase02_orchestrator.py`) devem ser revisadas e, se necessário, ajustadas para garantir que funcionem corretamente com a nova lógica.
+    - [ ] **Testes:** Um novo teste de integração deve ser criado em `tests/utils/test_file_discovery.py` (ou um nome similar, garantindo um caminho válido no Windows, sem pontos e vírgulas) para validar a correção. O teste deve:
+        1. Criar um diretório de teste com arquivos de dados e subdiretórios, incluindo:
+            - Uma pasta `fad-metadados`.
+            - Uma pasta `fad-config`.
+            - Uma pasta de backup antiga (ex: `fad-bkp-old-123`).
+            - Uma pasta de backup da execução atual (ex: `fad-bkp-current-456`).
+            - Pastas de dados válidas.
+        2. Chamar `find_files` passando apenas o diretório de backup da execução atual via `exclude_dirs`.
+        3. Assertar que a lista de arquivos retornada por `find_files` **não contém** arquivos de *nenhuma* das pastas excluídas (padrão e as passadas como argumento).
+
+*   **ID:** T031
+    **Título:** [UI - Parte 3] Implementar UI para Visualização e Refinamentos Finais
+    **Descrição:** Finalizar a implementação da interface gráfica, adicionando a funcionalidade para a fase de Visualização e incorporando refinamentos de UX, como a exibição de relatórios e tratamento de erros.
+    **Critérios de Aceitação:**
+    - [ ] **Fase Visualization:**
+        - [ ] A UI deve exibir um botão para "Iniciar Aplicação de Visualização".
+        - [ ] Clicar no botão deve executar o script `src/phases/phase04_visualization/app_explore_single_profile.py` em um subprocesso.
+    - [ ] **Exibição de Relatórios:** Após uma execução bem-sucedida de qualquer fase que gere relatório (ex: Discovery, Treatment), a UI deve exibir um link para download direto do relatório HTML/JSON gerado.
+    - [ ] **Tratamento de Erros:** Se a execução do subprocesso falhar, a UI deve exibir uma mensagem de erro clara e amigável para o usuário.
+    - [ ] **Testes:** Criar testes para validar a construção de comandos para a fase de Visualização e para a exibição/download de relatórios.
+    - [ ] **Documentação:** O `COMO_USAR.md` e o `LEIAME.md` devem ser atualizados para apresentar a nova interface gráfica como o método principal de uso interativo do kit de ferramentas.
+
+*   **ID:** T030
+    **Título:** [UI - Parte 2] Implementar UI para Fases Discovery e Treatment
+    **Descrição:** Expandir a interface gráfica principal para que, ao selecionar as fases `Discovery` ou `Treatment`, a área principal exiba dinamicamente os widgets correspondentes a cada argumento da linha de comando, permitindo a configuração visual das operações.
+    **Critérios de Aceitação:**
+    - [ ] **Fase Discovery:**
+        - [ ] A UI deve exibir checkboxes para `--compare-fields` e `--compare-types`.
+        - [ ] A UI deve exibir um seletor para `--report-output` (json/html).
+        - [ ] A UI deve exibir um campo de texto para o caminho do arquivo de configuração de limpeza de caracteres (`--generate-char-cleanup-config`).
+    - [ ] **Fase Treatment:**
+        - [ ] A UI deve exibir um menu suspenso para selecionar a operação (ex: `Remover Espaços`, `Substituir Valores`, `Encontrar e Substituir Texto`, `Concatenar Dados`, `Enriquecer Dados`).
+        - [ ] Se a operação selecionada exigir um arquivo de configuração YAML (ex: `--replace-values`, `--find-and-replace-text`, `--concatenate-data`, `--enrich-data`), um widget de upload de arquivo (`st.file_uploader`) deve aparecer para que o usuário possa carregar o arquivo.
+        - [ ] A lógica deve ser capaz de salvar o arquivo YAML enviado em um local temporário e passar seu caminho para o comando de execução do subprocesso.
+    - [ ] O comando final executado pelo subprocesso deve refletir corretamente todas as opções selecionadas pelo usuário na UI para as fases Discovery e Treatment.
+    - [ ] **Testes:** Criar testes para validar a construção de comandos para as diferentes operações e argumentos das fases Discovery e Treatment, garantindo que a UI gere os comandos CLI corretos.
+    - [ ] **Documentação:** Nenhuma atualização no `COMO_USAR.md` ou `LEIAME.md` é necessária nesta fase.
+
+*   **ID:** T029
+    **Título:** [UI - Parte 1] Criar o Esqueleto da Aplicação de Interface Gráfica
+    **Descrição:** Criar a estrutura principal da aplicação Streamlit (`src/app_main_interface.py`) que servirá como um painel de controle para o kit de ferramentas. Esta primeira tarefa foca nos componentes globais e na lógica central de execução de comandos, sem a lógica específica de cada fase.
+    **Critérios de Aceitação:**
+    - [ ] Um novo arquivo `src/app_main_interface.py` deve ser criado.
+    - [ ] A UI deve ter uma barra lateral com um campo de texto para o "Caminho do Projeto de Dados" e um menu suspenso para selecionar a "Fase" (`Discovery`, `Treatment`, etc.).
+    - [ ] A área principal deve exibir um botão "Executar".
+    - [ ] Ao clicar em "Executar", o script deve construir o comando básico (ex: `python src/run.py -d <caminho> -p <fase>`) e executá-lo em um subprocesso.
+    - [ ] A saída do console (stdout/stderr) do subprocesso deve ser capturada e exibida em tempo real dentro de um `st.code()` ou `st.text_area` na UI.
+    - [ ] A UI deve exibir uma mensagem de "Concluído" ou "Erro" ao final da execução.
+    - [ ] **Testes:** Dada a natureza da UI, testes de unidade formais não são o foco principal. No entanto, a lógica de construção de comandos pode ser testada. Criar um teste simples em `tests/` que valide se a função que monta a lista de argumentos a partir de seleções da UI funciona como esperado.
+    - [ ] **Documentação:** Nenhuma atualização no `COMO_USAR.md` é necessária nesta fase.
 
 ## Em Andamento
 

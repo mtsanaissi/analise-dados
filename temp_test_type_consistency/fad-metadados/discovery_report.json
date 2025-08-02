@@ -1,0 +1,317 @@
+{
+    "status": "success",
+    "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.",
+    "detailed_results": {
+        "encoding_analysis": [
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\01_ref.json",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\01_ref.xlsx",
+                "encoding": null,
+                "confidence": 0,
+                "error": "Não foi possível detectar o encoding."
+            },
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\02_consistent.json",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\02_consistent.xlsx",
+                "encoding": null,
+                "confidence": 0,
+                "error": "Não foi possível detectar o encoding."
+            },
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\03_inconsistent.json",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\03_inconsistent.xlsx",
+                "encoding": null,
+                "confidence": 0,
+                "error": "Não foi possível detectar o encoding."
+            }
+        ],
+        "data_volume_analysis": {
+            "summary_by_extension": [
+                {
+                    "extensao": "json",
+                    "total_arquivos": 3,
+                    "total_registros": 3,
+                    "total_tamanho_bytes": 129,
+                    "media_registros_por_arquivo": 1.0,
+                    "media_tamanho_por_arquivo": 43.0
+                },
+                {
+                    "extensao": "xlsx",
+                    "total_arquivos": 3,
+                    "total_registros": 3,
+                    "total_tamanho_bytes": 14886,
+                    "media_registros_por_arquivo": 1.0,
+                    "media_tamanho_por_arquivo": 4962.0
+                }
+            ],
+            "overall_summary": {
+                "total_arquivos_geral": 6,
+                "total_registros_geral": 6,
+                "total_tamanho_geral_bytes": 15015,
+                "total_tamanho_geral_formatado": "14.66 KB"
+            },
+            "files_with_errors": [],
+            "message": "Resumo de volume e tamanho gerado com sucesso."
+        },
+        "data_integrity_analysis": {
+            "status": "success",
+            "message": "Verificação de integridade concluída.",
+            "reports": [
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\01_ref.json",
+                    "file_type": "JSON",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "encoding_confidence": 1.0,
+                        "json_type": "Padrão (objeto/array único)",
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\01_ref.xlsx",
+                    "file_type": "Excel",
+                    "status": "OK",
+                    "details": {
+                        "is_empty": false,
+                        "sheets_info": [
+                            {
+                                "name": "Sheet1",
+                                "readable": true,
+                                "num_columns": 3,
+                                "error_message": null
+                            }
+                        ],
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\02_consistent.json",
+                    "file_type": "JSON",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "encoding_confidence": 1.0,
+                        "json_type": "Padrão (objeto/array único)",
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\02_consistent.xlsx",
+                    "file_type": "Excel",
+                    "status": "OK",
+                    "details": {
+                        "is_empty": false,
+                        "sheets_info": [
+                            {
+                                "name": "Sheet1",
+                                "readable": true,
+                                "num_columns": 3,
+                                "error_message": null
+                            }
+                        ],
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\03_inconsistent.json",
+                    "file_type": "JSON",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "encoding_confidence": 1.0,
+                        "json_type": "Padrão (objeto/array único)",
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "D:\\w\\analise-dados\\temp_test_type_consistency\\03_inconsistent.xlsx",
+                    "file_type": "Excel",
+                    "status": "OK",
+                    "details": {
+                        "is_empty": false,
+                        "sheets_info": [
+                            {
+                                "name": "Sheet1",
+                                "readable": true,
+                                "num_columns": 3,
+                                "error_message": null
+                            }
+                        ],
+                        "error_message": null
+                    }
+                }
+            ]
+        },
+        "csv_delimiter_analysis": [],
+        "csv_column_consistency_analysis": {},
+        "json_schema_validation": [
+            {
+                "file": "01_ref.json",
+                "result": {
+                    "status": "schema_inferred",
+                    "errors": null,
+                    "inferred_schema": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "product": {
+                                "type": "string"
+                            },
+                            "price": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "file": "02_consistent.json",
+                "result": {
+                    "status": "schema_inferred",
+                    "errors": null,
+                    "inferred_schema": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "product": {
+                                "type": "string"
+                            },
+                            "price": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "file": "03_inconsistent.json",
+                "result": {
+                    "status": "schema_inferred",
+                    "errors": null,
+                    "inferred_schema": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "product": {
+                                "type": "string"
+                            },
+                            "price": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "excel_sheet_analysis": [
+            {
+                "file": "01_ref.xlsx",
+                "result": {
+                    "status": "success",
+                    "sheets_info": [
+                        {
+                            "sheet_name": "Sheet1",
+                            "is_readable": true,
+                            "num_columns": 3,
+                            "error_message": null
+                        }
+                    ],
+                    "num_sheets": 1
+                }
+            },
+            {
+                "file": "02_consistent.xlsx",
+                "result": {
+                    "status": "success",
+                    "sheets_info": [
+                        {
+                            "sheet_name": "Sheet1",
+                            "is_readable": true,
+                            "num_columns": 3,
+                            "error_message": null
+                        }
+                    ],
+                    "num_sheets": 1
+                }
+            },
+            {
+                "file": "03_inconsistent.xlsx",
+                "result": {
+                    "status": "success",
+                    "sheets_info": [
+                        {
+                            "sheet_name": "Sheet1",
+                            "is_readable": true,
+                            "num_columns": 3,
+                            "error_message": null
+                        }
+                    ],
+                    "num_sheets": 1
+                }
+            }
+        ],
+        "field_comparison_analysis": [],
+        "type_consistency_analysis": [
+            {
+                "file": "01_ref.json",
+                "status": "referencia"
+            },
+            {
+                "file": "02_consistent.json",
+                "status": "consistente"
+            },
+            {
+                "file": "03_inconsistent.json",
+                "status": "inconsistente",
+                "inconsistencies": [
+                    {
+                        "column": "price",
+                        "reference_type": "Numérico",
+                        "current_type": "Categórico/Texto"
+                    }
+                ]
+            },
+            {
+                "file": "01_ref.xlsx",
+                "status": "referencia"
+            },
+            {
+                "file": "02_consistent.xlsx",
+                "status": "consistente"
+            },
+            {
+                "file": "03_inconsistent.xlsx",
+                "status": "inconsistente",
+                "inconsistencies": [
+                    {
+                        "column": "amount",
+                        "reference_type": "Numérico",
+                        "current_type": "Categórico/Texto"
+                    }
+                ]
+            }
+        ]
+    }
+}
