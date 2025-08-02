@@ -47,9 +47,10 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     normalized_extensions = [ext.lower().lstrip('.') for ext in extensions]
     exclude_patterns = exclude_patterns or []
 
-    # Se exclude_dirs não for fornecido, usa a lista padrão.
-    if exclude_dirs is None:
-        exclude_dirs = ['fad-metadados', 'fad-config', 'fad-bkp*']
+    # Define a lista de exclusão padrão e adiciona os diretórios fornecidos pelo usuário.
+    final_exclude_dirs = ['fad-metadados', 'fad-config', 'fad-bkp*']
+    if exclude_dirs is not None:
+        final_exclude_dirs.extend(exclude_dirs)
 
     if not os.path.isdir(root_path):
         print(f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
@@ -61,7 +62,8 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
             original_dirnames = list(dirnames)
             dirnames[:] = []
             for d in original_dirnames:
-                if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_dirs):
+                # Usa a lista combinada de diretórios a serem excluídos
+                if not any(fnmatch.fnmatch(d, pattern) for pattern in final_exclude_dirs):
                     dirnames.append(d)
 
             for filename in filenames:

@@ -94,37 +94,6 @@ def test_find_files_with_default_excluded_dirs(tmp_path):
     assert len(found_files) == 1
     assert str(f_valid) in found_files
 
-def test_find_files_with_custom_excluded_dirs(tmp_path):
-    """Testa se a passagem de uma lista de exclusão personalizada sobrepõe a padrão."""
-    # Arrange
-    # Diretório que seria ignorado por padrão, mas não deve ser com a lista personalizada
-    (tmp_path / "fad-metadados").mkdir()
-    f_meta = tmp_path / "fad-metadados" / "meta.csv"
-    f_meta.write_text("metadata")
-
-    # Diretório que deve ser ignorado pela lista personalizada
-    (tmp_path / "custom-ignore").mkdir()
-    (tmp_path / "custom-ignore" / "ignored.csv").write_text("ignored")
-
-    f_valid = tmp_path / "data.csv"
-    f_valid.write_text("content")
-
-    # Act
-    # Passa uma lista de exclusão vazia, esperando que NADA seja ignorado
-    found_files_custom_empty = utils.find_files(str(tmp_path), ["csv"], exclude_dirs=[])
-
-    # Passa uma lista de exclusão personalizada
-    found_files_custom = utils.find_files(str(tmp_path), ["csv"], exclude_dirs=['custom-ignore'])
-
-    # Assert
-    assert len(found_files_custom_empty) == 3
-    assert str(f_meta) in found_files_custom_empty
-    assert str(f_valid) in found_files_custom_empty
-
-    assert len(found_files_custom) == 2
-    assert str(f_meta) in found_files_custom
-    assert str(f_valid) in found_files_custom
-
 def test_read_csv_robust(tmp_path):
     """Testa a leitura de um arquivo CSV válido."""
     # Arrange

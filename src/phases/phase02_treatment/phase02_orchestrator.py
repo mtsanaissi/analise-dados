@@ -447,12 +447,15 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
                 df_original = df.copy()
 
-                # Aplicar .str.strip() em todas as colunas
+                # Limpa os nomes das colunas (espaços e aspas)
+                df.columns = df.columns.str.strip().str.strip('"')
+
+                # Aplicar .str.strip() em todas as colunas de dados (espaços e aspas)
                 for col in df.columns:
                     if df[col].dtype == 'object':
-                        df[col] = df[col].str.strip()
+                        df[col] = df[col].str.strip().str.strip('"')
 
-                if not df.equals(df_original):
+                if not df.equals(df_original) or not df.columns.equals(df_original.columns):
                     file_details["changes_made"] = True
                     relative_path = os.path.relpath(file_path, data_project_path)
                     backup_file_path = os.path.join(backup_dir_path, relative_path)
