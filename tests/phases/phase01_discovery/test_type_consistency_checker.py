@@ -2,7 +2,7 @@
 
 import os
 import json
-import shutil
+import tempfile
 import unittest
 import pandas as pd
 from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
@@ -12,13 +12,12 @@ class TestTypeConsistencyChecker(unittest.TestCase):
 
     def setUp(self):
         """Configura um ambiente de teste limpo antes de cada teste."""
-        self.test_dir = "temp_test_type_consistency"
-        os.makedirs(self.test_dir, exist_ok=True)
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.test_dir = self.temp_dir.name
 
     def tearDown(self):
         """Remove o ambiente de teste após a execução de cada teste."""
-        if os.path.exists(self.test_dir):
-            shutil.rmtree(self.test_dir)
+        self.temp_dir.cleanup()
 
     def _create_file(self, filename, content):
         """Cria um arquivo com o conteúdo especificado no diretório de teste."""

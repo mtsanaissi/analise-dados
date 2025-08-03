@@ -221,6 +221,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
     if json_files:
         logging.info("--- Executando Análises de JSON ---")
+        json_files.sort()
         for fp in json_files:
             results["json_schema_validation"].append(
                 {"file": os.path.basename(fp), "result": validate_json_schema(fp)})
@@ -293,6 +294,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
     if excel_files:
         logging.info("--- Executando Análises de Excel ---")
+        excel_files.sort()
         for fp in excel_files:
             results["excel_sheet_analysis"].append(
                 {"file": os.path.basename(fp), "result": analyze_excel_sheets(fp)})
