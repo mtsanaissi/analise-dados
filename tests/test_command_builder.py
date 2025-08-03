@@ -25,7 +25,8 @@ def test_build_base_command():
     assert "data/sample" in command
     assert "-p" in command
     assert "discovery" in command
-    assert len(command) == 5
+    # python_executable, run.py, -d, path, -p, phase
+    assert len(command) == 6
 
 # --- Testes da Fase de Discovery ---
 
@@ -78,7 +79,7 @@ def test_build_treatment_command_no_op():
     args = {"operation": "Selecione uma operação"}
     command = build_command("data/sample", "treatment", treatment_args=args)
     # Nenhum argumento de operação deve ser adicionado
-    assert len(command) == 5
+    assert len(command) == 6
 
 def test_build_treatment_command_strip_whitespace():
     """Testa a operação de remover espaços."""
@@ -132,4 +133,4 @@ def test_build_treatment_command_with_config_missing():
     command = build_command("data/sample", "treatment", treatment_args=args)
     assert "--replace-values" in command
     # O comando não deve incluir o caminho se ele for None
-    assert len(command) == 6
+    assert len(command) == 7
