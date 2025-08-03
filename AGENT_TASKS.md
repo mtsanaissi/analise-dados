@@ -2,6 +2,15 @@
 
 ## Backlog
 
+*   **ID:** T034
+    **Título:** Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness
+    **Descrição:** O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos.
+    **Critérios de Aceitação:**
+    - [ ] O teste `test_type_consistency_checker.py` deve ser refatorado para usar o módulo `tempfile` do Python para criar diretórios temporários únicos para cada execução de teste, garantindo isolamento total e evitando colisões de nomes de arquivo/diretório.
+    - [ ] A lógica de criação e exclusão de arquivos de teste deve ser encapsulada de forma a ser à prova de falhas, mesmo em cenários de interrupção.
+    - [ ] O teste deve continuar a validar corretamente a funcionalidade de comparação de tipos para CSV, Excel e JSON.
+    - [ ] O teste deve passar de forma consistente em múltiplas execuções.
+
 *   **ID:** T033
     **Título:** Adicionar Teste para a Função `build_command` da UI
     **Descrição:** Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso.
@@ -9,22 +18,6 @@
     - [ ] Um novo arquivo de teste, `tests/test_app_main_interface.py` (ou similar), deve ser criado.
     - [ ] O teste deve importar a função `build_command`.
     - [ ] O teste deve verificar se, para diferentes combinações de `project_path` e `phase`, a função `build_command` retorna a lista de argumentos esperada (incluindo o executável Python e o caminho do `run.py`).
-
-*   **ID:** T032
-    **Título:** Corrigir Lógica de Exclusão de Diretórios em `find_files` e Adicionar Teste de Integração
-    **Descrição:** A função `find_files` em `src/utils.py` não está adicionando corretamente os diretórios de exclusão passados como argumento à sua lista padrão, resultando na não exclusão de pastas de backup antigas. Além disso, falta um teste de integração robusto para validar este comportamento.
-    **Critérios de Aceitação:**
-    - [ ] A função `find_files` em `src/utils.py` deve ser modificada para que, se o argumento `exclude_dirs` for fornecido, seus valores sejam *adicionados* à lista de exclusão padrão (`fad-metadados`, `fad-config`, `fad-bkp*`), e não a sobrescrevam.
-    - [ ] Todas as chamadas para `find_files` nos arquivos orquestradores (ex: `phase01_orchestrator.py`, `phase02_orchestrator.py`) devem ser revisadas e, se necessário, ajustadas para garantir que funcionem corretamente com a nova lógica.
-    - [ ] **Testes:** Um novo teste de integração deve ser criado em `tests/utils/test_file_discovery.py` (ou um nome similar, garantindo um caminho válido no Windows, sem pontos e vírgulas) para validar a correção. O teste deve:
-        1. Criar um diretório de teste com arquivos de dados e subdiretórios, incluindo:
-            - Uma pasta `fad-metadados`.
-            - Uma pasta `fad-config`.
-            - Uma pasta de backup antiga (ex: `fad-bkp-old-123`).
-            - Uma pasta de backup da execução atual (ex: `fad-bkp-current-456`).
-            - Pastas de dados válidas.
-        2. Chamar `find_files` passando apenas o diretório de backup da execução atual via `exclude_dirs`.
-        3. Assertar que a lista de arquivos retornada por `find_files` **não contém** arquivos de *nenhuma* das pastas excluídas (padrão e as passadas como argumento).
 
 *   **ID:** T031
     **Título:** [UI - Parte 3] Implementar UI para Visualização e Refinamentos Finais
@@ -70,6 +63,10 @@
 ## Em Andamento
 
 ## Concluído
+
+*   **ID:** T032
+    **Título:** Corrigir Lógica de Exclusão de Diretórios em `find_files` e Adicionar Teste de Integração
+    **Descrição:** A função `find_files` em `src/utils.py` não está adicionando corretamente os diretórios de exclusão passados como argumento à sua lista padrão, resultando na não exclusão de pastas de backup antigas. Além disso, falta um teste de integração robusto para validar este comportamento.
 
 *   **ID:** T027
     **Título:** Criar Funcionalidade para Remover Espaços em Branco (Whitespace)
