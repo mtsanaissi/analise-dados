@@ -20,7 +20,6 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 
 ## Environment and Dependencies
 
-*  **Virtual Environment**: All commands and executions must assume we are using the virtual environment located at `.venv/`.
 *  **Dependency Management**: If you need to use a new external library (e.g., `scipy`, `scikit-learn`), you must **explicitly ask for my permission before installing it**, preferrably giving an intro about it and why it is needed. After getting approval, you **must** add it to the `requirements.txt` file.
 *  **User OS**: Assume the user is using **Windows 11**.
 
@@ -43,8 +42,9 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 When creating a new script or feature:
 1.  **Understand**: Analyze the request and relevant data.
 2.  **Plan**: Propose a plan of action. Describe the script's purpose, its inputs, and outputs.
-3.  **Implement**: Write the code following all conventions listed here.
-4.  **Verify**: Add logs or simple tests to verify correctness.
+3.  **Start with the Environment**: My first step in a new task session must be to run `pythonpip install -r requirements.txt` to ensure all dependencies are present. I should then run the test suite with `python -m pytest` to confirm the environment is stable before making any code changes.
+4.  **Implement**: Write the code following all conventions listed here.
+5.  **Verify**: Add logs and/or tests to verify correctness.
 
 ## Learning from Mistakes
 
