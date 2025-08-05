@@ -16,16 +16,14 @@ The process is as follows:
 2.  **My Analysis & Task Definition:** I analyze the request, investigate the codebase, and create a detailed task in `@AGENT_TASKS.json`. Each task will include a deterministic `branchName`.
 3.  **Prompt Generation for Jules:** At your request, I generate a detailed, structured prompt for Jules, instructing them to commit all work to the specified `branchName`.
 4.  **Completion Signal:** You inform me when Jules has completed the task.
-5.  **My Verification on Feature Branch:**
-    a. I run `git fetch origin` to get the latest branches.
-    b. I run `git checkout [branchName]` to switch to the feature branch.
-    c. I run `git log -n 1` to read the commit message and understand the implementation details.
-    d. I verify the changes described in the commit by reading the relevant files.
-    e. I run all quality checks (`format`, `test`, `build`).
-6.  **Merge and Finalize:**
-    a. Once the work is verified, I run `git checkout main`.
-    b. I merge the feature branch into main using `git merge --no-ff [branchName]`.
-    c. I update `@AGENT_TASKS.json` to move the completed task to the "done" list.
+5.  **My Verification and Merge Workflow:**
+    a. **Stash Local Changes:** If there are local, uncommitted changes, I will first run `git stash` to save them temporarily and ensure a clean working directory.
+    b. **Fetch and Checkout:** I will run `git fetch origin` and then `git checkout [branchName]` to switch to the feature branch.
+    c. **Review Implementation:** I will run `git log -n 1` to read the commit message and then verify the changes by reading the relevant files.
+    d. **Quality Assurance:** I will run all quality checks (`pytest`).
+    e. **Merge to Main:** Once the work is verified, I will run `git checkout main` and then merge the feature branch using `git merge --no-ff [branchName]`.
+    f. **Finalize Task:** I will update `@AGENT_TASKS.json` to move the completed task to the "done" list.
+    g. **Restore Local Changes:** Finally, I will run `git stash pop` to reapply any changes I stashed at the beginning of the process.
 
 ### Definition of Done
 
