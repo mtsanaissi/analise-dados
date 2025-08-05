@@ -189,12 +189,33 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
         ["--find-and-replace-text", "/path/to/find.json"]
     ),
     (
-        {"operation": "Concatenar Dados", "config_file_path": "/path/to/concat.json"},
-        ["--concatenate-data", "/path/to/concat.json"]
+        {
+            "operation": "Concatenar Dados",
+            "input_folder": "input",
+            "output_file": "output.csv",
+            "file_type": "csv",
+        },
+        ["--concatenate-data", "--input-folder", "input", "--output-file", "output.csv", "--file-type", "csv"],
     ),
     (
-        {"operation": "Enriquecer Dados", "config_file_path": "/path/to/enrich.json"},
-        ["--enrich-data", "/path/to/enrich.json"]
+        {
+            "operation": "Enriquecer Dados",
+            "main_file": "main.csv",
+            "lookup_file": "lookup.csv",
+            "main_key": "id",
+            "lookup_key": "id",
+            "columns_to_add": ["col1", "col2"],
+            "output_file": "enriched.csv",
+        },
+        [
+            "--enrich-data",
+            "--main-file", "main.csv",
+            "--lookup-file", "lookup.csv",
+            "--main-key", "id",
+            "--lookup-key", "id",
+            "--columns-to-add", "col1,col2",
+            "--output-file", "enriched.csv",
+        ],
     ),
     # Testa um caso onde o caminho do arquivo de configuração não é fornecido
     ({"operation": "Substituir Valores"}, ["--replace-values"]),
@@ -213,9 +234,3 @@ def test_build_command_treatment_phase(treatment_args, expected_fragment):
     assert all(item in command for item in expected_fragment)
     assert command[3] == project_path
     assert command[5] == "treatment"
-    # Verifica se o caminho do arquivo de config está presente apenas se foi fornecido
-    if treatment_args.get("config_file_path"):
-        assert treatment_args["config_file_path"] in command
-    else:
-        # Garante que nenhum caminho de arquivo extra foi adicionado se não era esperado
-        assert len(command) == 7
