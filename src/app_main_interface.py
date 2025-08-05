@@ -20,6 +20,7 @@ import subprocess
 import os
 import re
 import tempfile
+import chardet
 from src.utils import build_command
 
 
@@ -90,10 +91,13 @@ def main_interface():
     st.info(f"DEBUG: st.session_state = {st.session_state}")
 
     # Inicialização do estado da sessão
+    # Inicialização do estado da sessão
     if 'running' not in st.session_state:
         st.session_state.running = False
     if 'last_run_results' not in st.session_state:
         st.session_state.last_run_results = None
+    if 'temp_config_path' not in st.session_state:
+        st.session_state.temp_config_path = None
 
     with st.sidebar:
         st.header("Configurações de Execução")
@@ -132,42 +136,43 @@ def main_interface():
                 treatment_args["operation"] = st.selectbox(
                     "Operação de Tratamento", options=operations, help="Selecione a operação de tratamento.", disabled=st.session_state.running)
                 if treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto", "Concatenar Dados", "Enriquecer Dados"]:
-                    treatment_args["config_file"] = st.file_uploader("Carregar Arquivo de Configuração YAML", type=[
-                                                                     'yaml', 'yml'], help="Faça o upload do arquivo de configuração YAML.", disabled=st.session_state.running)
+                    uploaded_file = st.file_uploader("Carregar Arquivo de Configuração YAML", type=[
+                        'yaml', 'yml'], help="Faça o upload do arquivo de configuração YAML.", disabled=st.session_state.running)
+                    if uploaded_file is not None and st.session_state.temp_config_path is None:
+                        # Processar o arquivo imediatamente após o upload
+                        content_bytes = uploaded_file.getvalue()
+                        detected_encoding = chardet.detect(content_bytes)['encoding'] or 'utf-8'
+                        decoded_content = content_bytes.decode(detected_encoding)
 
-    # Lógica do botão de execução
-    button_label = "Nova Execução" if st.session_state.last_run_results else "Executar"
-    if st.sidebar.button(button_label, type="primary", use_container_width=True, disabled=st.session_state.running):
-        st.info("Botão Executar clicado!")
-        if not project_path or not os.path.isdir(project_path):
-            st.error(f"O caminho '{project_path}' não é um diretório válido.")
-        else:
-            st.session_state.last_run_results = None
-            st.session_state.running = True
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_file.name}", mode='w', encoding='utf-8') as tmp:
+                            st.session_state.temp_config_path = tmp.name
+                            tmp.write(decoded_content)
+                        st.rerun() # Rerender para mostrar o estado atualizado
+
+        button_label = "Nova Execução" if st.session_state.last_run_results else "Executar"
+        if st.sidebar.button(button_label, type="primary", use_container_width=True, disabled=st.session_state.running):
+            if not project_path or not os.path.isdir(project_path):
+                st.error(f"O caminho '{project_path}' não é um diretório válido.")
+            else:
+                st.session_state.last_run_results = None
+                st.session_state.running = True
+                st.rerun()
+
+        if st.sidebar.button("Limpar Resultados", use_container_width=True, disabled=st.session_state.running):
+            if st.session_state.temp_config_path and os.path.exists(st.session_state.temp_config_path):
+                os.remove(st.session_state.temp_config_path)
+
+            # Limpa todo o estado da sessão
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
 
     # Lógica de execução do processo
     if st.session_state.running:
-        temp_config_path = None
         try:
-            if selected_phase == "treatment" and treatment_args.get("config_file"):
-                uploaded_file = treatment_args["config_file"]
-                content_bytes = uploaded_file.getvalue()
-
-                # Detecta a codificação do arquivo original
-                detected_encoding = chardet.detect(content_bytes)['encoding']
-                if not detected_encoding:
-                    detected_encoding = 'utf-8'  # Padrão se a detecção falhar
-
-                # Decodifica o conteúdo para uma string Python
-                decoded_content = content_bytes.decode(detected_encoding)
-
-                # Cria um arquivo temporário e escreve o conteúdo decodificado como UTF-8
-                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_file.name}", mode='w', encoding='utf-8') as tmp:
-                    temp_config_path = tmp.name
-                    tmp.write(decoded_content)
-
-                treatment_args["config_file_path"] = temp_config_path
+            # Passa o caminho do arquivo temporário para o comando, se existir
+            if selected_phase == "treatment" and st.session_state.get('temp_config_path'):
+                 treatment_args["config_file_path"] = st.session_state.temp_config_path
 
             command = build_command(
                 project_path, selected_phase, discovery_args=discovery_args, treatment_args=treatment_args)
@@ -182,8 +187,7 @@ def main_interface():
             st.session_state.last_run_results = {
                 "return_code": return_code, "full_output": full_output, "selected_phase": selected_phase}
         finally:
-            if temp_config_path and os.path.exists(temp_config_path):
-                os.remove(temp_config_path)
+            # A limpeza do arquivo temporário agora é feita pelo botão "Limpar Resultados"
             st.session_state.running = False
             st.rerun()
 
