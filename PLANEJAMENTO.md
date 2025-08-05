@@ -18,18 +18,17 @@ Este documento detalha as tarefas planejadas para aprimorar os scripts de análi
   - [ ] Aperfeiçoar o LEIAME.md.
   - [ ] Criar documento com a especificação de cada script / funcionalidade.
 
-## 2. Próximas evoluções
+## Próximas evoluções
 
 ### 2.1. Orquestração e Usabilidade
 
-- 2.1.1. Orquestrador de Pipeline: Um script principal (main.py ou run_pipeline.py) que lê um arquivo de configuração (em formato YAML, por exemplo) e executa os outros scripts na ordem definida. Isso permitiria automatizar todo o fluxo de trabalho com um único comando.
-- 2.1.2. Logging Centralizado: Aprimorar o utils.py com uma configuração de logging que possa ser usada por todos os scripts para registrar o progresso, avisos e erros em um arquivo de log padronizado.
+- **Logging Centralizado**: Aprimorar o utils.py com uma configuração de logging que possa ser usada por todos os scripts para registrar o progresso, avisos e erros em um arquivo de log padronizado.
 
-### 2.2. Projetos de Análise de Dados
+### Projetos de Análise de Dados
 
-- 2.2.1. Implementar lógica de "projetos" de análise de dados. Cada pasta dentro da pasta \data\ seria um projeto.
+- Implementar lógica de "projetos" de análise de dados. Cada pasta dentro da pasta \data\ seria um projeto, com respectivos logs, configurações, e relatórios.
 
-## 3. Funcionalidades futuras
+## Funcionalidades futuras
 
 ### Ingestão de Dados
 

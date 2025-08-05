@@ -57,6 +57,10 @@ def run_process(command: List[str], output_placeholder):
     process = None
     full_output = ""
     try:
+        # Garante que o subprocesso use UTF-8 para stdout/stderr, crucial para Windows
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
+
         # Usar Popen para capturar a saída em tempo real
         process = subprocess.Popen(
             command,
@@ -65,7 +69,8 @@ def run_process(command: List[str], output_placeholder):
             text=True,
             encoding='utf-8',
             errors='replace',
-            bufsize=1
+            bufsize=1,
+            env=env
         )
 
         # Exibir a saída linha por linha

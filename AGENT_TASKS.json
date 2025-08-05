@@ -1,4 +1,128 @@
 {
-  "backlog": [],
-  "done": []
+  "backlog": [
+    {
+      "id": "T034",
+      "title": "Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness",
+      "description": "O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos.",
+      "acceptance_criteria": [
+        "O teste `test_type_consistency_checker.py` deve ser refatorado para usar o módulo `tempfile` do Python para criar diretórios temporários únicos para cada execução de teste, garantindo isolamento total e evitando colisões de nomes de arquivo/diretório.",
+        "A lógica de criação e exclusão de arquivos de teste deve ser encapsulada de forma a ser à prova de falhas, mesmo em cenários de interrupção.",
+        "O teste deve continuar a validar corretamente a funcionalidade de comparação de tipos para CSV, Excel e JSON.",
+        "O teste deve passar de forma consistente em múltiplas execuções."
+      ]
+    },
+    {
+      "id": "T033",
+      "title": "Adicionar Teste para a Função `build_command` da UI",
+      "description": "Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso.",
+      "acceptance_criteria": [
+        "Um novo arquivo de teste, `tests/test_app_main_interface.py` (ou similar), deve ser criado.",
+        "O teste deve importar a função `build_command`.",
+        "O teste deve verificar se, para diferentes combinações de `project_path` e `phase`, a função `build_command` retorna a lista de argumentos esperada (incluindo o executável Python e o caminho do `run.py`)."
+      ]
+    },
+    {
+      "id": "T031",
+      "title": "[UI - Parte 3] Implementar UI para Visualização e Refinamentos Finais",
+      "description": "Finalizar a implementação da interface gráfica, adicionando a funcionalidade para a fase de Visualização e incorporando refinamentos de UX, como a exibição de relatórios e tratamento de erros.",
+      "acceptance_criteria": [
+        "**Fase Visualization:**",
+        "A UI deve exibir um botão para \"Iniciar Aplicação de Visualização\".",
+        "Clicar no botão deve executar o script `src/phases/phase04_visualization/app_explore_single_profile.py` em um subprocesso.",
+        "**Exibição de Relatórios:** Após uma execução bem-sucedida de qualquer fase que gere relatório (ex: Discovery, Treatment), a UI deve exibir um link para download direto do relatório HTML/JSON gerado.",
+        "**Tratamento de Erros:** Se a execução do subprocesso falhar, a UI deve exibir uma mensagem de erro clara e amigável para o usuário.",
+        "**Testes:** Criar testes para validar a construção de comandos para a fase de Visualização e para a exibição/download de relatórios.",
+        "**Documentação:** O `COMO_USAR.md` e o `LEIAME.md` devem ser atualizados para apresentar a nova interface gráfica como o método principal de uso interativo do kit de ferramentas."
+      ]
+    },
+    {
+      "id": "T030",
+      "title": "[UI - Parte 2] Implementar UI para Fases Discovery e Treatment",
+      "description": "Expandir a interface gráfica principal para que, ao selecionar as fases `Discovery` ou `Treatment`, a área principal exiba dinamicamente os widgets correspondentes a cada argumento da linha de comando, permitindo a configuração visual das operações.",
+      "acceptance_criteria": [
+        "**Fase Discovery:**",
+        "A UI deve exibir checkboxes para `--compare-fields` e `--compare-types`.",
+        "A UI deve exibir um seletor para `--report-output` (json/html).",
+        "A UI deve exibir um campo de texto para o caminho do arquivo de configuração de limpeza de caracteres (`--generate-char-cleanup-config`).",
+        "**Fase Treatment:**",
+        "A UI deve exibir um menu suspenso para selecionar a operação (ex: `Remover Espaços`, `Substituir Valores`, `Encontrar e Substituir Texto`, `Concatenar Dados`, `Enriquecer Dados`).",
+        "Se a operação selecionada exigir um arquivo de configuração YAML (ex: `--replace-values`, `--find-and-replace-text`, `--concatenate-data`, `--enrich-data`), um widget de upload de arquivo (`st.file_uploader`) deve aparecer para que o usuário possa carregar o arquivo.",
+        "A lógica deve ser capaz de salvar o arquivo YAML enviado em um local temporário e passar seu caminho para o comando de execução do subprocesso.",
+        "O comando final executado pelo subprocesso deve refletir corretamente todas as opções selecionadas pelo usuário na UI para as fases Discovery e Treatment.",
+        "**Testes:** Criar testes para validar a construção de comandos para as diferentes operações e argumentos das fases Discovery e Treatment, garantindo que a UI gere os comandos CLI corretos.",
+        "**Documentação:** Nenhuma atualização no `COMO_USAR.md` ou `LEIAME.md` é necessária nesta fase."
+      ]
+    }
+  ],
+  "done": [
+    {
+      "id": "T029",
+      "title": "[UI - Parte 1] Criar o Esqueleto da Aplicação de Interface Gráfica",
+      "description": "Criar a estrutura principal da aplicação Streamlit (`src/app_main_interface.py`) que servirá como um painel de controle para o kit de ferramentas. Esta primeira tarefa foca nos componentes globais e na lógica central de execução de comandos, sem a lógica específica de cada fase.",
+      "acceptance_criteria": [
+        "Um novo arquivo `src/app_main_interface.py` deve ser criado.",
+        "A UI deve ter uma barra lateral com um campo de texto para o \"Caminho do Projeto de Dados\" e um menu suspenso para selecionar a \"Fase\" (`Discovery`, `Treatment`, etc.).",
+        "A área principal deve exibir um botão \"Executar\".",
+        "Ao clicar em \"Executar\", o script deve construir o comando básico (ex: `python src/run.py -d <caminho> -p <fase>`) e executá-lo em um subprocesso.",
+        "A saída do console (stdout/stderr) do subprocesso deve ser capturada e exibida em tempo real dentro de um `st.code()` ou `st.text_area` na UI.",
+        "A UI deve exibir uma mensagem de \"Concluído\" ou \"Erro\" ao final da execução.",
+        "**Testes:** Dada a natureza da UI, testes de unidade formais não são o foco principal. No entanto, a lógica de construção de comandos pode ser testada. Criar um teste simples em `tests/` que valide se a função que monta a lista de argumentos a partir de seleções da UI funciona como esperado.",
+        "**Documentação:** Nenhuma atualização no `COMO_USAR.md` é necessária nesta fase."
+      ]
+    },
+    {
+      "id": "T032",
+      "title": "Corrigir Lógica de Exclusão de Diretórios em `find_files` e Adicionar Teste de Integração",
+      "description": "A função `find_files` em `src/utils.py` não está adicionando corretamente os diretórios de exclusão passados como argumento à sua lista padrão, resultando na não exclusão de pastas de backup antigas. Além disso, falta um teste de integração robusto para validar este comportamento.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T027",
+      "title": "Criar Funcionalidade para Remover Espaços em Branco (Whitespace)",
+      "description": "Implementar uma nova operação na Fase 2, ativada pela flag `--strip-whitespace`, que remove espaços em branco do início e do fim de todos os valores em todas as colunas.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T026",
+      "title": "Corrigir e Aprimorar Verificação de Consistência de Tipos",
+      "description": "Corrigir um bug no orquestrador da Fase 1 onde a verificação de tipos para arquivos Excel só é executada se existirem arquivos CSV. Além disso, aprimorar os testes da funcionalidade para cobrir mais cenários e tipos de arquivo.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T024",
+      "title": "Implementar Verificação de Consistência de Tipos de Dados",
+      "description": "Adicionar uma nova funcionalidade na Fase 1 para comparar os tipos de dados (dtypes) de colunas com o mesmo nome entre diferentes arquivos do mesmo tipo (ex: CSVs).",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T025",
+      "title": "Adicionar `case_sensitive` ao `find-and-replace-text` e Atualizar Documentação",
+      "description": "Padronizar as funcionalidades de substituição, adicionando a opção `case_sensitive` à operação `--find-and-replace-text` e atualizando a documentação para ambas as operações.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T023",
+      "title": "Ignorar Pastas Específicas na Busca de Arquivos",
+      "description": "Aperfeiçoar o mecanismo de busca de arquivos de dados para que ignore explicitamente os diretórios `fad-metadados`, `fad-config` e `fad-bkp*`.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T022",
+      "title": "Configurar Sensibilidade de Caso na Substituição de Valores",
+      "description": "Permitir que a operação `--replace-values` da Fase 2 ignore diferenças de maiúsculas e minúsculas (case-insensitive) durante a busca por valores a serem substituídos.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T021",
+      "title": "Criar Operação de Substituição de Texto e Padrões (Regex)",
+      "description": "Adicionar uma nova operação na Fase 2, focada em substituição de substrings e padrões (regex) dentro do conteúdo das células, para lidar com casos de limpeza mais complexos que a substituição de valores inteiros não cobre.",
+      "acceptance_criteria": []
+    },
+    {
+      "id": "T020",
+      "title": "Aprimorar Operação de Substituição de Valores com Múltiplos Valores",
+      "description": "Evoluir a operação `--replace-values` para permitir que uma lista de múltiplos valores existentes (`existing_value`) seja mapeada para um único `new_value`, tornando as regras de padronização mais concisas e eficientes.",
+      "acceptance_criteria": []
+    }
+  ]
 }
