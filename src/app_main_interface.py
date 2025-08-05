@@ -21,7 +21,7 @@ import os
 import re
 import tempfile
 import chardet
-from src.utils import build_command
+from src.utils import build_command, get_file_header
 
 
 def run_process(command: list[str], output_placeholder):
@@ -88,9 +88,6 @@ def main_interface():
         layout="wide", page_title="Kit de Ferramentas de Análise de Dados")
     st.title("Painel de Controle do Kit de Ferramentas")
 
-    st.info(f"DEBUG: st.session_state = {st.session_state}")
-
-    # Inicialização do estado da sessão
     # Inicialização do estado da sessão
     if 'running' not in st.session_state:
         st.session_state.running = False
@@ -98,6 +95,10 @@ def main_interface():
         st.session_state.last_run_results = None
     if 'temp_config_path' not in st.session_state:
         st.session_state.temp_config_path = None
+    if 'enrich_columns_options' not in st.session_state:
+        st.session_state.enrich_columns_options = []
+    if 'enrich_columns_selected' not in st.session_state:
+        st.session_state.enrich_columns_selected = []
 
     with st.sidebar:
         st.header("Configurações de Execução")
@@ -135,11 +136,36 @@ def main_interface():
                               "Encontrar e Substituir Texto", "Concatenar Dados", "Enriquecer Dados"]
                 treatment_args["operation"] = st.selectbox(
                     "Operação de Tratamento", options=operations, help="Selecione a operação de tratamento.", disabled=st.session_state.running)
-                if treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto", "Concatenar Dados", "Enriquecer Dados"]:
+
+                if treatment_args["operation"] == "Enriquecer Dados":
+                    query_file_path = st.text_input(
+                        "Arquivo de Consulta",
+                        help="Caminho para o arquivo CSV ou Excel que contém os dados para enriquecimento.",
+                        disabled=st.session_state.running,
+                        key="query_file_path_input"
+                    )
+
+                    if st.session_state.query_file_path_input:
+                        if os.path.exists(st.session_state.query_file_path_input):
+                            st.session_state.enrich_columns_options = get_file_header(st.session_state.query_file_path_input)
+                            if not st.session_state.enrich_columns_options:
+                                st.warning("Não foi possível ler as colunas do arquivo. Verifique o formato ou o caminho.")
+                        else:
+                            st.warning("Caminho do arquivo de consulta inválido.")
+                            st.session_state.enrich_columns_options = []
+
+                    st.session_state.enrich_columns_selected = st.multiselect(
+                        "Colunas a Adicionar",
+                        options=st.session_state.enrich_columns_options,
+                        default=st.session_state.enrich_columns_selected,
+                        help="Selecione as colunas do arquivo de consulta para adicionar ao arquivo principal.",
+                        disabled=st.session_state.running
+                    )
+
+                elif treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto", "Concatenar Dados"]:
                     uploaded_file = st.file_uploader("Carregar Arquivo de Configuração YAML", type=[
                         'yaml', 'yml'], help="Faça o upload do arquivo de configuração YAML.", disabled=st.session_state.running)
                     if uploaded_file is not None and st.session_state.temp_config_path is None:
-                        # Processar o arquivo imediatamente após o upload
                         content_bytes = uploaded_file.getvalue()
                         detected_encoding = chardet.detect(content_bytes)['encoding'] or 'utf-8'
                         decoded_content = content_bytes.decode(detected_encoding)
@@ -147,7 +173,7 @@ def main_interface():
                         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_file.name}", mode='w', encoding='utf-8') as tmp:
                             st.session_state.temp_config_path = tmp.name
                             tmp.write(decoded_content)
-                        st.rerun() # Rerender para mostrar o estado atualizado
+                        st.rerun()
 
         button_label = "Nova Execução" if st.session_state.last_run_results else "Executar"
         if st.sidebar.button(button_label, type="primary", use_container_width=True, disabled=st.session_state.running):
