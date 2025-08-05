@@ -12,43 +12,23 @@
         "A lógica do botão \"Limpar Resultados\" deve ser aprimorada para também verificar se `st.session_state.temp_config_path` existe e, em caso afirmativo, remover o arquivo temporário do disco antes de limpar o estado da sessão.",
         "A execução de uma operação de tratamento com um arquivo de configuração (ex: `--enrich-data`) deve funcionar perfeitamente através da UI, sem falhas ou ausência de ação."
       ]
-    },
-    {
-      "id": "T035",
-      "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
-      "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment.",
-      "branchName": "feature/evolui-testes-build-command",
-      "acceptance_criteria": [
-        "O arquivo `tests/test_utils.py` deve ser atualizado para incluir testes para a função `build_command`.",
-        "Os novos testes devem ser parametrizados para cobrir diferentes combinações de argumentos para a fase 'Discovery' (ex: `--compare-fields`, `--compare-types`, `--report-output`, `--generate-char-cleanup-config`).",
-        "Os novos testes devem ser parametrizados para cobrir diferentes operações da fase 'Treatment' (ex: `--strip-whitespace`, `--replace-values`).",
-        "O teste para operações da fase 'Treatment' que exigem um arquivo de configuração (ex: `--replace-values`) deve simular a presença de um `config_file_path` e verificar se ele é adicionado corretamente ao comando.",
-        "Os testes devem passar com sucesso, garantindo que a função `build_command` gera os comandos CLI corretos em todos os cenários."
-      ]
     }
   ],
   "done": [
     {
       "id": "T033",
       "title": "Adicionar Teste para a Função `build_command` da UI",
-      "description": "Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso.",
-      "acceptance_criteria": [
-        "Um novo arquivo de teste, `tests/test_app_main_interface.py` (ou similar), deve ser criado.",
-        "O teste deve importar a função `build_command`.",
-        "O teste deve verificar se, para diferentes combinações de `project_path` e `phase`, a função `build_command` retorna a lista de argumentos esperada (incluindo o executável Python e o caminho do `run.py`)."
-      ]
+      "description": "Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso."
     },
     {
       "id": "T030",
       "title": "[UI - Parte 2] Implementar UI para Fases Discovery e Treatment",
-      "description": "Expandir a interface gráfica principal para que, ao selecionar as fases `Discovery` ou `Treatment`, a área principal exiba dinamicamente os widgets correspondentes a cada argumento da linha de comando, permitindo a configuração visual das operações.",
-      "acceptance_criteria": []
+      "description": "Expandir a interface gráfica principal para que, ao selecionar as fases `Discovery` ou `Treatment`, a área principal exiba dinamicamente os widgets correspondentes a cada argumento da linha de comando, permitindo a configuração visual das operações."
     },
     {
       "id": "T029",
       "title": "[UI - Parte 1] Criar o Esqueleto da Aplicação de Interface Gráfica",
-      "description": "Criar a estrutura principal da aplicação Streamlit (`src/app_main_interface.py`) que servirá como um painel de controle para o kit de ferramentas. Esta primeira tarefa foca nos componentes globais e na lógica central de execução de comandos, sem a lógica específica de cada fase.",
-      "acceptance_criteria": []
+      "description": "Criar a estrutura principal da aplicação Streamlit (`src/app_main_interface.py`) que servirá como um painel de controle para o kit de ferramentas. Esta primeira tarefa foca nos componentes globais e na lógica central de execução de comandos, sem a lógica específica de cada fase."
     },
     {
       "id": "T034",
@@ -59,6 +39,11 @@
       "id": "T031",
       "title": "[UI] Finalizar e Polir UI para Fases Discovery e Treatment",
       "description": "Concluir a implementação da interface gráfica para as fases Discovery e Treatment, garantindo uma experiência de usuário robusta e polida. Isso inclui a exibição de relatórios, tratamento de erros, feedback visual durante a execução e uma documentação completa e atualizada."
+    },
+    {
+      "id": "T035",
+      "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
+      "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment."
     }
   ]
 }
