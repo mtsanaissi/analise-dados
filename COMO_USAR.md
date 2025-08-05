@@ -12,12 +12,12 @@ python src/run.py -d <caminho_para_dados> -p <fase> [argumentos_da_fase...]
 
 ### Argumentos Principais:
 
-*   `-d, --data-project-path`: **(Obrigatório)** Caminho para a pasta do seu projeto de dados. É aqui que a ferramenta irá procurar arquivos para analisar e onde salvará os metadados e relatórios.
-*   `-p, --phase`: **(Obrigatório)** A fase do processo de análise que você deseja executar. As opções são:
-    *   `discovery`: Para entender a estrutura, qualidade e características dos dados.
-    *   `treatment`: Para limpar, padronizar, enriquecer ou concatenar os dados.
-    *   `exploratory`: (Em desenvolvimento) Para análises exploratórias.
-    *   `visualization`: Para iniciar aplicações de visualização de dados.
+- `-d, --data-project-path`: **(Obrigatório)** Caminho para a pasta do seu projeto de dados. É aqui que a ferramenta irá procurar arquivos para analisar e onde salvará os metadados e relatórios.
+- `-p, --phase`: **(Obrigatório)** A fase do processo de análise que você deseja executar. As opções são:
+  - `discovery`: Para entender a estrutura, qualidade e características dos dados.
+  - `treatment`: Para limpar, padronizar, enriquecer ou concatenar os dados.
+  - `exploratory`: (Em desenvolvimento) Para análises exploratórias.
+  - `visualization`: Para iniciar aplicações de visualização de dados.
 
 ---
 
@@ -33,31 +33,34 @@ python src/run.py -d data/meu_projeto -p discovery
 
 ### Argumentos Específicos da Fase `discovery`
 
-*   `--report-output <formato>`: Define o formato do arquivo de relatório.
-    *   `json` (padrão): Gera um `discovery_report.json` na pasta `fad_metadata` do seu projeto de dados.
-    *   `html`: Gera um `discovery_report.html` visualmente mais amigável.
-    *   **Exemplo:**
-        ```bash
-        python src/run.py -d data/meu_projeto -p discovery --report-output html
-        ```
+- `--report-output <formato>`: Define o formato do arquivo de relatório.
 
-*   `--compare-fields`: Compara as colunas (para CSV/Excel) ou chaves (para JSON) entre os arquivos do mesmo tipo. Isso é útil para verificar se múltiplos arquivos que deveriam ter a mesma estrutura realmente a têm.
-    *   **Exemplo:**
-        ```bash
-        python src/run.py -d data/meu_projeto -p discovery --compare-fields
-        ```
+  - `json` (padrão): Gera um `discovery_report.json` na pasta `fad_metadata` do seu projeto de dados.
+  - `html`: Gera um `discovery_report.html` visualmente mais amigável.
+  - **Exemplo:**
+    ```bash
+    python src/run.py -d data/meu_projeto -p discovery --report-output html
+    ```
 
-*   `--compare-types`: Compara os tipos de dados inferidos para colunas de mesmo nome entre arquivos do mesmo tipo (ex: CSVs em um mesmo diretório). Ajuda a identificar inconsistências, como uma coluna que é numérica em um arquivo e texto em outro.
-    *   **Exemplo:**
-        ```bash
-        python src/run.py -d data/meu_projeto -p discovery --compare-types
-        ```
+- `--compare-fields`: Compara as colunas (para CSV/Excel) ou chaves (para JSON) entre os arquivos do mesmo tipo. Isso é útil para verificar se múltiplos arquivos que deveriam ter a mesma estrutura realmente a têm.
 
-*   `--generate-char-cleanup-config <caminho_saida.yaml>`: Realiza uma verificação específica por caracteres problemáticos (como caracteres de controle invisíveis ou de substituição) em todos os arquivos. Se encontrados, gera um arquivo de configuração YAML no caminho especificado. Este arquivo pode ser usado pela Fase 2 para realizar a limpeza.
-    *   **Exemplo:**
-        ```bash
-        python src/run.py -d data/meu_projeto -p discovery --generate-char-cleanup-config configs/limpeza_chars.yaml
-        ```
+  - **Exemplo:**
+    ```bash
+    python src/run.py -d data/meu_projeto -p discovery --compare-fields
+    ```
+
+- `--compare-types`: Compara os tipos de dados inferidos para colunas de mesmo nome entre arquivos do mesmo tipo (ex: CSVs em um mesmo diretório). Ajuda a identificar inconsistências, como uma coluna que é numérica em um arquivo e texto em outro.
+
+  - **Exemplo:**
+    ```bash
+    python src/run.py -d data/meu_projeto -p discovery --compare-types
+    ```
+
+- `--generate-char-cleanup-config <caminho_saida.yaml>`: Realiza uma verificação específica por caracteres problemáticos (como caracteres de controle invisíveis ou de substituição) em todos os arquivos. Se encontrados, gera um arquivo de configuração YAML no caminho especificado. Este arquivo pode ser usado pela Fase 2 para realizar a limpeza.
+  - **Exemplo:**
+    ```bash
+    python src/run.py -d data/meu_projeto -p discovery --generate-char-cleanup-config configs/limpeza_chars.yaml
+    ```
 
 ---
 
@@ -77,10 +80,10 @@ Aplica um conjunto de substituições de valores em múltiplos arquivos, com bas
 
 Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de regras de substituição.
 
-*   `column`: (Opcional) A coluna onde a substituição deve ser aplicada. Se omitido, a regra será aplicada a todas as colunas.
-*   `existing_value`: O valor (ou lista de valores) a ser substituído.
-*   `new_value`: O novo valor que substituirá o valor antigo.
-*   `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca por `existing_value` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
+- `column`: (Opcional) A coluna onde a substituição deve ser aplicada. Se omitido, a regra será aplicada a todas as colunas.
+- `existing_value`: O valor (ou lista de valores) a ser substituído.
+- `new_value`: O novo valor que substituirá o valor antigo.
+- `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca por `existing_value` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
 
 ```yaml
 # Lista de regras de substituição a serem aplicadas.
@@ -105,8 +108,8 @@ replacements:
 
   # Regra 4: Substituição global insensível ao caso.
   # Troca "BR" e "br" por "Brasil" em todas as colunas.
-  - existing_value: 'br'
-    new_value: 'Brasil'
+  - existing_value: "br"
+    new_value: "Brasil"
     case_sensitive: false
 ```
 
@@ -130,9 +133,9 @@ output_file: "caminho/para/arquivo_final.csv"
 file_type: "csv"
 ```
 
-*   `input_folder`: O diretório contendo os arquivos a serem concatenados.
-*   `output_file`: O nome e caminho do arquivo de saída.
-*   `file_type`: O formato dos arquivos de entrada (`csv`, `xlsx`, etc.).
+- `input_folder`: O diretório contendo os arquivos a serem concatenados.
+- `output_file`: O nome e caminho do arquivo de saída.
+- `file_type`: O formato dos arquivos de entrada (`csv`, `xlsx`, etc.).
 
 #### Comando
 
@@ -159,11 +162,11 @@ columns_to_add:
   - "coluna2_da_consulta"
 ```
 
-*   `main_file`: O arquivo que receberá as novas informações.
-*   `lookup_file`: O arquivo que contém as informações a serem adicionadas.
-*   `output_file`: O nome e caminho do arquivo de saída.
-*   `main_key` / `lookup_key`: As colunas usadas para combinar os dois arquivos.
-*   `columns_to_add`: A lista de colunas do arquivo de consulta que serão adicionadas ao arquivo principal.
+- `main_file`: O arquivo que receberá as novas informações.
+- `lookup_file`: O arquivo que contém as informações a serem adicionadas.
+- `output_file`: O nome e caminho do arquivo de saída.
+- `main_key` / `lookup_key`: As colunas usadas para combinar os dois arquivos.
+- `columns_to_add`: A lista de colunas do arquivo de consulta que serão adicionadas ao arquivo principal.
 
 #### Comando
 
@@ -178,8 +181,9 @@ python src/run.py -d data/meu_projeto -p treatment --enrich-data config_enrich.y
 Esta operação é ideal para fazer substituições parciais dentro de células de texto, como corrigir parte de uma palavra, remover ou alterar um padrão específico usando texto simples ou expressões regulares (regex).
 
 **Diferença para `--replace-values`**:
-*   `--replace-values`: Substitui o **valor inteiro** de uma célula. Ex: `Status: "Inativo"` se torna `Status: "Desativado"`.
-*   `--find-and-replace-text`: Substitui uma **parte do texto** dentro de uma célula. Ex: `Descrição: "REF-123-PROD"` pode se tornar `Descrição: "ID-123-PROD"` ao substituir apenas "REF".
+
+- `--replace-values`: Substitui o **valor inteiro** de uma célula. Ex: `Status: "Inativo"` se torna `Status: "Desativado"`.
+- `--find-and-replace-text`: Substitui uma **parte do texto** dentro de uma célula. Ex: `Descrição: "REF-123-PROD"` pode se tornar `Descrição: "ID-123-PROD"` ao substituir apenas "REF".
 
 **Importante:** Esta operação também **substitui** os arquivos originais e cria um backup automático.
 
@@ -187,11 +191,11 @@ Esta operação é ideal para fazer substituições parciais dentro de células 
 
 Requer um arquivo de configuração YAML (ex: `substituicoes_texto.yaml`) com uma lista de regras na chave `text_replacements`.
 
-*   `column`: A coluna onde a substituição deve ser aplicada.
-*   `pattern`: O texto ou a expressão regular a ser encontrada.
-*   `new_value`: O novo valor que substituirá o padrão encontrado.
-*   `is_regex`: (Opcional) Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular. Padrão: `false`.
-*   `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca pelo `pattern` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
+- `column`: A coluna onde a substituição deve ser aplicada.
+- `pattern`: O texto ou a expressão regular a ser encontrada.
+- `new_value`: O novo valor que substituirá o padrão encontrado.
+- `is_regex`: (Opcional) Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular. Padrão: `false`.
+- `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca pelo `pattern` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
 
 ```yaml
 # Lista de regras para encontrar e substituir texto.
@@ -260,7 +264,7 @@ Esta fase lança aplicações interativas para explorar os dados.
 
 ### Aplicação: Explorador de Perfil de Dados
 
-Inicia uma aplicação web (Streamlit) para gerar e visualizar um relatório de *profiling* detalhado de um único arquivo de dados.
+Inicia uma aplicação web (Streamlit) para gerar e visualizar um relatório de _profiling_ detalhado de um único arquivo de dados.
 
 #### Comando
 
@@ -269,6 +273,7 @@ python src/phases/phase04_visualization/app_explore_single_profile.py
 ```
 
 Após executar o comando, uma página web será aberta no seu navegador. Você poderá então:
+
 1.  Especificar o diretório onde seus dados estão.
 2.  Buscar por arquivos (`.csv`, `.xlsx`, etc.).
 3.  Selecionar um arquivo da lista para gerar e visualizar o relatório interativo.

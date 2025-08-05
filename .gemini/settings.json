@@ -8,5 +8,6 @@
             ]
         }
     },
+    "contextFileName": ["GEMINI.md", "GEMINI_MEMORY.md", "LEIAME.md", "FASES.md", "AGENT_TASKS.md"],
     "usageStatisticsEnabled": false
 }

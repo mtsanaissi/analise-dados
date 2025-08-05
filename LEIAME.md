@@ -8,12 +8,13 @@ Siga os passos abaixo para configurar o ambiente e executar os scripts.
 
 ### Pré-requisitos
 
--   Python 3.11 ou superior
--   Git
+- Python 3.11 ou superior
+- Git
 
 ### Instalação
 
 1.  **Clone o repositório:**
+
     ```bash
     git clone <URL_DO_SEU_REPOSITORIO>
     cd analise-dados
@@ -22,14 +23,14 @@ Siga os passos abaixo para configurar o ambiente e executar os scripts.
 2.  **Ative o ambiente virtual:**
     O projeto já inclui um ambiente virtual em `.venv/`.
 
-    -   No **Windows**:
-        ```bash
-        .venv\Scripts\activate
-        ```
-    -   No **macOS/Linux**:
-        ```bash
-        source .venv/bin/activate
-        ```
+    - No **Windows**:
+      ```bash
+      .venv\Scripts\activate
+      ```
+    - No **macOS/Linux**:
+      ```bash
+      source .venv/bin/activate
+      ```
 
 3.  **Instale as dependências:**
     As dependências do projeto estão listadas em `requirements.txt`.
@@ -43,10 +44,10 @@ O projeto é estruturado em fases que representam o ciclo de vida da análise de
 
 ### Visão Geral das Fases
 
-*   **Fase 1: Descoberta e Diagnóstico**: Avalia a qualidade, estrutura e conteúdo dos dados brutos.
-*   **Fase 2: Tratamento e Padronização**: Foca em corrigir problemas identificados, limpando e padronizando os dados.
-*   **Fase 3: Análise Exploratória e Pré-processamento**: Explora, filtra e transforma os dados para análise.
-*   **Fase 4: Visualização e Dashboards**: Comunica os resultados através de ferramentas visuais e interativas.
+- **Fase 1: Descoberta e Diagnóstico**: Avalia a qualidade, estrutura e conteúdo dos dados brutos.
+- **Fase 2: Tratamento e Padronização**: Foca em corrigir problemas identificados, limpando e padronizando os dados.
+- **Fase 3: Análise Exploratória e Pré-processamento**: Explora, filtra e transforma os dados para análise.
+- **Fase 4: Visualização e Dashboards**: Comunica os resultados através de ferramentas visuais e interativas.
 
 ## 📂 Estrutura do Projeto
 
@@ -87,8 +88,8 @@ Para executar uma fase, certifique-se de que seu ambiente virtual esteja ativado
 python src/main/orchestrator.py --data-project-path <caminho_para_sua_pasta_de_dados> --phase <nome_da_fase>
 ```
 
-*   **`<caminho_para_sua_pasta_de_dados>`**: O caminho para o diretório que contém os arquivos de dados do seu projeto (ex: `data/meu_projeto`).
-*   **`<nome_da_fase>`**: A fase que você deseja executar. As opções são: `discovery`, `treatment`, `exploratory`, `visualization`.
+- **`<caminho_para_sua_pasta_de_dados>`**: O caminho para o diretório que contém os arquivos de dados do seu projeto (ex: `data/meu_projeto`).
+- **`<nome_da_fase>`**: A fase que você deseja executar. As opções são: `discovery`, `treatment`, `exploratory`, `visualization`.
 
 **Exemplo de execução da fase de Descoberta e Diagnóstico:**
 
@@ -104,9 +105,9 @@ A fase de tratamento inclui uma ferramenta poderosa para enriquecer um conjunto 
 
 **Propósito:**
 
--   **Unir Dataframes**: Executa uma operação de `merge` (junção) entre dois arquivos de dados (principal e de consulta) com base em uma coluna-chave comum.
--   **Validação de Integridade**: Antes de unir, a ferramenta verifica se a coluna-chave no arquivo de consulta contém valores duplicados, o que poderia levar a resultados incorretos. Se duplicatas forem encontradas, a operação é interrompida com uma mensagem de erro clara.
--   **Flexibilidade**: Permite configurar os caminhos dos arquivos, a coluna de junção e o tipo de `merge` através de um arquivo de configuração JSON.
+- **Unir Dataframes**: Executa uma operação de `merge` (junção) entre dois arquivos de dados (principal e de consulta) com base em uma coluna-chave comum.
+- **Validação de Integridade**: Antes de unir, a ferramenta verifica se a coluna-chave no arquivo de consulta contém valores duplicados, o que poderia levar a resultados incorretos. Se duplicatas forem encontradas, a operação é interrompida com uma mensagem de erro clara.
+- **Flexibilidade**: Permite configurar os caminhos dos arquivos, a coluna de junção e o tipo de `merge` através de um arquivo de configuração JSON.
 
 **Como Usar:**
 
@@ -118,8 +119,8 @@ Use o seguinte comando, a partir da raiz do projeto:
 python src/phases/phase02_treatment/phase02_orchestrator.py <caminho_para_pasta_de_dados> --enrich-data <caminho_para_config.json>
 ```
 
--   **`<caminho_para_pasta_de_dados>`**: Argumento posicional que, neste modo, serve como um contexto para o projeto, embora os caminhos dos arquivos sejam definidos no JSON.
--   **`--enrich-data <caminho_para_config.json>`**: Aponta para o arquivo de configuração JSON que define os parâmetros da operação de enriquecimento.
+- **`<caminho_para_pasta_de_dados>`**: Argumento posicional que, neste modo, serve como um contexto para o projeto, embora os caminhos dos arquivos sejam definidos no JSON.
+- **`--enrich-data <caminho_para_config.json>`**: Aponta para o arquivo de configuração JSON que define os parâmetros da operação de enriquecimento.
 
 **Exemplo de Arquivo de Configuração (`enrich_config.json`):**
 
@@ -135,10 +136,10 @@ Crie um arquivo JSON com a seguinte estrutura para definir a operação:
 }
 ```
 
--   `main_file_path`: Caminho para o arquivo principal que será enriquecido.
--   `query_file_path`: Caminho para o arquivo de consulta que contém os dados adicionais.
--   `join_on`: Nome da coluna usada como chave para a junção.
--   `join_how` (opcional): Tipo de `merge` a ser executado (ex: `left`, `inner`, `right`, `outer`). O padrão é `left`.
--   `output_file_path`: Caminho onde o arquivo resultante e enriquecido será salvo.
+- `main_file_path`: Caminho para o arquivo principal que será enriquecido.
+- `query_file_path`: Caminho para o arquivo de consulta que contém os dados adicionais.
+- `join_on`: Nome da coluna usada como chave para a junção.
+- `join_how` (opcional): Tipo de `merge` a ser executado (ex: `left`, `inner`, `right`, `outer`). O padrão é `left`.
+- `output_file_path`: Caminho onde o arquivo resultante e enriquecido será salvo.
 
 **Exemplo de execução:**

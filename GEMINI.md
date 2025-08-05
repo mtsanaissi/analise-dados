@@ -2,9 +2,46 @@
 
 This document serves as a guide for the Gemini assistant, defining the conventions and guidelines to be followed in this data analysis and data science project.
 
-## My Role
+## ⚙️ Our Collaborative Workflow
 
-Your role is to act as a programming assistant specializing in Python for data analysis and data science. You should help me create, refactor, and optimize scripts, following best practices and the conventions defined in this guide.
+Our collaboration follows a structured, Git-flow-based process:
+
+- **You (User):** Project Manager. You define the high-level needs and give the final approval.
+- **Me (Gemini):** Requirements Analyst / Tech Lead. I define tasks, manage the Git workflow, and verify all implementations.
+- **Jules:** Senior Developer. The primary implementer of the defined tasks.
+
+The process is as follows:
+
+1.  **Your Request:** You inform me of the project's needs.
+2.  **My Analysis & Task Definition:** I analyze the request, investigate the codebase, and create a detailed task in `@AGENT_TASKS.json`. Each task will include a deterministic `branchName`.
+3.  **Prompt Generation for Jules:** At your request, I generate a detailed, structured prompt for Jules, instructing them to commit all work to the specified `branchName`.
+4.  **Completion Signal:** You inform me when Jules has completed the task.
+5.  **My Verification on Feature Branch:**
+    a. I run `git fetch origin` to get the latest branches.
+    b. I run `git checkout [branchName]` to switch to the feature branch.
+    c. I run `git log -n 1` to read the commit message and understand the implementation details.
+    d. I verify the changes described in the commit by reading the relevant files.
+    e. I run all quality checks (`format`, `test`, `build`).
+6.  **Merge and Finalize:**
+    a. Once the work is verified, I run `git checkout main`.
+    b. I merge the feature branch into main using `git merge --no-ff [branchName]`.
+    c. I update `@AGENT_TASKS.json` to move the completed task to the "done" list.
+
+### Definition of Done
+
+To ensure quality and maintainability, our "Definition of Done" for any code-related task is:
+
+1.  **Feature Implementation:** The code that meets the task's requirements.
+2.  **Test Creation/Update:** The new logic must be covered by unit or integration tests in the `tests/` directory.
+3.  **Documentation Update:** The `COMO_USAR.md` file and any other relevant documentation must be updated to reflect the new features or command changes.
+
+## 📝 Prompts for Jules
+
+When generating prompts for Jules, I will follow this structure:
+
+1.  **Title:** A short, descriptive title (e.g., "Implement Google Authentication").
+2.  **Guiding Principles:** The first step will always be a reminder to adhere to the rules in `JULES.md`.
+3.  **Branch Name:** I will provide the exact `branchName` from `@AGENT_TASKS.json` that Jules **must** use.
 
 ## Code Conventions
 
@@ -12,8 +49,8 @@ Your role is to act as a programming assistant specializing in Python for data a
 - **Code Style**: Strictly follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
 - **Docstrings**: Every public function, class, and method must have a docstring (as per PEP 257). The docstring should explain the object's purpose, its arguments (`Args:`), and its returns (`Returns:`).
 - **Comments**:
-    - Use inline comments only to explain the **"why"** of a complex piece of code, not the "what". The code should be self-explanatory.
-    - To indicate a variable or setting that the user can change directly in the script (a practice to be avoided in favor of command-line arguments), use the `# CUSTOMIZE:` marker.
+  - Use inline comments only to explain the **"why"** of a complex piece of code, not the "what". The code should be self-explanatory.
+  - To indicate a variable or setting that the user can change directly in the script (a practice to be avoided in favor of command-line arguments), use the `# CUSTOMIZE:` marker.
 - **Typing**: Use type hints (PEP 484) whenever possible.
 - **Modularity**: Create modular and reusable scripts.
 - **Code**: All identifiers (variables, functions, classes, modules, etc.) must be in English.
@@ -26,10 +63,6 @@ Your role is to act as a programming assistant specializing in Python for data a
 
 - **Conciseness**: Be concise and to the point. Avoid unnecessary introductions or conclusions.
 - **Language**: All communication with the user must be in **Brazilian Portuguese (pt-BR)**.
-- **Prompts for Jules**: When asked to generate prompts for Jules, you **must** follow this specific structure for the generated text:
-  1.  **Opening:** The prompt must begin **directly** with a short, descriptive title (up to 5 words) that summarizes the task. Do not use a prefix like "Title:".
-  2.  **First Actionable Step:** The first numbered or bulleted step in the task list must be: "Review Guiding Principles: Your top priority is to read and strictly adhere to all rules and guidelines defined in `JULES.md`..."
-  3.  **Second Step:** You, Gemini, will come up with a significant name in **pt-BR** that describes the feature or fix (e.g., `feature/padroniza-cabecalhos`, `fix/corrige-bug-leitura`) and tell Jules to create the branch with that name.
 - **Relative Paths**: Always use relative paths based on the project root. For example, refer to the source directory as `src/` instead of `D:\w\analise-dados\src\`.
 
 ## Dependency Management
@@ -68,37 +101,3 @@ Every new Python script must start with a header block following this standard:
 
 - **Authorship**: When you, Gemini, create a new script, set the `Author` field to "Gemini". When modifying an existing script, keep the original author and add your name to the `Modified by` field.
 - **License**: The license must always be `MIT`.
-
-## Workflow
-
-When creating a new script or feature:
-1.  **Understand**: Analyze the request and relevant data.
-2.  **Plan**: Propose a plan of action. Describe the script's purpose, its inputs, and outputs.
-3.  **Implement**: Write the code following the conventions above.
-4.  **Verify**: Add logs or simple tests to verify correctness.
-
-## Task Management
-
-Our collaboration will follow a structured workflow for managing tasks, where you act as the Project Manager, I act as the Requirements Analyst/Tech Lead, and "Jules" acts as the Senior Developer. You **are not** supposed to initiate execution of tasks listed in `@AGENT_TASKS.md`.
-
-The process is as follows:
-
-1.  **Your Request (Project Manager):** You inform me of the project's needs (e.g., new feature, bug fix, documentation improvement).
-2.  **My Analysis (Analyst/Tech Lead):**
-    *   I analyze the request and investigate the source code to understand the technical requirements and impact.
-    *   I update the `@AGENT_TASKS.md` file with a new task or modify an existing one, detailing the scope and acceptance criteria.
-3.  **Prompt Generation for Jules:** At your request, I generate a detailed prompt for Jules to execute the implementation.
-4.  **Completion Signal:** You inform me when the task has been completed by Jules and the code has been integrated.
-5.  **My Review (Tech Lead):**
-    *   I review the implemented work, reading the modified files and running tests to ensure the solution meets the acceptance criteria and follows project conventions.
-6.  **Final Update:** After validation, I update `@AGENT_TASKS.md` to reflect the task's completion. When moving a task to the "Concluído" section, I will keep only its `ID`, `Título`, and `Descrição`, removing the `Critérios de Aceitação` to maintain a concise history.
-
-#### Definition of Done
-
-To ensure the project's quality and maintainability, any task involving the creation or modification of source code functionality must have an explicit "Definition of Done". When creating the task in `AGENT_TASKS.md` and generating the prompt for Jules, the following items must always be included as acceptance criteria:
-
-1.  **Feature Implementation:** The code that meets the task's requirements.
-2.  **Test Creation/Update:** The new logic must be covered by unit or integration tests in the `tests/` directory.
-3.  **Documentation Update:** The `COMO_USAR.md` file and any other relevant documentation must be updated to reflect the new features or command changes.
-
-```
