@@ -67,9 +67,11 @@ class TestTypeConsistencyChecker(unittest.TestCase):
         self.assertEqual(inconsistency["current_type"], "Categórico/Texto")
 
     def _create_excel_file(self, filename, data_dict):
-        """Cria um arquivo Excel com os dados fornecidos."""
+        """Cria um arquivo Excel com os dados fornecidos, garantindo o fechamento do arquivo."""
         df = pd.DataFrame(data_dict)
-        df.to_excel(os.path.join(self.test_dir, filename), index=False)
+        file_path = os.path.join(self.test_dir, filename)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
 
     def test_compare_types_for_excel_and_json(self):
         """

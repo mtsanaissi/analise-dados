@@ -1,49 +1,11 @@
 {
-  "backlog": [
+  "backlog": [],
+  "done": [
     {
       "id": "T036",
       "title": "Refatorar Lógica de Upload e Estado da UI para Corrigir Bug de Execução",
       "description": "A interface do Streamlit não consegue iniciar a execução de uma fase quando um arquivo de configuração é anexado. Isso ocorre devido a um re-render automático do `st.file_uploader` que interfere com o estado do botão de execução. A solução é desacoplar o processamento do upload da lógica de execução, usando o `st.session_state` de forma mais robusta.",
-      "branchName": "fix/refatora-estado-upload-ui",
-      "acceptance_criteria": [
-        "No `app_main_interface.py`, a inicialização do `st.session_state` deve incluir uma nova chave, `temp_config_path`, inicializada como `None`.",
-        "A lógica do widget `st.file_uploader` deve ser modificada para, assim que um arquivo for carregado, processá-lo imediatamente: detectar a codificação, decodificar para uma string Python, criar um arquivo temporário em UTF-8 e salvar o caminho deste arquivo em `st.session_state.temp_config_path`.",
-        "O bloco de lógica que é executado quando `st.session_state.running` é `True` deve ser simplificado. Ele não deve mais criar o arquivo temporário; em vez disso, deve ler o caminho de `st.session_state.temp_config_path` e passá-lo para a função `build_command`.",
-        "A lógica do botão \"Limpar Resultados\" deve ser aprimorada para também verificar se `st.session_state.temp_config_path` existe e, em caso afirmativo, remover o arquivo temporário do disco antes de limpar o estado da sessão.",
-        "A execução de uma operação de tratamento com um arquivo de configuração (ex: `--enrich-data`) deve funcionar perfeitamente através da UI, sem falhas ou ausência de ação."
-      ]
-    }
-  ],
-  "done": [
-    {
-      "id": "T033",
-      "title": "Adicionar Teste para a Função `build_command` da UI",
-      "description": "Criar um teste de unidade simples para a função `build_command` em `src/app_main_interface.py` para garantir que ela constrói corretamente a lista de argumentos para o subprocesso."
-    },
-    {
-      "id": "T030",
-      "title": "[UI - Parte 2] Implementar UI para Fases Discovery e Treatment",
-      "description": "Expandir a interface gráfica principal para que, ao selecionar as fases `Discovery` ou `Treatment`, a área principal exiba dinamicamente os widgets correspondentes a cada argumento da linha de comando, permitindo a configuração visual das operações."
-    },
-    {
-      "id": "T029",
-      "title": "[UI - Parte 1] Criar o Esqueleto da Aplicação de Interface Gráfica",
-      "description": "Criar a estrutura principal da aplicação Streamlit (`src/app_main_interface.py`) que servirá como um painel de controle para o kit de ferramentas. Esta primeira tarefa foca nos componentes globais e na lógica central de execução de comandos, sem a lógica específica de cada fase."
-    },
-    {
-      "id": "T034",
-      "title": "Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness",
-      "description": "O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos."
-    },
-    {
-      "id": "T031",
-      "title": "[UI] Finalizar e Polir UI para Fases Discovery e Treatment",
-      "description": "Concluir a implementação da interface gráfica para as fases Discovery e Treatment, garantindo uma experiência de usuário robusta e polida. Isso inclui a exibição de relatórios, tratamento de erros, feedback visual durante a execução e uma documentação completa e atualizada."
-    },
-    {
-      "id": "T035",
-      "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
-      "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment."
+      "branchName": "fix/refatora-estado-upload-ui"
     }
   ]
 }
