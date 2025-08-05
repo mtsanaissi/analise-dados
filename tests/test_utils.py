@@ -141,3 +141,81 @@ def test_save_df_to_csv(tmp_path):
     assert p.exists()
     read_df = pd.read_csv(str(p), sep=';')
     pd.testing.assert_frame_equal(df, read_df)
+
+@pytest.mark.parametrize("discovery_args, expected_fragment", [
+    ({"compare_fields": True}, ["--compare-fields"]),
+    ({"compare_types": True}, ["--compare-types"]),
+    ({"report_output": "json"}, ["--report-output", "json"]),
+    ({"report_output": "html"}, ["--report-output", "html"]),
+    ({"char_cleanup_path": "/path/to/config"}, ["--generate-char-cleanup-config", "/path/to/config"]),
+    (
+        {
+            "compare_fields": True,
+            "compare_types": True,
+            "report_output": "html",
+            "char_cleanup_path": "/path/to/config"
+        },
+        [
+            "--compare-fields",
+            "--compare-types",
+            "--report-output", "html",
+            "--generate-char-cleanup-config", "/path/to/config"
+        ]
+    ),
+])
+def test_build_command_discovery_phase(discovery_args, expected_fragment):
+    """
+    Testa a construção de comandos para a fase 'discovery' com diferentes argumentos.
+    """
+    # Arrange
+    project_path = "/fake/project"
+
+    # Act
+    command = utils.build_command(project_path, "discovery", discovery_args=discovery_args)
+
+    # Assert
+    assert all(item in command for item in expected_fragment)
+    assert command[3] == project_path
+    assert command[5] == "discovery"
+
+@pytest.mark.parametrize("treatment_args, expected_fragment", [
+    ({"operation": "Remover Espaços"}, ["--strip-whitespace"]),
+    (
+        {"operation": "Substituir Valores", "config_file_path": "/path/to/config.json"},
+        ["--replace-values", "/path/to/config.json"]
+    ),
+    (
+        {"operation": "Encontrar e Substituir Texto", "config_file_path": "/path/to/find.json"},
+        ["--find-and-replace-text", "/path/to/find.json"]
+    ),
+    (
+        {"operation": "Concatenar Dados", "config_file_path": "/path/to/concat.json"},
+        ["--concatenate-data", "/path/to/concat.json"]
+    ),
+    (
+        {"operation": "Enriquecer Dados", "config_file_path": "/path/to/enrich.json"},
+        ["--enrich-data", "/path/to/enrich.json"]
+    ),
+    # Testa um caso onde o caminho do arquivo de configuração não é fornecido
+    ({"operation": "Substituir Valores"}, ["--replace-values"]),
+])
+def test_build_command_treatment_phase(treatment_args, expected_fragment):
+    """
+    Testa a construção de comandos para a fase 'treatment' com diferentes operações.
+    """
+    # Arrange
+    project_path = "/fake/project"
+
+    # Act
+    command = utils.build_command(project_path, "treatment", treatment_args=treatment_args)
+
+    # Assert
+    assert all(item in command for item in expected_fragment)
+    assert command[3] == project_path
+    assert command[5] == "treatment"
+    # Verifica se o caminho do arquivo de config está presente apenas se foi fornecido
+    if treatment_args.get("config_file_path"):
+        assert treatment_args["config_file_path"] in command
+    else:
+        # Garante que nenhum caminho de arquivo extra foi adicionado se não era esperado
+        assert len(command) == 7
