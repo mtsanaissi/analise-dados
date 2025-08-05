@@ -1,279 +1,79 @@
 # Guia de Uso: Kit de Ferramentas de Análise de Dados
 
-Este documento detalha como usar os comandos disponíveis neste projeto para executar as diferentes fases de análise de dados.
+Este guia foca em como utilizar a interface gráfica do "Painel de Controle do Kit de Ferramentas" para executar as fases de análise de dados.
 
-## Estrutura do Comando Principal
+## Iniciando a Aplicação
 
-Todos os comandos são executados através do script `src/run.py`. A estrutura básica é a seguinte:
+Para começar, execute o seguinte comando no seu terminal a partir da raiz do projeto:
 
 ```bash
-python src/run.py -d <caminho_para_dados> -p <fase> [argumentos_da_fase...]
+streamlit run src/app_main_interface.py
 ```
 
-### Argumentos Principais:
+Isso iniciará a aplicação e abrirá uma nova aba no seu navegador.
 
-- `-d, --data-project-path`: **(Obrigatório)** Caminho para a pasta do seu projeto de dados. É aqui que a ferramenta irá procurar arquivos para analisar e onde salvará os metadados e relatórios.
-- `-p, --phase`: **(Obrigatório)** A fase do processo de análise que você deseja executar. As opções são:
-  - `discovery`: Para entender a estrutura, qualidade e características dos dados.
-  - `treatment`: Para limpar, padronizar, enriquecer ou concatenar os dados.
-  - `exploratory`: (Em desenvolvimento) Para análises exploratórias.
-  - `visualization`: Para iniciar aplicações de visualização de dados.
+## Configurações Principais
+
+No painel lateral esquerdo, você encontrará as "Configurações de Execução", que são a base para qualquer operação.
+
+1.  **Caminho do Projeto de Dados**: Insira o caminho para a pasta que contém os arquivos de dados que você deseja analisar. Por padrão, ele aponta para `data/sample`, que contém dados de exemplo.
+
+2.  **Fase do Projeto**: Selecione a fase que deseja executar. Atualmente, as fases `discovery` e `treatment` estão disponíveis na interface.
+
+## Fase 1: Discovery
+
+A fase de *Discovery* é usada para diagnosticar seus dados brutos. Ela gera relatórios sobre a estrutura, qualidade e características dos arquivos, sem modificar os dados originais.
+
+### Como Usar
+
+1.  Selecione `discovery` na lista de "Fase do Projeto".
+2.  Configure as opções na seção "Opções da Fase de Discovery":
+    -   **Comparar Campos/Colunas**: Marque esta opção para verificar se arquivos do mesmo tipo (ex: múltiplos CSVs) possuem as mesmas colunas.
+    -   **Comparar Tipos de Dados**: Marque para comparar os tipos de dados inferidos para colunas de mesmo nome entre diferentes arquivos.
+    -   **Formato do Relatório**: Escolha entre `json` (para análise de máquina) ou `html` (para um relatório visual e interativo).
+    -   **Gerar Config. de Limpeza de Caracteres**: Se desejar procurar por caracteres problemáticos e gerar um arquivo de configuração para a fase de tratamento, especifique um nome de arquivo aqui (ex: `config_limpeza.yaml`).
+
+3.  Clique no botão **Executar**.
+
+### Resultados
+
+-   O progresso e os logs da execução serão exibidos em tempo real na área principal da tela.
+-   Se a execução for bem-sucedida e um relatório for gerado, um botão **Baixar Relatório** aparecerá, permitindo que você salve o arquivo.
+-   Em caso de erro, uma mensagem clara será exibida com os detalhes para ajudar a diagnosticar o problema.
+
+## Fase 2: Treatment
+
+A fase de *Treatment* é usada para limpar, padronizar e modificar seus dados.
+
+### Como Usar
+
+1.  Selecione `treatment` na lista de "Fase do Projeto".
+2.  Na seção "Opções da Fase de Treatment", escolha a **Operação de Tratamento** que deseja realizar.
+
+#### Opções de Tratamento
+
+-   **Remover Espaços**: Remove espaços em branco do início e do fim de todos os valores em todos os arquivos. Nenhuma configuração adicional é necessária.
+
+-   **Substituir Valores**: Substitui valores inteiros em células específicas.
+    -   **Requer Configuração**: Faça o upload de um arquivo YAML contendo as regras de substituição.
+
+-   **Encontrar e Substituir Texto**: Substitui partes de texto dentro das células, útil para correções com regex.
+    -   **Requer Configuração**: Faça o upload de um arquivo YAML com as regras de busca e substituição.
+
+-   **Concatenar Dados**: Junta múltiplos arquivos em um único arquivo de saída.
+    -   **Requer Configuração**: Faça o upload de um arquivo YAML especificando os arquivos de entrada e o de saída.
+
+-   **Enriquecer Dados**: Adiciona colunas a um arquivo principal com base em dados de um arquivo de consulta (lookup).
+    -   **Requer Configuração**: Faça o upload de um arquivo YAML com as especificações da operação.
+
+3.  Após configurar a operação e, se necessário, fazer o upload do arquivo de configuração, clique em **Executar**.
+
+### Resultados
+
+-   Assim como na fase de Discovery, o output da execução será exibido em tempo real.
+-   Como as operações de tratamento modificam os arquivos, um backup dos dados originais é criado automaticamente em uma pasta `fad-bkp-treatment-[timestamp]` dentro do seu projeto de dados.
+-   Uma mensagem de sucesso ou erro será exibida ao final da execução. Se um relatório for gerado (dependendo da operação), um link para download será fornecido.
 
 ---
 
-## Fase 1: Descoberta (`discovery`)
-
-Esta fase ajuda a diagnosticar seus dados brutos. Ela gera relatórios sobre o volume, integridade, codificação e estrutura dos arquivos, sem alterar os dados originais.
-
-### Comando Básico
-
-```bash
-python src/run.py -d data/meu_projeto -p discovery
-```
-
-### Argumentos Específicos da Fase `discovery`
-
-- `--report-output <formato>`: Define o formato do arquivo de relatório.
-
-  - `json` (padrão): Gera um `discovery_report.json` na pasta `fad_metadata` do seu projeto de dados.
-  - `html`: Gera um `discovery_report.html` visualmente mais amigável.
-  - **Exemplo:**
-    ```bash
-    python src/run.py -d data/meu_projeto -p discovery --report-output html
-    ```
-
-- `--compare-fields`: Compara as colunas (para CSV/Excel) ou chaves (para JSON) entre os arquivos do mesmo tipo. Isso é útil para verificar se múltiplos arquivos que deveriam ter a mesma estrutura realmente a têm.
-
-  - **Exemplo:**
-    ```bash
-    python src/run.py -d data/meu_projeto -p discovery --compare-fields
-    ```
-
-- `--compare-types`: Compara os tipos de dados inferidos para colunas de mesmo nome entre arquivos do mesmo tipo (ex: CSVs em um mesmo diretório). Ajuda a identificar inconsistências, como uma coluna que é numérica em um arquivo e texto em outro.
-
-  - **Exemplo:**
-    ```bash
-    python src/run.py -d data/meu_projeto -p discovery --compare-types
-    ```
-
-- `--generate-char-cleanup-config <caminho_saida.yaml>`: Realiza uma verificação específica por caracteres problemáticos (como caracteres de controle invisíveis ou de substituição) em todos os arquivos. Se encontrados, gera um arquivo de configuração YAML no caminho especificado. Este arquivo pode ser usado pela Fase 2 para realizar a limpeza.
-  - **Exemplo:**
-    ```bash
-    python src/run.py -d data/meu_projeto -p discovery --generate-char-cleanup-config configs/limpeza_chars.yaml
-    ```
-
----
-
-## Fase 2: Tratamento (`treatment`)
-
-Esta fase é usada para modificar os dados. **Você deve escolher apenas uma das operações abaixo por execução.**
-
-**Nota sobre Arquivos de Configuração:** Por padrão, a ferramenta espera que os arquivos de configuração YAML para esta fase estejam localizados em um diretório chamado `fad-config` dentro da pasta do seu projeto de dados (`--data-project-path`). Se você fornecer apenas o nome do arquivo (ex: `correcoes.yaml`), ele será procurado nesse local. Caminhos absolutos para arquivos de configuração ainda são suportados.
-
-### Operação 1: Substituir Valores (`--replace-values`)
-
-Aplica um conjunto de substituições de valores em múltiplos arquivos, com base em um arquivo de configuração YAML. É ideal para corrigir erros de digitação, padronizar termos ou remover caracteres indesejados de forma controlada.
-
-**Importante:** Esta operação **substitui** os arquivos originais. Um backup dos arquivos originais é criado automaticamente em uma pasta `fad-bkp-treatment-[timestamp]` dentro do seu projeto de dados.
-
-#### Configuração
-
-Requer um arquivo de configuração YAML (ex: `correcoes.yaml`) com uma lista de regras de substituição.
-
-- `column`: (Opcional) A coluna onde a substituição deve ser aplicada. Se omitido, a regra será aplicada a todas as colunas.
-- `existing_value`: O valor (ou lista de valores) a ser substituído.
-- `new_value`: O novo valor que substituirá o valor antigo.
-- `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca por `existing_value` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
-
-```yaml
-# Lista de regras de substituição a serem aplicadas.
-replacements:
-  # Regra 1: Substitui "Inativo" por "Desativado" na coluna "Status" (sensível ao caso).
-  - column: "Status"
-    existing_value: "Inativo"
-    new_value: "Desativado"
-    case_sensitive: true # Comportamento padrão
-
-  # Regra 2: Padroniza múltiplos valores para um valor nulo na coluna "Status".
-  - column: "Status"
-    existing_value: ["N/D", "NA", "Sem Info", "?"]
-    new_value: null
-
-  # Regra 3: Substitui "pendente" (e suas variações como "Pendente" ou "PENDENTE")
-  # por "Em Andamento" na coluna "Status", de forma insensível ao caso.
-  - column: "Status"
-    existing_value: "pendente"
-    new_value: "Em Andamento"
-    case_sensitive: false
-
-  # Regra 4: Substituição global insensível ao caso.
-  # Troca "BR" e "br" por "Brasil" em todas as colunas.
-  - existing_value: "br"
-    new_value: "Brasil"
-    case_sensitive: false
-```
-
-#### Comando
-
-```bash
-python src/run.py -d data/meu_projeto -p treatment --replace-values correcoes.yaml
-```
-
-### Operação 2: Concatenar Dados (`--concatenate-data`)
-
-Junta múltiplos arquivos de um diretório em um único arquivo de saída.
-
-#### Configuração
-
-Esta operação requer um arquivo de configuração YAML. Crie um arquivo (ex: `config_concat.yaml`) com a seguinte estrutura:
-
-```yaml
-input_folder: "caminho/para/pasta/com/arquivos"
-output_file: "caminho/para/arquivo_final.csv"
-file_type: "csv"
-```
-
-- `input_folder`: O diretório contendo os arquivos a serem concatenados.
-- `output_file`: O nome e caminho do arquivo de saída.
-- `file_type`: O formato dos arquivos de entrada (`csv`, `xlsx`, etc.).
-
-#### Comando
-
-```bash
-python src/run.py -d data/meu_projeto -p treatment --concatenate-data config_concat.yaml
-```
-
-### Operação 3: Enriquecer Dados (`--enrich-data`)
-
-Adiciona informações a um arquivo principal (main) com base em um arquivo de consulta (lookup), similar a um `JOIN` em bancos de dados.
-
-#### Configuração
-
-Requer um arquivo de configuração YAML (ex: `config_enrich.yaml`):
-
-```yaml
-main_file: "caminho/para/arquivo_principal.csv"
-lookup_file: "caminho/para/arquivo_consulta.csv"
-output_file: "caminho/para/arquivo_enriquecido.csv"
-main_key: "coluna_chave_principal"
-lookup_key: "coluna_chave_consulta"
-columns_to_add:
-  - "coluna1_da_consulta"
-  - "coluna2_da_consulta"
-```
-
-- `main_file`: O arquivo que receberá as novas informações.
-- `lookup_file`: O arquivo que contém as informações a serem adicionadas.
-- `output_file`: O nome e caminho do arquivo de saída.
-- `main_key` / `lookup_key`: As colunas usadas para combinar os dois arquivos.
-- `columns_to_add`: A lista de colunas do arquivo de consulta que serão adicionadas ao arquivo principal.
-
-#### Comando
-
-```bash
-python src/run.py -d data/meu_projeto -p treatment --enrich-data config_enrich.yaml
-```
-
----
-
-### Operação 4: Encontrar e Substituir Texto (`--find-and-replace-text`)
-
-Esta operação é ideal para fazer substituições parciais dentro de células de texto, como corrigir parte de uma palavra, remover ou alterar um padrão específico usando texto simples ou expressões regulares (regex).
-
-**Diferença para `--replace-values`**:
-
-- `--replace-values`: Substitui o **valor inteiro** de uma célula. Ex: `Status: "Inativo"` se torna `Status: "Desativado"`.
-- `--find-and-replace-text`: Substitui uma **parte do texto** dentro de uma célula. Ex: `Descrição: "REF-123-PROD"` pode se tornar `Descrição: "ID-123-PROD"` ao substituir apenas "REF".
-
-**Importante:** Esta operação também **substitui** os arquivos originais e cria um backup automático.
-
-#### Configuração
-
-Requer um arquivo de configuração YAML (ex: `substituicoes_texto.yaml`) com uma lista de regras na chave `text_replacements`.
-
-- `column`: A coluna onde a substituição deve ser aplicada.
-- `pattern`: O texto ou a expressão regular a ser encontrada.
-- `new_value`: O novo valor que substituirá o padrão encontrado.
-- `is_regex`: (Opcional) Um booleano (`true` ou `false`) que indica se o `pattern` deve ser tratado como uma expressão regular. Padrão: `false`.
-- `case_sensitive`: (Opcional) Um booleano (`true` ou `false`). Se `false`, a busca pelo `pattern` ignorará diferenças de maiúsculas e minúsculas. O padrão é `true`.
-
-```yaml
-# Lista de regras para encontrar e substituir texto.
-text_replacements:
-  # Regra 1: Substituição de substring simples e sensível ao caso (padrão).
-  # Transforma "Produto A-123" em "SKU-A-123", mas não afetaria "produto a-123".
-  - column: "description"
-    pattern: "Produto A"
-    new_value: "SKU-A"
-    is_regex: false
-    case_sensitive: true
-
-  # Regra 2: Substituição de substring insensível ao caso.
-  # Transforma "REF:" (e "ref:", "Ref:", etc.) em "ID-".
-  - column: "code"
-    pattern: "REF:"
-    new_value: "ID-"
-    is_regex: false
-    case_sensitive: false
-
-  # Regra 3: Substituição com regex sensível ao caso.
-  # Remove hífens apenas de categorias que começam com "Eletronicos-".
-  - column: "category"
-    pattern: "(Eletronicos)-(\\w+)"
-    new_value: "\\1 \\2"
-    is_regex: true
-
-  # Regra 4: Substituição com regex insensível ao caso.
-  # Padroniza "user email" ou "User Email" para "email" em uma coluna de logs.
-  - column: "log_entry"
-    pattern: "user email"
-    new_value: "email"
-    is_regex: true
-    case_sensitive: false
-```
-
-#### Comando
-
-```bash
-python src/run.py -d data/meu_projeto -p treatment --find-and-replace-text substituicoes_texto.yaml
-```
-
-### Operação 5: Remover Espaços em Branco (`--strip-whitespace`)
-
-Esta operação remove todos os espaços em branco (espaços, tabulações, quebras de linha) do início e do fim de todos os valores em todas as colunas de todos os arquivos de dados do projeto. É uma operação de limpeza rápida e global que não requer um arquivo de configuração.
-
-**Importante:** Esta operação também **substitui** os arquivos originais e cria um backup automático.
-
-#### Principais Características:
-
-- **Global:** Aplica-se a todos os arquivos e todas as colunas.
-- **Segura:** Para garantir que a operação funcione em colunas de qualquer tipo (números, datas, etc.) sem erros, todos os dados são lidos como texto (`string`) antes da limpeza.
-- **Sem Configuração:** Basta ativar a flag no comando.
-
-#### Comando
-
-```bash
-python src/run.py -d data/meu_projeto -p treatment --strip-whitespace
-```
-
----
-
-## Fase 4: Visualização (`visualization`)
-
-Esta fase lança aplicações interativas para explorar os dados.
-
-### Aplicação: Explorador de Perfil de Dados
-
-Inicia uma aplicação web (Streamlit) para gerar e visualizar um relatório de _profiling_ detalhado de um único arquivo de dados.
-
-#### Comando
-
-```bash
-python src/phases/phase04_visualization/app_explore_single_profile.py
-```
-
-Após executar o comando, uma página web será aberta no seu navegador. Você poderá então:
-
-1.  Especificar o diretório onde seus dados estão.
-2.  Buscar por arquivos (`.csv`, `.xlsx`, etc.).
-3.  Selecionar um arquivo da lista para gerar e visualizar o relatório interativo.
+**Nota**: Enquanto uma operação está em andamento, todos os controles da interface são desabilitados para prevenir múltiplas execuções simultâneas. Um indicador visual (spinner) mostrará que a aplicação está ocupada.
