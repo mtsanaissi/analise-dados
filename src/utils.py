@@ -184,3 +184,60 @@ def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> 
     except Exception as e:
         print(f"Erro ao salvar o arquivo CSV em '{output_path}': {e}", file=sys.stderr)
         return False
+
+def build_command(
+    project_path: str,
+    phase: str,
+    discovery_args: dict = None,
+    treatment_args: dict = None
+) -> list[str]:
+    """
+    Constrói a lista de argumentos do comando para o subprocesso.
+
+    Args:
+        project_path (str): O caminho para o projeto de dados.
+        phase (str): A fase do projeto a ser executada.
+        discovery_args (dict, optional): Argumentos para a fase de descoberta.
+        treatment_args (dict, optional): Argumentos para a fase de tratamento.
+
+    Returns:
+        list[str]: A lista de argumentos do comando.
+    """
+    python_executable = sys.executable
+    # Ajuste para encontrar o run.py a partir da localização de utils.py
+    run_script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'run.py'))
+
+    command = [
+        python_executable,
+        run_script_path,
+        "-d", project_path,
+        "-p", phase
+    ]
+
+    if phase == "discovery" and discovery_args:
+        if discovery_args.get("compare_fields"):
+            command.append("--compare-fields")
+        if discovery_args.get("compare_types"):
+            command.append("--compare-types")
+        if discovery_args.get("report_output"):
+            command.extend(["--report-output", discovery_args["report_output"]])
+        if discovery_args.get("char_cleanup_path"):
+            command.extend(["--generate-char-cleanup-config", discovery_args["char_cleanup_path"]])
+
+    if phase == "treatment" and treatment_args:
+        operation_map = {
+            "Remover Espaços": "--strip-whitespace",
+            "Substituir Valores": "--replace-values",
+            "Encontrar e Substituir Texto": "--find-and-replace-text",
+            "Concatenar Dados": "--concatenate-data",
+            "Enriquecer Dados": "--enrich-data"
+        }
+        operation = treatment_args.get("operation")
+        if operation in operation_map:
+            command.append(operation_map[operation])
+            if operation != "Remover Espaços":
+                config_path = treatment_args.get("config_file_path")
+                if config_path:
+                    command.append(config_path)
+
+    return command
