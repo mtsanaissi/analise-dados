@@ -1,5 +1,45 @@
 {
-  "backlog": [],
+  "backlog": [
+    {
+      "id": "T037",
+      "title": "Refatorar Operação --enrich-data para Usar Argumentos CLI",
+      "description": "Como parte da simplificação da UI, a operação --enrich-data deve ser refatorada para aceitar seus parâmetros via argumentos de linha de comando, em vez de um arquivo de configuração YAML.",
+      "branchName": "feature/refatora-cli-enrich-data",
+      "acceptance_criteria": [
+        "No src/phases/phase02_treatment/phase02_orchestrator.py, o argumento --enrich-data não deve mais aceitar um caminho de arquivo.",
+        "Novos argumentos devem ser adicionados ao parser: --main-file, --lookup-file, --main-key, --lookup-key, --columns-to-add (deve aceitar múltiplos valores), e --output-file.",
+        "A lógica do orquestrador deve coletar esses argumentos e passá-los para a classe DataEnricher.",
+        "A classe DataEnricher em src/phases/phase02_treatment/core/data_enricher.py deve ser atualizada para aceitar os novos argumentos em seu construtor, em vez de um dicionário de configuração.",
+        "Os testes em tests/phases/phase02_treatment/core/test_data_enricher.py devem ser atualizados para refletir a nova forma de instanciar e usar a classe DataEnricher."
+      ]
+    },
+    {
+      "id": "T038",
+      "title": "Refatorar Operação --concatenate-data para Usar Argumentos CLI",
+      "description": "Como parte da simplificação da UI, a operação --concatenate-data deve ser refatorada para aceitar seus parâmetros via argumentos de linha de comando, em vez de um arquivo de configuração YAML.",
+      "branchName": "feature/refatora-cli-concatenate-data",
+      "acceptance_criteria": [
+        "No src/phases/phase02_treatment/phase02_orchestrator.py, o argumento --concatenate-data não deve mais aceitar um caminho de arquivo.",
+        "Novos argumentos devem ser adicionados ao parser: --input-folder, --output-file, e --file-type (com opções 'csv', 'json', 'xlsx').",
+        "A lógica do orquestrador deve coletar esses argumentos e passá-los para a classe DataConcatenator.",
+        "A classe DataConcatenator em src/phases/phase02_treatment/core/data_concatenator.py deve ser atualizada para aceitar os novos argumentos em seu construtor.",
+        "Os testes em tests/phases/phase02_treatment/core/test_data_concatenator.py devem ser atualizados para refletir a nova forma de instanciar e usar a classe DataConcatenator."
+      ]
+    },
+    {
+      "id": "T039",
+      "title": "[UI] Adaptar UI para Novas Operações CLI de Tratamento",
+      "description": "Com a refatoração das operações --enrich-data e --concatenate-data para usar argumentos diretos, a interface do Streamlit precisa ser atualizada para fornecer campos de entrada para esses novos argumentos, em vez de um uploader de arquivo.",
+      "branchName": "feature/adapta-ui-novos-args",
+      "acceptance_criteria": [
+        "No src/app_main_interface.py, quando a operação \"Enriquecer Dados\" for selecionada, a UI deve exibir campos de texto (st.text_input) para: 'Arquivo Principal', 'Arquivo de Consulta', 'Chave Principal', 'Chave de Consulta', e 'Arquivo de Saída'.",
+        "Um campo st.multiselect deve ser usado para as 'Colunas a Adicionar'.",
+        "Quando a operação \"Concatenar Dados\" for selecionada, a UI deve exibir campos de texto para: 'Pasta de Entrada' e 'Arquivo de Saída', e um st.selectbox para o 'Tipo de Arquivo'.",
+        "A função build_command deve ser atualizada para construir o comando CLI com os novos argumentos e seus valores, em vez de usar config_file_path para essas duas operações.",
+        "A UI deve incluir textos de ajuda (help=...) claros para o usuário, explicando que os nomes dos arquivos devem ser relativos à pasta do projeto de dados e que os arquivos de configuração para as outras operações devem estar em data/fad-config."
+      ]
+    }
+  ],
   "done": [
     {
       "id": "T036",
