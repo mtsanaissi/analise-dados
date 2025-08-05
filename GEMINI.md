@@ -39,7 +39,7 @@ When generating prompts for Jules, I will follow this structure:
 
 1.  **Title:** A short, descriptive title (e.g., "Implement Google Authentication").
 2.  **Guiding Principles:** The first step will always be a reminder to adhere to the rules in `JULES.md`.
-3.  **Branch Name:** I will provide the exact `branchName` from `@AGENT_TASKS.json` that Jules **must** use.
+3.  **Branch Name:** At the end of the prompt, I will provide the exact `branchName` from `@AGENT_TASKS.json` that Jules **must** use to commit his changes.
 
 ## Code Conventions
 

@@ -1,22 +1,6 @@
 {
   "backlog": [
     {
-      "id": "T031",
-      "title": "[UI] Finalizar e Polir UI para Fases Discovery e Treatment",
-      "description": "Concluir a implementação da interface gráfica para as fases Discovery e Treatment, garantindo uma experiência de usuário robusta e polida. Isso inclui a exibição de relatórios, tratamento de erros, feedback visual durante a execução e uma documentação completa e atualizada.",
-      "branchName": "feature/finaliza-ui-discovery-treatment",
-      "acceptance_criteria": [
-        "**Exibição de Relatórios:** Após a execução bem-sucedida de uma fase que gera relatório, a UI deve exibir um link para download direto do arquivo gerado.",
-        "**Tratamento de Erros:** Se a execução do subprocesso falhar, a UI deve capturar o erro e exibir uma mensagem clara e amigável para o usuário.",
-        "**Polimento da UI (UX):**",
-        "- Ao iniciar uma fase, um indicador visual (ex: spinner) deve ser exibido e os controles de execução devem ser desabilitados.",
-        "- Após a conclusão, uma mensagem de sucesso clara (ex: 'Fase Discovery concluída com sucesso!') deve ser exibida.",
-        "- Adicionar tooltips ou textos de ajuda para explicar cada opção configurável nas fases Discovery e Treatment.",
-        "**Testes:** Criar testes para validar a lógica de exibição de relatórios e o tratamento de mensagens de erro na UI.",
-        "**Atualização Abrangente da Documentação:** O arquivo `COMO_USAR.md` deve ser completamente reescrito para refletir a nova interface gráfica como o principal método de uso. A documentação deve cobrir em detalhes as funcionalidades das fases Discovery e Treatment implementadas na UI (tarefas T029, T030 e esta)."
-      ]
-    },
-    {
       "id": "T035",
       "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
       "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment.",
@@ -57,6 +41,11 @@
       "id": "T034",
       "title": "Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness",
       "description": "O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos."
+    },
+    {
+      "id": "T031",
+      "title": "[UI] Finalizar e Polir UI para Fases Discovery e Treatment",
+      "description": "Concluir a implementação da interface gráfica para as fases Discovery e Treatment, garantindo uma experiência de usuário robusta e polida. Isso inclui a exibição de relatórios, tratamento de erros, feedback visual durante a execução e uma documentação completa e atualizada."
     }
   ]
 }
