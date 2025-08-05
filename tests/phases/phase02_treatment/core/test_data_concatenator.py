@@ -14,14 +14,12 @@ def test_concatenate_data(tmp_path):
     df1.to_csv(input_folder / "file1.csv", index=False, sep=';')
     df2.to_csv(input_folder / "file2.csv", index=False, sep=';')
 
-    config = {
-        'input_folder': str(input_folder),
-        'output_file': str(output_file),
-        'file_type': 'csv'
-    }
-
     # Act
-    concatenator = DataConcatenator(config)
+    concatenator = DataConcatenator(
+        input_folder=str(input_folder),
+        output_file=str(output_file),
+        file_type='csv'
+    )
     concatenator.concatenate_files()
 
     # Assert
@@ -36,14 +34,12 @@ def test_concatenate_data_with_no_files(tmp_path):
     output_file = tmp_path / "output.csv"
     input_folder.mkdir()
 
-    config = {
-        'input_folder': str(input_folder),
-        'output_file': str(output_file),
-        'file_type': 'csv'
-    }
-
     # Act
-    concatenator = DataConcatenator(config)
+    concatenator = DataConcatenator(
+        input_folder=str(input_folder),
+        output_file=str(output_file),
+        file_type='csv'
+    )
     concatenator.concatenate_files()
 
     # Assert

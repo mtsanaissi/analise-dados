@@ -29,12 +29,14 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
     parser.add_argument("--main-key", help="Chave de junção no arquivo principal.")
     parser.add_argument("--lookup-key", help="Chave de junção no arquivo de consulta.")
     parser.add_argument("--columns-to-add", nargs='+', help="Colunas a serem adicionadas do arquivo de consulta.")
-    parser.add_argument("--output-file", help="Caminho para salvar o arquivo enriquecido.")
 
     operation_group.add_argument("--concatenate-data",
-                                 dest="concatenate_config_path",
-                                 metavar="PATH",
-                                 help="Caminho para o arquivo de configuração YAML para a concatenação de dados.")
+                                 action="store_true",
+                                 help="Ativa a concatenação de dados. Requer --input-folder, --output-file, e --file-type.")
+    parser.add_argument("--input-folder", help="Pasta de entrada para a concatenação.")
+    parser.add_argument("--output-file", help="Arquivo de saída para a concatenação ou enriquecimento.")
+    parser.add_argument("--file-type", choices=['csv', 'json', 'xlsx'], help="Tipo de arquivo para a concatenação.")
+
     operation_group.add_argument("--replace-values",
                                  dest="replace_config_path",
                                  metavar="PATH",
@@ -73,53 +75,35 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         except Exception as e:
             logging.error(f"Ocorreu um erro inesperado durante o enriquecimento de dados: {e}", exc_info=True)
 
-    elif args.concatenate_config_path:
-        logging.info(
-            f"Modo de concatenação de dados ativado. Carregando configuração de: {args.concatenate_config_path}")
+    elif args.concatenate_data:
+        logging.info("Modo de concatenação de dados ativado.")
         try:
-            config_path = args.concatenate_config_path
-            if not os.path.isabs(config_path):
-                config_path = os.path.join(data_project_path, "fad-config", config_path)
+            if not all([args.input_folder, args.output_file, args.file_type]):
+                logging.error("Para a concatenação, os argumentos --input-folder, --output-file, e --file-type são obrigatórios.")
+                return
 
-            config_dir = os.path.dirname(config_path)
+            input_folder = os.path.abspath(args.input_folder)
+            output_file = os.path.abspath(args.output_file)
 
-            with open(config_path, 'r', encoding='utf-8-sig') as f:
-                concat_config = yaml.safe_load(f)
-
-            for key in ['input_folder', 'output_file']:
-                if key in concat_config:
-                    concat_config[key] = os.path.join(
-                        config_dir, concat_config[key])
-
-            concatenator = DataConcatenator(concat_config)
+            concatenator = DataConcatenator(
+                input_folder=input_folder,
+                output_file=output_file,
+                file_type=args.file_type
+            )
             concatenator.concatenate_files()
             logging.info("Concatenação de dados concluída com sucesso.")
-        except FileNotFoundError:
-            logging.error(
-                f"Arquivo de configuração de concatenação não encontrado em: {config_path}")
-        except yaml.YAMLError:
-            logging.error(
-                f"Erro ao decodificar o arquivo YAML de configuração: {config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
 
     elif args.replace_config_path:
-        try:
-            config_path = args.replace_config_path
-            if not os.path.isabs(config_path):
-                config_path = os.path.join(data_project_path, "fad-config", config_path)
+        config_path = args.replace_config_path
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(data_project_path, "fad-config", config_path)
 
-            with open(config_path, 'r', encoding='utf-8-sig') as f:
-                replace_config = yaml.safe_load(f)
-                if not isinstance(replace_config, dict) or 'replacements' not in replace_config:
-                    logging.error("Arquivo de configuração YAML é inválido. A chave 'replacements' não foi encontrada.")
-                    return
-        except FileNotFoundError:
-            logging.error(f"Arquivo de configuração de substituição não encontrado em: {config_path}")
-            return
-        except yaml.YAMLError as e:
-            logging.error(f"Erro ao processar o arquivo YAML: {e}")
+        replace_config = read_yaml_config_robustly(config_path)
+        if not replace_config or 'replacements' not in replace_config:
+            logging.error("Arquivo de configuração YAML para substituição é inválido ou não foi encontrado.")
             return
 
         supported_extensions = ["csv", "json", "xlsx"]
@@ -174,13 +158,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                             logging.warning(f"  -> A coluna '{column}' especificada na regra não existe no arquivo {os.path.basename(file_path)}. A regra será ignorada.")
                             continue
 
-                        # Apenas aplica a lógica case-insensitive em colunas de texto/objeto
                         is_object_dtype = pd.api.types.is_object_dtype(df[column])
 
                         if not case_sensitive and is_object_dtype:
-                            # Lógica Case-Insensitive para coluna específica
                             if isinstance(existing_value, list):
-                                # Garante que todos os valores na lista sejam strings para lower()
                                 lower_existing = [str(v).lower() for v in existing_value]
                                 mask = df[column].str.lower().isin(lower_existing)
                             else:
@@ -190,7 +171,6 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                             if count > 0:
                                 df.loc[mask, column] = new_value
                         else:
-                            # Lógica Case-Sensitive (comportamento original)
                             if isinstance(existing_value, list):
                                 count = df[column].isin(existing_value).sum()
                             else:
@@ -199,9 +179,8 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                             count = int(count)
                             if count > 0:
                                 df[column] = df[column].replace(existing_value, new_value)
-                    else: # Substituição Global
+                    else: 
                         if not case_sensitive:
-                            # Lógica Case-Insensitive para substituição global
                             total_count = 0
                             for col_name in df.select_dtypes(include=['object']).columns:
                                 if isinstance(existing_value, list):
@@ -216,7 +195,6 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                                     total_count += col_count
                             count = total_count
                         else:
-                            # Lógica Case-Sensitive global (comportamento original)
                             if isinstance(existing_value, list):
                                 count = df.apply(lambda x: x.isin(existing_value).sum()).sum()
                             else:
@@ -325,15 +303,12 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     count = 0
                     if column in df.columns:
                         if pd.api.types.is_object_dtype(df[column]):
-                            # Define os parâmetros com base na sensibilidade ao caso e se é regex
                             if is_regex:
                                 flags = re.IGNORECASE if not case_sensitive else 0
-                                # O parâmetro 'case' é ignorado pelo pandas quando regex=True, então usamos 'flags'
                                 count = df[column].str.contains(pattern, regex=True, flags=flags, na=False).sum()
                                 if count > 0:
                                     df[column] = df[column].str.replace(pattern, new_value, regex=True, flags=flags)
                             else:
-                                # Para não-regex, o parâmetro 'case' controla a sensibilidade
                                 count = df[column].str.contains(pattern, regex=False, case=case_sensitive, na=False).sum()
                                 if count > 0:
                                     df[column] = df[column].str.replace(pattern, new_value, regex=False, case=case_sensitive)
@@ -418,7 +393,6 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             }
             try:
                 logging.info(f"Processando arquivo: {os.path.basename(file_path)}")
-                # Forçar todas as colunas a serem lidas como texto (str)
                 connector = get_data_loader(file_path, delimiter=';', dtype=str)
                 df = connector.read()
                 if df is None:
@@ -429,10 +403,8 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
                 df_original = df.copy()
 
-                # Limpa os nomes das colunas (espaços e aspas)
                 df.columns = df.columns.str.strip().str.strip('"')
 
-                # Aplicar .str.strip() em todas as colunas de dados (espaços e aspas)
                 for col in df.columns:
                     if df[col].dtype == 'object':
                         df[col] = df[col].str.strip().str.strip('"')

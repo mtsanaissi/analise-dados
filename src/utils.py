@@ -22,6 +22,7 @@ import chardet
 import csv
 import fnmatch
 import yaml
+import logging
 
 METADATA_DIR = "fad-metadados"
 
@@ -48,7 +49,6 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     normalized_extensions = [ext.lower().lstrip('.') for ext in extensions]
     exclude_patterns = exclude_patterns or []
 
-    # Define a lista de exclusão padrão e adiciona os diretórios fornecidos pelo usuário.
     final_exclude_dirs = ['fad-metadados', 'fad-config', 'fad-bkp*']
     if exclude_dirs is not None:
         final_exclude_dirs.extend(exclude_dirs)
@@ -59,16 +59,13 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
 
     if recursive:
         for dirpath, dirnames, filenames in os.walk(root_path):
-            # Excluir diretórios da busca usando fnmatch para suportar wildcards
             original_dirnames = list(dirnames)
             dirnames[:] = []
             for d in original_dirnames:
-                # Usa a lista combinada de diretórios a serem excluídos
                 if not any(fnmatch.fnmatch(d, pattern) for pattern in final_exclude_dirs):
                     dirnames.append(d)
 
             for filename in filenames:
-                # Verifica se o arquivo deve ser excluído
                 if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns):
                     continue
 
@@ -79,7 +76,6 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
     else:
         try:
             for filename in os.listdir(root_path):
-                # Verifica se o arquivo deve ser excluído
                 if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns):
                     continue
 
@@ -108,13 +104,11 @@ def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None
         pd.DataFrame | None: O DataFrame lido ou None em caso de erro.
     """
     try:
-        # Detectar encoding com uma amostra
         with open(file_path, 'rb') as f_raw:
-            raw_data = f_raw.read(50 * 1024)  # Amostra de 50KB
+            raw_data = f_raw.read(50 * 1024)
             detection = chardet.detect(raw_data)
             encoding = detection['encoding'] if detection['confidence'] > 0.7 else 'utf-8'
 
-        # Ler o CSV com o encoding detectado ou fallback para utf-8 com replace
         try:
             df = pd.read_csv(file_path, sep=delimiter, encoding=encoding, low_memory=False)
         except UnicodeDecodeError:
@@ -128,7 +122,7 @@ def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None
         return None
     except pd.errors.EmptyDataError:
         print(f"Aviso: Arquivo CSV vazio ou sem dados: {os.path.basename(file_path)}", file=sys.stderr)
-        return pd.DataFrame() # Retorna DF vazio para consistência
+        return pd.DataFrame()
     except Exception as e:
         print(f"Erro inesperado ao ler o arquivo '{os.path.basename(file_path)}': {e}", file=sys.stderr)
         return None
@@ -155,7 +149,6 @@ def has_problematic_char(text_value: any) -> bool:
     for char_read in text_value:
         if char_read in problematic_chars:
             return True
-        # Verifica caracteres de controle não permitidos
         if not char_read.isprintable() and char_read not in control_chars_allowed:
             return True
 
@@ -174,17 +167,38 @@ def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> 
         bool: True se o arquivo foi salvo com sucesso, False caso contrário.
     """
     try:
-        # Garante que o diretório de saída exista
         output_dir = os.path.dirname(output_path)
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
         
-        # Salva o DataFrame com encoding utf-8-sig e sem o índice
         df.to_csv(output_path, sep=delimiter, index=False, encoding='utf-8-sig', quoting=csv.QUOTE_MINIMAL)
         return True
     except Exception as e:
         print(f"Erro ao salvar o arquivo CSV em '{output_path}': {e}", file=sys.stderr)
         return False
+
+def read_yaml_config_robustly(file_path: str) -> dict | None:
+    """
+    Lê um arquivo de configuração YAML de forma robusta.
+
+    Args:
+        file_path (str): O caminho para o arquivo YAML.
+
+    Returns:
+        dict | None: O dicionário com os dados do YAML ou None em caso de erro.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        logging.error(f"Arquivo de configuração não encontrado em: {file_path}")
+        return None
+    except yaml.YAMLError as e:
+        logging.error(f"Erro ao decodificar o arquivo YAML de configuração: {file_path}\n{e}")
+        return None
+    except Exception as e:
+        logging.error(f"Ocorreu um erro inesperado ao ler o arquivo YAML: {e}", exc_info=True)
+        return None
 
 def build_command(
     project_path: str,
@@ -205,7 +219,6 @@ def build_command(
         list[str]: A lista de argumentos do comando.
     """
     python_executable = sys.executable
-    # Ajuste para encontrar o run.py a partir da localização de utils.py
     run_script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'run.py'))
 
     command = [
@@ -242,23 +255,3 @@ def build_command(
                     command.append(config_path)
 
     return command
-
-def read_yaml_config_robustly(file_path: str) -> dict | None:
-    """
-    Lê um arquivo de configuração YAML de forma robusta.
-
-    Args:
-        file_path (str): O caminho para o arquivo YAML.
-
-    Returns:
-        dict | None: O dicionário com a configuração ou None em caso de erro.
-    """
-    try:
-        with open(file_path, 'r', encoding='utf-8-sig') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        print(f"Erro: Arquivo de configuração não encontrado em '{file_path}'.", file=sys.stderr)
-        return None
-    except yaml.YAMLError as e:
-        print(f"Erro ao decodificar o arquivo YAML '{os.path.basename(file_path)}': {e}", file=sys.stderr)
-        return None
