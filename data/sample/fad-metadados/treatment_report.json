@@ -1,24 +1,19 @@
 {
     "summary": {
-        "total_files": 3,
-        "processed_successfully": 0,
-        "failed": 3
+        "total_files": 2,
+        "processed_successfully": 2,
+        "failed": 0
     },
     "details": [
         {
             "file_name": "consumidorgovbr_2025-01.csv",
-            "status": "Failed",
-            "replacements_applied": []
-        },
-        {
-            "file_name": "discovery_report.json",
-            "status": "Failed",
-            "replacements_applied": []
+            "status": "Success",
+            "changes_made": false
         },
         {
             "file_name": "consumidorgovbr_2025-02.csv",
-            "status": "Failed",
-            "replacements_applied": []
+            "status": "Success",
+            "changes_made": false
         }
     ]
 }

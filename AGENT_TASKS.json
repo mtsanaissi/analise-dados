@@ -1,6 +1,19 @@
 {
   "backlog": [
     {
+      "id": "T036",
+      "title": "Refatorar Lógica de Upload e Estado da UI para Corrigir Bug de Execução",
+      "description": "A interface do Streamlit não consegue iniciar a execução de uma fase quando um arquivo de configuração é anexado. Isso ocorre devido a um re-render automático do `st.file_uploader` que interfere com o estado do botão de execução. A solução é desacoplar o processamento do upload da lógica de execução, usando o `st.session_state` de forma mais robusta.",
+      "branchName": "fix/refatora-estado-upload-ui",
+      "acceptance_criteria": [
+        "No `app_main_interface.py`, a inicialização do `st.session_state` deve incluir uma nova chave, `temp_config_path`, inicializada como `None`.",
+        "A lógica do widget `st.file_uploader` deve ser modificada para, assim que um arquivo for carregado, processá-lo imediatamente: detectar a codificação, decodificar para uma string Python, criar um arquivo temporário em UTF-8 e salvar o caminho deste arquivo em `st.session_state.temp_config_path`.",
+        "O bloco de lógica que é executado quando `st.session_state.running` é `True` deve ser simplificado. Ele não deve mais criar o arquivo temporário; em vez disso, deve ler o caminho de `st.session_state.temp_config_path` e passá-lo para a função `build_command`.",
+        "A lógica do botão \"Limpar Resultados\" deve ser aprimorada para também verificar se `st.session_state.temp_config_path` existe e, em caso afirmativo, remover o arquivo temporário do disco antes de limpar o estado da sessão.",
+        "A execução de uma operação de tratamento com um arquivo de configuração (ex: `--enrich-data`) deve funcionar perfeitamente através da UI, sem falhas ou ausência de ação."
+      ]
+    },
+    {
       "id": "T035",
       "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
       "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment.",

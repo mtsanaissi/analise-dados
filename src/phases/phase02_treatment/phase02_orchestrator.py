@@ -55,30 +55,19 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
         logging.info(
             f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
         try:
-            config_path = args.enrich_config_path
-            if not os.path.isabs(config_path):
-                config_path = os.path.join(data_project_path, "fad-config", config_path)
-
-            config_dir = os.path.dirname(config_path)
-
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(args.enrich_config_path, 'r', encoding='utf-8-sig') as f:
                 enrich_config = yaml.safe_load(f)
 
-            for key in ['main_file', 'lookup_file', 'output_file']:
-                if key in enrich_config:
-                    enrich_config[key] = os.path.join(
-                        config_dir, enrich_config[key])
-
-            enricher = DataEnricher(enrich_config)
+            # Passa o caminho do projeto de dados para o enriquecedor
+            enricher = DataEnricher(enrich_config, data_project_path)
             status = enricher.enrich_data()
             logging.info(
                 f"Enriquecimento de dados concluído com sucesso. Status: {status}")
         except FileNotFoundError:
             logging.error(
-                f"Arquivo de configuração de enriquecimento não encontrado em: {config_path}")
-        except yaml.YAMLError:
-            logging.error(
-                f"Erro ao decodificar o arquivo YAML de configuração: {config_path}")
+                f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
+        except (yaml.YAMLError, ValueError) as e:
+            logging.error(f"Erro na configuração ou processamento do YAML: {e}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
@@ -93,7 +82,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
             config_dir = os.path.dirname(config_path)
 
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(config_path, 'r', encoding='utf-8-sig') as f:
                 concat_config = yaml.safe_load(f)
 
             for key in ['input_folder', 'output_file']:
@@ -120,7 +109,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             if not os.path.isabs(config_path):
                 config_path = os.path.join(data_project_path, "fad-config", config_path)
 
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(config_path, 'r', encoding='utf-8-sig') as f:
                 replace_config = yaml.safe_load(f)
                 if not isinstance(replace_config, dict) or 'replacements' not in replace_config:
                     logging.error("Arquivo de configuração YAML é inválido. A chave 'replacements' não foi encontrada.")
@@ -277,7 +266,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             if not os.path.isabs(config_path):
                 config_path = os.path.join(data_project_path, "fad-config", config_path)
 
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(config_path, 'r', encoding='utf-8-sig') as f:
                 text_replace_config = yaml.safe_load(f)
                 if not isinstance(text_replace_config, dict) or 'text_replacements' not in text_replace_config:
                     logging.error("Arquivo de configuração YAML é inválido. A chave 'text_replacements' não foi encontrada.")
