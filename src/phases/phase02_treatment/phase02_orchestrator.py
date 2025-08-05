@@ -261,21 +261,9 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             generate_html_report(report_data, report_path)
 
     elif args.text_replace_config_path:
-        try:
-            config_path = args.text_replace_config_path
-            if not os.path.isabs(config_path):
-                config_path = os.path.join(data_project_path, "fad-config", config_path)
-
-            with open(config_path, 'r', encoding='utf-8-sig') as f:
-                text_replace_config = yaml.safe_load(f)
-                if not isinstance(text_replace_config, dict) or 'text_replacements' not in text_replace_config:
-                    logging.error("Arquivo de configuração YAML é inválido. A chave 'text_replacements' não foi encontrada.")
-                    return
-        except FileNotFoundError:
-            logging.error(f"Arquivo de configuração de substituição de texto não encontrado em: {config_path}")
-            return
-        except yaml.YAMLError as e:
-            logging.error(f"Erro ao processar o arquivo YAML: {e}")
+        text_replace_config = read_yaml_config_robustly(config_path)
+        if not text_replace_config or 'text_replacements' not in text_replace_config:
+            logging.error("Arquivo de configuração YAML para substituição de texto é inválido ou não foi encontrado.")
             return
 
         supported_extensions = ["csv", "json", "xlsx"]
