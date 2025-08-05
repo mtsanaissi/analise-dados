@@ -15,30 +15,26 @@ class DataConcatenator:
     A class to concatenate data from multiple files in a directory into a single output file.
     """
 
-    def __init__(self, config: Dict[str, str]):
+    def __init__(self, input_folder: str, output_file: str, file_type: str):
         """
-        Initializes the DataConcatenator with a configuration dictionary.
+        Initializes the DataConcatenator.
 
         Args:
-            config (Dict[str, str]): A dictionary containing the configuration:
-                                     - input_folder (str): Absolute path to the folder with source files.
-                                     - output_file (str): Absolute path to the output file.
-                                     - file_type (str): The type of file to concatenate ('csv' or 'xlsx').
+            input_folder (str): Absolute path to the folder with source files.
+            output_file (str): Absolute path to the output file.
+            file_type (str): The type of file to concatenate ('csv', 'json', or 'xlsx').
         """
-        self.config = config
+        self.input_folder = input_folder
+        self.output_file = output_file
+        self.file_type = file_type
         self.validate_config()
 
     def validate_config(self):
         """
-        Validates the provided configuration.
+        Validates the provided file type.
         """
-        required_keys = ['input_folder', 'output_file', 'file_type']
-        for key in required_keys:
-            if key not in self.config:
-                raise ValueError(f"Missing required configuration key: {key}")
-
-        if self.config['file_type'] not in ['csv', 'xlsx']:
-            raise ValueError(f"Unsupported file type: {self.config['file_type']}. Must be 'csv' or 'xlsx'.")
+        if self.file_type not in ['csv', 'json', 'xlsx']:
+            raise ValueError(f"Unsupported file type: {self.file_type}. Must be 'csv', 'json', or 'xlsx'.")
 
     def concatenate_files(self):
         """
@@ -46,7 +42,7 @@ class DataConcatenator:
         """
         logging.info("Starting concatenation process...")
         try:
-            files_to_process = find_files(self.config['input_folder'], [self.config['file_type']])
+            files_to_process = find_files(self.input_folder, [self.file_type])
             if not files_to_process:
                 logging.warning("No files found to concatenate.")
                 return
@@ -78,11 +74,13 @@ class DataConcatenator:
         for file_path in files:
             try:
                 logging.info(f"Reading file: {file_path}")
-                if self.config['file_type'] == 'csv':
+                if self.file_type == 'csv':
                     connector = CsvConnector(file_path=file_path)
                     df = connector.read()
-                elif self.config['file_type'] == 'xlsx':
+                elif self.file_type == 'xlsx':
                     df = pd.read_excel(file_path)
+                elif self.file_type == 'json':
+                    df = pd.read_json(file_path)
 
                 dataframes.append(df)
             except Exception as e:
@@ -103,7 +101,6 @@ class DataConcatenator:
             return pd.DataFrame()
 
         logging.info("Concatenating DataFrames...")
-        # CUSTOMIZAR: pd.concat can be customized with other parameters like 'join' if needed.
         master_df = pd.concat(dataframes, ignore_index=True, sort=False)
         return master_df
 
@@ -114,22 +111,18 @@ class DataConcatenator:
         Args:
             df (pd.DataFrame): The DataFrame to write.
         """
-        output_file = self.config['output_file']
-        file_type = self.config['file_type']
+        logging.info(f"Writing concatenated data to {self.output_file}...")
 
-        logging.info(f"Writing concatenated data to {output_file}...")
-
-        # Create output directory if it doesn't exist
-        output_dir = os.path.dirname(output_file)
+        output_dir = os.path.dirname(self.output_file)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        if file_type == 'csv':
-            # CUSTOMIZAR: CsvConnector can be customized with different delimiters, encodings, etc.
-            connector = CsvConnector(file_path=output_file)
+        if self.file_type == 'csv':
+            connector = CsvConnector(file_path=self.output_file)
             connector.write(df)
-        elif file_type == 'xlsx':
-            # CUSTOMIZAR: to_excel can be customized with sheet_name, etc.
-            df.to_excel(output_file, index=False)
+        elif self.file_type == 'xlsx':
+            df.to_excel(self.output_file, index=False)
+        elif self.file_type == 'json':
+            df.to_json(self.output_file, orient='records', indent=4)
 
         logging.info("Output file written successfully.")

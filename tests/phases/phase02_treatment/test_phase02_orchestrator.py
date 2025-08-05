@@ -58,24 +58,25 @@ def test_orchestrator_enrich_data_routing_absolute_path(mock_data_enricher, tmp_
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataConcatenator')
 def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path):
     # Arrange
-    config_dir = tmp_path / "fad-config"
-    config_dir.mkdir()
-    config_path = config_dir / "concat_config.yaml"
-    config = {
-        'input_folder': 'data/',
-        'output_file': 'output.csv',
-        'file_type': 'csv'
-    }
-    with open(config_path, 'w') as f:
-        yaml.dump(config, f)
+    input_folder = tmp_path / "data"
+    output_file = tmp_path / "output.csv"
 
-    args = ['--concatenate-data', 'concat_config.yaml']
+    args = [
+        '--concatenate-data',
+        '--input-folder', str(input_folder),
+        '--output-file', str(output_file),
+        '--file-type', 'csv'
+    ]
 
     # Act
     run_treatment_phase(str(tmp_path), args)
 
     # Assert
-    mock_data_concatenator.assert_called_once()
+    mock_data_concatenator.assert_called_once_with(
+        input_folder=str(input_folder.resolve()),
+        output_file=str(output_file.resolve()),
+        file_type='csv'
+    )
     mock_data_concatenator.return_value.concatenate_files.assert_called_once()
 
 @patch('src.phases.phase02_treatment.phase02_orchestrator.shutil.move')

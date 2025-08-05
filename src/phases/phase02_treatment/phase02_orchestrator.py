@@ -7,7 +7,7 @@ import datetime
 import shutil
 import yaml
 import re
-from src.utils import find_files, METADATA_DIR
+from src.utils import find_files, METADATA_DIR, read_yaml_config_robustly
 from src.connectors.factory import get_data_loader
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
@@ -28,9 +28,8 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                                  metavar="PATH",
                                  help="Caminho para o arquivo de configuração YAML para o enriquecimento de dados.")
     operation_group.add_argument("--concatenate-data",
-                                 dest="concatenate_config_path",
-                                 metavar="PATH",
-                                 help="Caminho para o arquivo de configuração YAML para a concatenação de dados.")
+                                 action="store_true",
+                                 help="Ativa a concatenação de dados. Requer --input-folder, --output-file, e --file-type.")
     operation_group.add_argument("--replace-values",
                                  dest="replace_config_path",
                                  metavar="PATH",
@@ -42,6 +41,11 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
     operation_group.add_argument("--strip-whitespace",
                                  action="store_true",
                                  help="Remove espaços em branco do início e do fim de todos os valores em todas as colunas.")
+
+    # Argumentos para a operação de concatenação
+    parser.add_argument("--input-folder", help="Pasta de entrada para a concatenação.")
+    parser.add_argument("--output-file", help="Arquivo de saída para a concatenação.")
+    parser.add_argument("--file-type", choices=['csv', 'json', 'xlsx'], help="Tipo de arquivo para a concatenação.")
 
     parser.add_argument("--report-output",
                         choices=['json', 'html'],
@@ -72,33 +76,23 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             logging.error(
                 f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
 
-    elif args.concatenate_config_path:
-        logging.info(
-            f"Modo de concatenação de dados ativado. Carregando configuração de: {args.concatenate_config_path}")
+    elif args.concatenate_data:
+        logging.info("Modo de concatenação de dados ativado.")
         try:
-            config_path = args.concatenate_config_path
-            if not os.path.isabs(config_path):
-                config_path = os.path.join(data_project_path, "fad-config", config_path)
+            if not all([args.input_folder, args.output_file, args.file_type]):
+                logging.error("Para a concatenação, os argumentos --input-folder, --output-file, e --file-type são obrigatórios.")
+                return
 
-            config_dir = os.path.dirname(config_path)
+            input_folder = os.path.abspath(args.input_folder)
+            output_file = os.path.abspath(args.output_file)
 
-            with open(config_path, 'r', encoding='utf-8-sig') as f:
-                concat_config = yaml.safe_load(f)
-
-            for key in ['input_folder', 'output_file']:
-                if key in concat_config:
-                    concat_config[key] = os.path.join(
-                        config_dir, concat_config[key])
-
-            concatenator = DataConcatenator(concat_config)
+            concatenator = DataConcatenator(
+                input_folder=input_folder,
+                output_file=output_file,
+                file_type=args.file_type
+            )
             concatenator.concatenate_files()
             logging.info("Concatenação de dados concluída com sucesso.")
-        except FileNotFoundError:
-            logging.error(
-                f"Arquivo de configuração de concatenação não encontrado em: {config_path}")
-        except yaml.YAMLError:
-            logging.error(
-                f"Erro ao decodificar o arquivo YAML de configuração: {config_path}")
         except Exception as e:
             logging.error(
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
@@ -261,6 +255,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             generate_html_report(report_data, report_path)
 
     elif args.text_replace_config_path:
+        config_path = args.text_replace_config_path
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(data_project_path, "fad-config", config_path)
+
         text_replace_config = read_yaml_config_robustly(config_path)
         if not text_replace_config or 'text_replacements' not in text_replace_config:
             logging.error("Arquivo de configuração YAML para substituição de texto é inválido ou não foi encontrado.")
