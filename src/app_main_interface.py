@@ -199,29 +199,7 @@ def main_interface():
             st.session_state.running = False
             st.experimental_rerun()
 
-    if not st.session_state.running:
-        if st.button("Executar", type="primary"):
-            if not project_path or not os.path.isdir(project_path):
-                st.error(f"O caminho '{project_path}' não é um diretório válido.")
-                return
-
-            st.session_state.running = True
-            st.experimental_rerun()
-            st.success(f"Fase '{selected_phase}' concluída com sucesso!")
-            report_path = find_report_path(full_output)
-            if report_path and os.path.exists(report_path):
-                with open(report_path, "rb") as f:
-                    st.download_button(
-                        label="Baixar Relatório",
-                        data=f,
-                        file_name=os.path.basename(report_path)
-                    )
-        else:
-            st.error("Ocorreu um erro durante a execução.")
-            st.code(full_output)
-
-        st.session_state.running = False
-        st.experimental_rerun()
+    
 
 if __name__ == "__main__":
     main_interface()
