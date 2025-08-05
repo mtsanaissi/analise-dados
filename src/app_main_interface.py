@@ -158,19 +158,55 @@ def main_interface():
         st.experimental_rerun()
 
     if st.session_state.running:
-        # Lógica para lidar com o arquivo carregado
-        # ... (código existente)
+        temp_config_path = None
+        try:
+            if selected_phase == "treatment" and treatment_args.get("config_file"):
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".yaml", mode='wb') as tmp:
+                    tmp.write(treatment_args["config_file"].getvalue())
+                    temp_config_path = tmp.name
+                treatment_args["config_file_path"] = temp_config_path
 
-        command = build_command(project_path, selected_phase, discovery_args, treatment_args)
-        st.info(f"Executando comando: `{' '.join(command)}`")
+            command = build_command(
+                project_path,
+                selected_phase,
+                discovery_args=discovery_args,
+                treatment_args=treatment_args
+            )
+            st.info(f"Executando comando: `{' '.join(command)}`")
 
-        output_placeholder = st.empty()
-        output_placeholder.code("Iniciando a execução...")
+            output_placeholder = st.empty()
+            output_placeholder.code("Iniciando a execução...")
 
-        with st.spinner("Processando... Por favor, aguarde."):
-            return_code, full_output = run_process(command, output_placeholder)
+            with st.spinner("Processando... Por favor, aguarde."):
+                return_code, full_output = run_process(command, output_placeholder)
 
-        if return_code == 0:
+            if return_code == 0:
+                st.success(f"Fase '{selected_phase}' concluída com sucesso!")
+                report_path = find_report_path(full_output)
+                if report_path and os.path.exists(report_path):
+                    with open(report_path, "rb") as f:
+                        st.download_button(
+                            label="Baixar Relatório",
+                            data=f,
+                            file_name=os.path.basename(report_path)
+                        )
+            else:
+                st.error("Ocorreu um erro durante a execução.")
+                st.code(full_output)
+        finally:
+            if temp_config_path and os.path.exists(temp_config_path):
+                os.remove(temp_config_path)
+            st.session_state.running = False
+            st.experimental_rerun()
+
+    if not st.session_state.running:
+        if st.button("Executar", type="primary"):
+            if not project_path or not os.path.isdir(project_path):
+                st.error(f"O caminho '{project_path}' não é um diretório válido.")
+                return
+
+            st.session_state.running = True
+            st.experimental_rerun()
             st.success(f"Fase '{selected_phase}' concluída com sucesso!")
             report_path = find_report_path(full_output)
             if report_path and os.path.exists(report_path):
