@@ -21,6 +21,7 @@ import pandas as pd
 import chardet
 import csv
 import fnmatch
+import yaml
 
 METADATA_DIR = "fad-metadados"
 
@@ -241,3 +242,23 @@ def build_command(
                     command.append(config_path)
 
     return command
+
+def read_yaml_config_robustly(file_path: str) -> dict | None:
+    """
+    Lê um arquivo de configuração YAML de forma robusta.
+
+    Args:
+        file_path (str): O caminho para o arquivo YAML.
+
+    Returns:
+        dict | None: O dicionário com a configuração ou None em caso de erro.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Erro: Arquivo de configuração não encontrado em '{file_path}'.", file=sys.stderr)
+        return None
+    except yaml.YAMLError as e:
+        print(f"Erro ao decodificar o arquivo YAML '{os.path.basename(file_path)}': {e}", file=sys.stderr)
+        return None

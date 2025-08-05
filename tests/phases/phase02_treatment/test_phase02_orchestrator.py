@@ -8,51 +8,32 @@ from src.phases.phase02_treatment.phase02_orchestrator import run_treatment_phas
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataEnricher')
 def test_orchestrator_enrich_data_routing(mock_data_enricher, tmp_path):
     # Arrange
-    config_dir = tmp_path / "fad-config"
-    config_dir.mkdir()
-    config_path = config_dir / "enrich_config.yaml"
-    config = {
-        'main_file': 'main.csv',
-        'lookup_file': 'lookup.csv',
-        'main_key': 'key',
-        'lookup_key': 'key',
-        'columns_to_add': ['extra_data'],
-        'output_file': 'output.csv'
-    }
-    with open(config_path, 'w') as f:
-        yaml.dump(config, f)
+    main_file = tmp_path / "main.csv"
+    lookup_file = tmp_path / "lookup.csv"
+    output_file = tmp_path / "output.csv"
 
-    args = ['--enrich-data', str(config_path)]
+    args = [
+        '--enrich-data',
+        '--main-file', str(main_file),
+        '--lookup-file', str(lookup_file),
+        '--main-key', 'key',
+        '--lookup-key', 'key',
+        '--columns-to-add', 'extra_data',
+        '--output-file', str(output_file)
+    ]
 
     # Act
     run_treatment_phase(str(tmp_path), args)
 
     # Assert
-    mock_data_enricher.assert_called_once_with(config, str(tmp_path))
-    mock_data_enricher.return_value.enrich_data.assert_called_once()
-
-@patch('src.phases.phase02_treatment.phase02_orchestrator.DataEnricher')
-def test_orchestrator_enrich_data_routing_absolute_path(mock_data_enricher, tmp_path):
-    # Arrange
-    config = {
-        'main_file': 'main.csv',
-        'lookup_file': 'lookup.csv',
-        'main_key': 'key',
-        'lookup_key': 'key',
-        'columns_to_add': ['extra_data'],
-        'output_file': 'output.csv'
-    }
-    config_path = tmp_path / "enrich_config.yaml"
-    with open(config_path, 'w') as f:
-        yaml.dump(config, f)
-
-    args = ['--enrich-data', str(config_path)]
-
-    # Act
-    run_treatment_phase(str(tmp_path), args)
-
-    # Assert
-    mock_data_enricher.assert_called_once()
+    mock_data_enricher.assert_called_once_with(
+        main_file=str(main_file),
+        lookup_file=str(lookup_file),
+        main_key='key',
+        lookup_key='key',
+        columns_to_add=['extra_data'],
+        output_file=str(output_file)
+    )
     mock_data_enricher.return_value.enrich_data.assert_called_once()
 
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataConcatenator')

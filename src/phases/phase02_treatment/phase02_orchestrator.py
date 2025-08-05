@@ -7,7 +7,7 @@ import datetime
 import shutil
 import yaml
 import re
-from src.utils import find_files, METADATA_DIR
+from src.utils import find_files, METADATA_DIR, read_yaml_config_robustly
 from src.connectors.factory import get_data_loader
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
@@ -23,10 +23,14 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
     operation_group = parser.add_mutually_exclusive_group(required=True)
 
-    operation_group.add_argument("--enrich-data",
-                                 dest="enrich_config_path",
-                                 metavar="PATH",
-                                 help="Caminho para o arquivo de configuração YAML para o enriquecimento de dados.")
+    operation_group.add_argument("--enrich-data", action="store_true", help="Ativa o modo de enriquecimento de dados.")
+    parser.add_argument("--main-file", help="Caminho para o arquivo principal.")
+    parser.add_argument("--lookup-file", help="Caminho para o arquivo de consulta.")
+    parser.add_argument("--main-key", help="Chave de junção no arquivo principal.")
+    parser.add_argument("--lookup-key", help="Chave de junção no arquivo de consulta.")
+    parser.add_argument("--columns-to-add", nargs='+', help="Colunas a serem adicionadas do arquivo de consulta.")
+    parser.add_argument("--output-file", help="Caminho para salvar o arquivo enriquecido.")
+
     operation_group.add_argument("--concatenate-data",
                                  dest="concatenate_config_path",
                                  metavar="PATH",
@@ -51,26 +55,23 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
     logging.info("--- Iniciando Fase 02: Tratamento ---")
 
-    if args.enrich_config_path:
-        logging.info(
-            f"Modo de enriquecimento de dados ativado. Carregando configuração de: {args.enrich_config_path}")
+    if args.enrich_data:
+        logging.info("Modo de enriquecimento de dados ativado.")
         try:
-            with open(args.enrich_config_path, 'r', encoding='utf-8-sig') as f:
-                enrich_config = yaml.safe_load(f)
-
-            # Passa o caminho do projeto de dados para o enriquecedor
-            enricher = DataEnricher(enrich_config, data_project_path)
+            enricher = DataEnricher(
+                main_file=args.main_file,
+                lookup_file=args.lookup_file,
+                main_key=args.main_key,
+                lookup_key=args.lookup_key,
+                columns_to_add=args.columns_to_add,
+                output_file=args.output_file
+            )
             status = enricher.enrich_data()
-            logging.info(
-                f"Enriquecimento de dados concluído com sucesso. Status: {status}")
-        except FileNotFoundError:
-            logging.error(
-                f"Arquivo de configuração de enriquecimento não encontrado em: {args.enrich_config_path}")
-        except (yaml.YAMLError, ValueError) as e:
-            logging.error(f"Erro na configuração ou processamento do YAML: {e}")
+            logging.info(f"Enriquecimento de dados concluído. Status: {status}")
+        except (ValueError, FileNotFoundError) as e:
+            logging.error(f"Erro durante o enriquecimento de dados: {e}")
         except Exception as e:
-            logging.error(
-                f"Ocorreu um erro durante o enriquecimento de dados: {e}", exc_info=True)
+            logging.error(f"Ocorreu um erro inesperado durante o enriquecimento de dados: {e}", exc_info=True)
 
     elif args.concatenate_config_path:
         logging.info(
@@ -261,6 +262,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             generate_html_report(report_data, report_path)
 
     elif args.text_replace_config_path:
+        config_path = args.text_replace_config_path
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(data_project_path, "fad-config", config_path)
+
         text_replace_config = read_yaml_config_robustly(config_path)
         if not text_replace_config or 'text_replacements' not in text_replace_config:
             logging.error("Arquivo de configuração YAML para substituição de texto é inválido ou não foi encontrado.")

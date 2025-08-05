@@ -17,17 +17,15 @@ def test_enrich_data_success(tmp_path):
     main_df.to_csv(main_file, index=False)
     lookup_df.to_csv(lookup_file, index=False)
 
-    config = {
-        'main_file': "main.csv",
-        'lookup_file': "lookup.csv",
-        'main_key': 'key',
-        'lookup_key': 'key',
-        'columns_to_add': ['extra_data'],
-        'output_file': "output.csv"
-    }
-
     # Act
-    enricher = DataEnricher(config, project_path=str(tmp_path))
+    enricher = DataEnricher(
+        main_file=str(main_file),
+        lookup_file=str(lookup_file),
+        main_key='key',
+        lookup_key='key',
+        columns_to_add=['extra_data'],
+        output_file=str(output_file)
+    )
     enricher.enrich_data()
 
     # Assert
@@ -51,17 +49,15 @@ def test_enrich_data_duplicate_keys_in_lookup(tmp_path):
     main_df.to_csv(main_file, index=False)
     lookup_df.to_csv(lookup_file, index=False)
 
-    config = {
-        'main_file': "main.csv",
-        'lookup_file': "lookup.csv",
-        'main_key': 'key',
-        'lookup_key': 'key',
-        'columns_to_add': ['extra_data'],
-        'output_file': "output.csv"
-    }
-
     # Act
-    enricher = DataEnricher(config, project_path=str(tmp_path))
+    enricher = DataEnricher(
+        main_file=str(main_file),
+        lookup_file=str(lookup_file),
+        main_key='key',
+        lookup_key='key',
+        columns_to_add=['extra_data'],
+        output_file=str(output_file)
+    )
     enricher.enrich_data()
 
     # Assert
