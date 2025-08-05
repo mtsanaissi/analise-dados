@@ -177,29 +177,6 @@ def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> 
         print(f"Erro ao salvar o arquivo CSV em '{output_path}': {e}", file=sys.stderr)
         return False
 
-def read_yaml_config_robustly(file_path: str) -> dict | None:
-    """
-    Lê um arquivo de configuração YAML de forma robusta.
-
-    Args:
-        file_path (str): O caminho para o arquivo YAML.
-
-    Returns:
-        dict | None: O dicionário com os dados do YAML ou None em caso de erro.
-    """
-    try:
-        with open(file_path, 'r', encoding='utf-8-sig') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        logging.error(f"Arquivo de configuração não encontrado em: {file_path}")
-        return None
-    except yaml.YAMLError as e:
-        logging.error(f"Erro ao decodificar o arquivo YAML de configuração: {file_path}\n{e}")
-        return None
-    except Exception as e:
-        logging.error(f"Ocorreu um erro inesperado ao ler o arquivo YAML: {e}", exc_info=True)
-        return None
-
 def build_command(
     project_path: str,
     phase: str,
@@ -249,9 +226,43 @@ def build_command(
         operation = treatment_args.get("operation")
         if operation in operation_map:
             command.append(operation_map[operation])
-            if operation != "Remover Espaços":
+
+            if operation == "Enriquecer Dados":
+                for arg_name in ["main_file", "lookup_file", "main_key", "lookup_key", "output_file"]:
+                    if treatment_args.get(arg_name):
+                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+                if treatment_args.get("columns_to_add"):
+                    command.extend(["--columns-to-add"] + treatment_args["columns_to_add"])
+
+            elif operation == "Concatenar Dados":
+                for arg_name in ["input_folder", "output_file", "file_type"]:
+                    if treatment_args.get(arg_name):
+                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+
+            elif operation in ["Substituir Valores", "Encontrar e Substituir Texto"]:
                 config_path = treatment_args.get("config_file_path")
                 if config_path:
                     command.append(config_path)
 
     return command
+
+def read_yaml_config(file_path: str) -> dict | None:
+    """
+    Lê um arquivo de configuração YAML de forma robusta.
+
+    Args:
+        file_path (str): O caminho para o arquivo YAML.
+
+    Returns:
+        dict | None: O conteúdo do arquivo YAML como um dicionário, ou None em caso de erro.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            config = yaml.safe_load(f)
+            return config
+    except FileNotFoundError:
+        logging.error(f"Arquivo de configuração não encontrado em: {file_path}")
+        return None
+    except yaml.YAMLError as e:
+        logging.error(f"Erro ao processar o arquivo YAML '{os.path.basename(file_path)}': {e}")
+        return None

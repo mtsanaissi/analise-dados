@@ -135,7 +135,7 @@ def main_interface():
                               "Encontrar e Substituir Texto", "Concatenar Dados", "Enriquecer Dados"]
                 treatment_args["operation"] = st.selectbox(
                     "Operação de Tratamento", options=operations, help="Selecione a operação de tratamento.", disabled=st.session_state.running)
-                if treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto", "Concatenar Dados", "Enriquecer Dados"]:
+                if treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto"]:
                     uploaded_file = st.file_uploader("Carregar Arquivo de Configuração YAML", type=[
                         'yaml', 'yml'], help="Faça o upload do arquivo de configuração YAML.", disabled=st.session_state.running)
                     if uploaded_file is not None and st.session_state.temp_config_path is None:
@@ -148,6 +148,20 @@ def main_interface():
                             st.session_state.temp_config_path = tmp.name
                             tmp.write(decoded_content)
                         st.rerun() # Rerender para mostrar o estado atualizado
+
+                if treatment_args["operation"] == "Enriquecer Dados":
+                    treatment_args["main_file"] = st.text_input("Arquivo Principal", help="Nome do arquivo principal a ser enriquecido (relativo à pasta do projeto de dados). Ex: `vendas.csv`", disabled=st.session_state.running)
+                    treatment_args["lookup_file"] = st.text_input("Arquivo de Consulta", help="Nome do arquivo de consulta (relativo à pasta do projeto de dados). Ex: `produtos.xlsx`", disabled=st.session_state.running)
+                    treatment_args["main_key"] = st.text_input("Chave Principal", help="Nome da coluna chave no arquivo principal. Ex: `id_produto`", disabled=st.session_state.running)
+                    treatment_args["lookup_key"] = st.text_input("Chave de Consulta", help="Nome da coluna chave no arquivo de consulta. Ex: `id`", disabled=st.session_state.running)
+                    treatment_args["columns_to_add"] = st.multiselect("Colunas a Adicionar", options=[], help="Selecione as colunas do arquivo de consulta para adicionar ao principal.", disabled=st.session_state.running)
+                    treatment_args["output_file"] = st.text_input("Arquivo de Saída", help="Nome do arquivo de saída (relativo à pasta do projeto de dados). Ex: `vendas_enriquecido.csv`", disabled=st.session_state.running)
+
+                if treatment_args["operation"] == "Concatenar Dados":
+                    treatment_args["input_folder"] = st.text_input("Pasta de Entrada", help="Caminho para a pasta contendo os arquivos a serem concatenados (relativo à pasta do projeto de dados). Ex: `faturamento`", disabled=st.session_state.running)
+                    treatment_args["output_file"] = st.text_input("Arquivo de Saída", help="Nome do arquivo de saída consolidado (relativo à pasta do projeto de dados). Ex: `faturamento_consolidado.csv`", disabled=st.session_state.running)
+                    treatment_args["file_type"] = st.selectbox("Tipo de Arquivo", options=["csv", "xlsx", "json"], help="Selecione o tipo de arquivo a ser concatenado.", disabled=st.session_state.running)
+
 
         button_label = "Nova Execução" if st.session_state.last_run_results else "Executar"
         if st.sidebar.button(button_label, type="primary", use_container_width=True, disabled=st.session_state.running):

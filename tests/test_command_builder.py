@@ -107,25 +107,48 @@ def test_build_treatment_command_find_and_replace_with_config():
     assert "--find-and-replace-text" in command
     assert "/tmp/find.yaml" in command
 
-def test_build_treatment_command_concatenate_with_config():
-    """Testa a operação de concatenar com um arquivo de configuração."""
+def test_build_treatment_command_concatenate_with_args():
+    """Testa a operação de concatenar com os novos argumentos da CLI."""
     args = {
         "operation": "Concatenar Dados",
-        "config_file_path": "/tmp/concat.yaml"
+        "input_folder": "input",
+        "output_file": "output.csv",
+        "file_type": "csv"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
     assert "--concatenate-data" in command
-    assert "/tmp/concat.yaml" in command
+    assert "--input-folder" in command
+    assert "input" in command
+    assert "--output-file" in command
+    assert "output.csv" in command
+    assert "--file-type" in command
+    assert "csv" in command
 
-def test_build_treatment_command_enrich_with_config():
-    """Testa a operação de enriquecer com um arquivo de configuração."""
+def test_build_treatment_command_enrich_with_args():
+    """Testa a operação de enriquecer com os novos argumentos da CLI."""
     args = {
         "operation": "Enriquecer Dados",
-        "config_file_path": "/tmp/enrich.yaml"
+        "main_file": "main.csv",
+        "lookup_file": "lookup.csv",
+        "main_key": "id",
+        "lookup_key": "id",
+        "columns_to_add": ["col1", "col2"],
+        "output_file": "enriched.csv"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
     assert "--enrich-data" in command
-    assert "/tmp/enrich.yaml" in command
+    assert "--main-file" in command
+    assert "main.csv" in command
+    assert "--lookup-file" in command
+    assert "lookup.csv" in command
+    assert "--main-key" in command
+    assert "id" in command
+    assert "--lookup-key" in command
+    assert "id" in command
+    assert "--columns-to-add" in command
+    assert "col1,col2" in command
+    assert "--output-file" in command
+    assert "enriched.csv" in command
 
 def test_build_treatment_command_with_config_missing():
     """Testa uma operação que requer config mas o caminho não é fornecido."""

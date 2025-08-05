@@ -7,7 +7,7 @@ import datetime
 import shutil
 import yaml
 import re
-from src.utils import find_files, METADATA_DIR, read_yaml_config_robustly
+from src.utils import find_files, METADATA_DIR, read_yaml_config
 from src.connectors.factory import get_data_loader
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
@@ -97,11 +97,8 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                 f"Ocorreu um erro durante a concatenação de dados: {e}", exc_info=True)
 
     elif args.replace_config_path:
-        config_path = args.replace_config_path
-        if not os.path.isabs(config_path):
-            config_path = os.path.join(data_project_path, "fad-config", config_path)
-
-        replace_config = read_yaml_config_robustly(config_path)
+        config_path = os.path.join(data_project_path, "fad-config", args.replace_config_path)
+        replace_config = read_yaml_config(config_path)
         if not replace_config or 'replacements' not in replace_config:
             logging.error("Arquivo de configuração YAML para substituição é inválido ou não foi encontrado.")
             return
@@ -240,11 +237,8 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             generate_html_report(report_data, report_path)
 
     elif args.text_replace_config_path:
-        config_path = args.text_replace_config_path
-        if not os.path.isabs(config_path):
-            config_path = os.path.join(data_project_path, "fad-config", config_path)
-
-        text_replace_config = read_yaml_config_robustly(config_path)
+        config_path = os.path.join(data_project_path, "fad-config", args.text_replace_config_path)
+        text_replace_config = read_yaml_config(config_path)
         if not text_replace_config or 'text_replacements' not in text_replace_config:
             logging.error("Arquivo de configuração YAML para substituição de texto é inválido ou não foi encontrado.")
             return
