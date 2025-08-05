@@ -22,13 +22,13 @@ def test_orchestrator_enrich_data_routing(mock_data_enricher, tmp_path):
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
 
-    args = ['--enrich-data', 'enrich_config.yaml']
+    args = ['--enrich-data', str(config_path)]
 
     # Act
     run_treatment_phase(str(tmp_path), args)
 
     # Assert
-    mock_data_enricher.assert_called_once()
+    mock_data_enricher.assert_called_once_with(config, str(tmp_path))
     mock_data_enricher.return_value.enrich_data.assert_called_once()
 
 @patch('src.phases.phase02_treatment.phase02_orchestrator.DataEnricher')
