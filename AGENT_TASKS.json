@@ -1,34 +1,26 @@
 {
   "backlog": [
     {
-      "id": "T034",
-      "title": "Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness",
-      "description": "O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos.",
-      "acceptance_criteria": [
-        "O teste `test_type_consistency_checker.py` deve ser refatorado para usar o módulo `tempfile` do Python para criar diretórios temporários únicos para cada execução de teste, garantindo isolamento total e evitando colisões de nomes de arquivo/diretório.",
-        "A lógica de criação e exclusão de arquivos de teste deve ser encapsulada de forma a ser à prova de falhas, mesmo em cenários de interrupção.",
-        "O teste deve continuar a validar corretamente a funcionalidade de comparação de tipos para CSV, Excel e JSON.",
-        "O teste deve passar de forma consistente em múltiplas execuções."
-      ]
-    },
-    {
       "id": "T031",
-      "title": "[UI - Parte 3] Implementar UI para Visualização e Refinamentos Finais",
-      "description": "Finalizar a implementação da interface gráfica, adicionando a funcionalidade para a fase de Visualização e incorporando refinamentos de UX, como a exibição de relatórios e tratamento de erros.",
+      "title": "[UI] Finalizar e Polir UI para Fases Discovery e Treatment",
+      "description": "Concluir a implementação da interface gráfica para as fases Discovery e Treatment, garantindo uma experiência de usuário robusta e polida. Isso inclui a exibição de relatórios, tratamento de erros, feedback visual durante a execução e uma documentação completa e atualizada.",
+      "branchName": "feature/finaliza-ui-discovery-treatment",
       "acceptance_criteria": [
-        "**Fase Visualization:**",
-        "A UI deve exibir um botão para \"Iniciar Aplicação de Visualização\".",
-        "Clicar no botão deve executar o script `src/phases/phase04_visualization/app_explore_single_profile.py` em um subprocesso.",
-        "**Exibição de Relatórios:** Após uma execução bem-sucedida de qualquer fase que gere relatório (ex: Discovery, Treatment), a UI deve exibir um link para download direto do relatório HTML/JSON gerado.",
-        "**Tratamento de Erros:** Se a execução do subprocesso falhar, a UI deve exibir uma mensagem de erro clara e amigável para o usuário.",
-        "**Testes:** Criar testes para validar a construção de comandos para a fase de Visualização e para a exibição/download de relatórios.",
-        "**Documentação:** O `COMO_USAR.md` e o `LEIAME.md` devem ser atualizados para apresentar a nova interface gráfica como o método principal de uso interativo do kit de ferramentas."
+        "**Exibição de Relatórios:** Após a execução bem-sucedida de uma fase que gera relatório, a UI deve exibir um link para download direto do arquivo gerado.",
+        "**Tratamento de Erros:** Se a execução do subprocesso falhar, a UI deve capturar o erro e exibir uma mensagem clara e amigável para o usuário.",
+        "**Polimento da UI (UX):**",
+        "- Ao iniciar uma fase, um indicador visual (ex: spinner) deve ser exibido e os controles de execução devem ser desabilitados.",
+        "- Após a conclusão, uma mensagem de sucesso clara (ex: 'Fase Discovery concluída com sucesso!') deve ser exibida.",
+        "- Adicionar tooltips ou textos de ajuda para explicar cada opção configurável nas fases Discovery e Treatment.",
+        "**Testes:** Criar testes para validar a lógica de exibição de relatórios e o tratamento de mensagens de erro na UI.",
+        "**Atualização Abrangente da Documentação:** O arquivo `COMO_USAR.md` deve ser completamente reescrito para refletir a nova interface gráfica como o principal método de uso. A documentação deve cobrir em detalhes as funcionalidades das fases Discovery e Treatment implementadas na UI (tarefas T029, T030 e esta)."
       ]
     },
     {
       "id": "T035",
       "title": "Evoluir Testes da Função `build_command` para Cobrir Lógica Dinâmica",
       "description": "A função `build_command` em `src/utils.py` foi expandida para lidar com múltiplos argumentos dinâmicos da UI, mas os testes atuais em `tests/test_utils.py` não validam essa nova complexidade. É necessário criar testes parametrizados que cubram os diferentes cenários de construção de comandos para as fases Discovery e Treatment.",
+      "branchName": "feature/evolui-testes-build-command",
       "acceptance_criteria": [
         "O arquivo `tests/test_utils.py` deve ser atualizado para incluir testes para a função `build_command`.",
         "Os novos testes devem ser parametrizados para cobrir diferentes combinações de argumentos para a fase 'Discovery' (ex: `--compare-fields`, `--compare-types`, `--report-output`, `--generate-char-cleanup-config`).",
@@ -62,58 +54,9 @@
       "acceptance_criteria": []
     },
     {
-      "id": "T032",
-      "title": "Corrigir Lógica de Exclusão de Diretórios em `find_files` e Adicionar Teste de Integração",
-      "description": "A função `find_files` em `src/utils.py` não está adicionando corretamente os diretórios de exclusão passados como argumento à sua lista padrão, resultando na não exclusão de pastas de backup antigas. Além disso, falta um teste de integração robusto para validar este comportamento.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T027",
-      "title": "Criar Funcionalidade para Remover Espaços em Branco (Whitespace)",
-      "description": "Implementar uma nova operação na Fase 2, ativada pela flag `--strip-whitespace`, que remove espaços em branco do início e do fim de todos os valores em todas as colunas.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T026",
-      "title": "Corrigir e Aprimorar Verificação de Consistência de Tipos",
-      "description": "Corrigir um bug no orquestrador da Fase 1 onde a verificação de tipos para arquivos Excel só é executada se existirem arquivos CSV. Além disso, aprimorar os testes da funcionalidade para cobrir mais cenários e tipos de arquivo.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T024",
-      "title": "Implementar Verificação de Consistência de Tipos de Dados",
-      "description": "Adicionar uma nova funcionalidade na Fase 1 para comparar os tipos de dados (dtypes) de colunas com o mesmo nome entre diferentes arquivos do mesmo tipo (ex: CSVs).",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T025",
-      "title": "Adicionar `case_sensitive` ao `find-and-replace-text` e Atualizar Documentação",
-      "description": "Padronizar as funcionalidades de substituição, adicionando a opção `case_sensitive` à operação `--find-and-replace-text` e atualizando a documentação para ambas as operações.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T023",
-      "title": "Ignorar Pastas Específicas na Busca de Arquivos",
-      "description": "Aperfeiçoar o mecanismo de busca de arquivos de dados para que ignore explicitamente os diretórios `fad-metadados`, `fad-config` e `fad-bkp*`.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T022",
-      "title": "Configurar Sensibilidade de Caso na Substituição de Valores",
-      "description": "Permitir que a operação `--replace-values` da Fase 2 ignore diferenças de maiúsculas e minúsculas (case-insensitive) durante a busca por valores a serem substituídos.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T021",
-      "title": "Criar Operação de Substituição de Texto e Padrões (Regex)",
-      "description": "Adicionar uma nova operação na Fase 2, focada em substituição de substrings e padrões (regex) dentro do conteúdo das células, para lidar com casos de limpeza mais complexos que a substituição de valores inteiros não cobre.",
-      "acceptance_criteria": []
-    },
-    {
-      "id": "T020",
-      "title": "Aprimorar Operação de Substituição de Valores com Múltiplos Valores",
-      "description": "Evoluir a operação `--replace-values` para permitir que uma lista de múltiplos valores existentes (`existing_value`) seja mapeada para um único `new_value`, tornando as regras de padronização mais concisas e eficientes.",
-      "acceptance_criteria": []
+      "id": "T034",
+      "title": "Aprimorar Robustez do Teste de Consistência de Tipos contra Flakiness",
+      "description": "O teste `tests/phases/phase01_discovery/test_type_consistency_checker.py` pode apresentar falhas intermitentes devido a problemas de concorrência na manipulação de arquivos temporários. Aprimorar o setup e teardown do teste para garantir isolamento completo e robustez na criação e exclusão de arquivos."
     }
   ]
 }

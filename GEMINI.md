@@ -22,7 +22,7 @@ The process is as follows:
     c. **Review Implementation:** I will run `git log -n 1` to read the commit message and then verify the changes by reading the relevant files.
     d. **Quality Assurance:** I will run all quality checks (`pytest`).
     e. **Merge to Main:** Once the work is verified, I will run `git checkout main` and then merge the feature branch using `git merge --no-ff [branchName]`.
-    f. **Finalize Task:** I will update `@AGENT_TASKS.json` to move the completed task to the "done" list.
+    f. **Finalize Task:** I will update `@AGENT_TASKS.json` to move the completed task to the "done" list, removing acceptance criteria.
     g. **Restore Local Changes:** Finally, I will run `git stash pop` to reapply any changes I stashed at the beginning of the process.
 
 ### Definition of Done
