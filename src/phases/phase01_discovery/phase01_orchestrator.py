@@ -15,7 +15,6 @@ from src.phases.phase01_discovery.core.data_profiler import profile_dataframe
 from src.connectors.factory import CsvConnector, XlsxConnector
 import pandas as pd
 
-import argparse
 import json
 import yaml
 import numpy as np
@@ -38,41 +37,21 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 
-def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx', 'xls', 'json', 'txt'], recursive=True):
+def run_discovery_logic(
+    data_project_path: str,
+    extensions: list = ['csv', 'xlsx', 'xls', 'json', 'txt'],
+    recursive: bool = True,
+    output_format: str = "text",
+    report_output: str = "json",
+    compare_fields: bool = False,
+    compare_types: bool = False,
+    generate_char_cleanup_config: str = None
+):
     """
     Orquestra todas as ferramentas da Fase 1: Descoberta e Diagnóstico.
-    Retorna um relatório consolidado de todas as análises.
+    Retorna um dicionário estruturado com os resultados.
     """
-    parser = argparse.ArgumentParser(
-        description="Argumentos para a fase de descoberta.")
-    parser.add_argument(
-        "-o", "--output-format", type=str, default="text",
-        choices=['text', 'interactive'],
-        help="Formato da saída para a fase de descoberta (text, interactive)."
-    )
-    parser.add_argument(
-        "--report-output", type=str, default="json",
-        choices=['json', 'html'],
-        help="Formato do arquivo de relatório (json, html)."
-    )
-    parser.add_argument(
-        "--compare-fields",
-        action="store_true",
-        help="Habilita a comparação de campos/colunas entre arquivos do mesmo tipo."
-    )
-    parser.add_argument(
-        "--compare-types",
-        action="store_true",
-        help="Habilita a comparação de tipos de dados entre colunas de mesmo nome em arquivos do mesmo tipo."
-    )
-    parser.add_argument(
-        "--generate-char-cleanup-config",
-        metavar="OUTPUT_PATH",
-        help="Verifica todos os arquivos em busca de caracteres problemáticos (ex: de controle, de substituição) e gera um arquivo de configuração YAML no caminho especificado, que pode ser usado na Fase 2 para limpeza."
-    )
-    args = parser.parse_args(extra_args)
-
-    if args.output_format == 'interactive':
+    if output_format == 'interactive':
         logging.getLogger().setLevel(logging.WARNING)
     else:
         logging.getLogger().setLevel(logging.INFO)
@@ -88,7 +67,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
 
     if not discovered_files:
         logging.warning("Nenhum arquivo encontrado para análise.")
-        return {"status": "success", "message": "Nenhum arquivo encontrado para análise.", "results": {}}
+        return {"status": "success", "message": "Nenhum arquivo encontrado para análise.", "report_path": None}
 
     results = {
         "encoding_analysis": [],
@@ -130,7 +109,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
             if "delimiter" in delimiter_result:
                 detected_delimiters[fp] = delimiter_result["delimiter"]
 
-            if args.compare_fields:
+            if compare_fields:
                 from .file_type_specific.csv.column_consistency_checker import get_csv_headers
                 delimiter = detected_delimiters.get(fp)
                 current_headers = get_csv_headers(fp, delimiter=delimiter)
@@ -153,7 +132,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
 
-            if args.compare_types:
+            if compare_types:
                 base_name = os.path.basename(fp)
                 df = None
                 try:
@@ -225,7 +204,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         for fp in json_files:
             results["json_schema_validation"].append(
                 {"file": os.path.basename(fp), "result": validate_json_schema(fp)})
-            if args.compare_fields:
+            if compare_fields:
                 from .file_type_specific.json.schema_validator import get_json_keys
                 current_keys = get_json_keys(fp)
                 if reference_columns['json'] is None:
@@ -247,7 +226,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     }
                 results["field_comparison_analysis"].append(comparison_result)
 
-            if args.compare_types:
+            if compare_types:
                 base_name = os.path.basename(fp)
                 df = None
                 try:
@@ -305,7 +284,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                     )
 
                     # 2. Comparação de Campos
-                    if args.compare_fields:
+                    if compare_fields:
                         current_columns = get_excel_columns(xls)
                         if reference_columns['excel'] is None:
                             reference_columns['excel'] = current_columns
@@ -323,7 +302,7 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                         results["field_comparison_analysis"].append(comparison_result)
 
                     # 3. Comparação de Tipos
-                    if args.compare_types:
+                    if compare_types:
                         # Lê a primeira planilha para o DataFrame
                         df = xls.parse(xls.sheet_names[0])
                         if df is None or df.empty:
@@ -358,9 +337,9 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                                     results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
             except Exception as e:
                 logging.error(f"Erro ao processar o arquivo Excel {base_name}: {e}")
-                if args.compare_types:
+                if compare_types:
                     results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
-                if args.compare_fields:
+                if compare_fields:
                      results["field_comparison_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
 
     logging.info("Fase 1: Descoberta e Diagnóstico concluída.")
@@ -368,23 +347,24 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
     results_wrapper = {"status": "success",
                        "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.", "detailed_results": results}
 
-    if args.output_format == 'interactive':
+    if output_format == 'interactive':
         display_interactive_report(results_wrapper)
 
-    if args.report_output == 'json':
+    output_path = None
+    if report_output == 'json':
         output_filename = "discovery_report.json"
         output_path = os.path.join(metadata_path, output_filename)
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results_wrapper, f, indent=4,
                       ensure_ascii=False, cls=NpEncoder)
         logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
-    elif args.report_output == 'html':
+    elif report_output == 'html':
         output_filename = "discovery_report.html"
         output_path = os.path.join(metadata_path, output_filename)
         generate_html_report(results_wrapper['detailed_results'], output_path)
         logging.info(f"Relatório da Fase 1 salvo em: {output_path}")
 
-    if args.generate_char_cleanup_config:
+    if generate_char_cleanup_config:
         logging.info("--- Gerando Configuração de Limpeza de Caracteres ---")
 
         encoding_map = {
@@ -426,17 +406,21 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
                 ]
             }
 
-            output_path = args.generate_char_cleanup_config
+            output_path_yaml = generate_char_cleanup_config
             try:
-                with open(output_path, 'w', encoding='utf-8') as f:
+                with open(output_path_yaml, 'w', encoding='utf-8') as f:
                     f.write("# Arquivo de configuração gerado automaticamente para limpeza de caracteres.\n")
                     yaml.dump(cleanup_config, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
-                logging.info(f"Arquivo de configuração para limpeza de caracteres salvo em: {output_path}")
+                logging.info(f"Arquivo de configuração para limpeza de caracteres salvo em: {output_path_yaml}")
 
             except Exception as e:
-                logging.error(f"Falha ao salvar o arquivo de configuração YAML em {output_path}: {e}")
+                logging.error(f"Falha ao salvar o arquivo de configuração YAML em {output_path_yaml}: {e}")
         else:
             logging.info("Nenhum caractere problemático foi encontrado nos arquivos analisados.")
 
-    return results_wrapper
+    return {
+        "status": "success",
+        "message": f"Fase de Descoberta e Diagnóstico concluída com sucesso. Relatório salvo em: {output_path}",
+        "report_path": output_path
+    }

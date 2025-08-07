@@ -6,7 +6,7 @@ import gc
 import sys
 import time
 import json
-from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_phase
+from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_logic
 from src.utils import METADATA_DIR
 
 
@@ -70,8 +70,12 @@ class TestTypeConsistencyChecker(unittest.TestCase):
         self._create_file("03_inconsistent.json", '{"id": 3, "product": "C", "price": "free"}')
 
         # 2. Executar a fase de descoberta
-        extra_args = ["--compare-types", "--report-output", "json"]
-        run_discovery_phase(self.test_dir, extra_args, extensions=['xlsx', 'json'])
+        run_discovery_logic(
+            data_project_path=self.test_dir,
+            compare_types=True,
+            report_output="json",
+            extensions=['xlsx', 'json']
+        )
 
         # 3. Ler o relatório
         report_path = os.path.join(self.test_dir, METADATA_DIR, "discovery_report.json")

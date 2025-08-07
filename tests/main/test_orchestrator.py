@@ -12,7 +12,7 @@ def mock_args():
     return _mock_args
 
 @patch("src.main.orchestrator.os.path.isdir")
-@patch("src.phases.phase01_discovery.phase01_orchestrator.run_discovery_phase")
+@patch("src.phases.phase01_discovery.phase01_orchestrator.run_discovery_logic")
 def test_main_discovery_phase(mock_run_discovery, mock_isdir, mock_args, tmp_path):
     """Testa se a fase 'discovery' é chamada com os argumentos corretos."""
     # Arrange
@@ -25,9 +25,7 @@ def test_main_discovery_phase(mock_run_discovery, mock_isdir, mock_args, tmp_pat
         orchestrator.main()
 
         # Assert
-        mock_run_discovery.assert_called_once()
-        args, _ = mock_run_discovery.call_args
-        assert args[0] == data_path
+        mock_run_discovery.assert_called_once_with(data_project_path=data_path)
 
 @patch("src.main.orchestrator.os.path.isdir")
 @patch("src.phases.phase02_treatment.phase02_orchestrator.run_treatment_phase")
@@ -78,7 +76,7 @@ def test_argument_parsing(mock_parse_args):
 
     # Mock para evitar a execução do resto da função
     with patch('src.main.orchestrator.os.path.isdir', return_value=True):
-        with patch('src.phases.phase01_discovery.phase01_orchestrator.run_discovery_phase'):
+        with patch('src.phases.phase01_discovery.phase01_orchestrator.run_discovery_logic'):
             # Act
             orchestrator.main()
 
