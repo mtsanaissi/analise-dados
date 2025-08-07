@@ -31,15 +31,15 @@ class XlsxConnector:
 
     def read(self) -> pd.DataFrame:
         """
-        Lê dados de um arquivo Excel para um DataFrame.
+        Lê dados de um arquivo Excel para um DataFrame, garantindo que o arquivo seja fechado.
 
         Returns:
             pd.DataFrame: O DataFrame lido do arquivo.
         """
         try:
-            # Modificado para ler a primeira planilha por índice (0) se sheet_name não for especificado.
-            sheet_to_read = self.sheet_name if self.sheet_name is not None else 0
-            return pd.read_excel(self.file_path, sheet_name=sheet_to_read, dtype=self.dtype)
+            with pd.ExcelFile(self.file_path) as xls:
+                sheet_to_read = self.sheet_name if self.sheet_name is not None else xls.sheet_names[0]
+                return pd.read_excel(xls, sheet_name=sheet_to_read, dtype=self.dtype)
         except FileNotFoundError:
             raise
         except Exception as e:

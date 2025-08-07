@@ -1,62 +1,85 @@
 import pandas as pd
+import gc
+import logging
 
-def get_excel_columns(file_path):
+
+def get_excel_columns(excel_file):
     """
-    Lê um arquivo Excel e retorna as colunas da primeira planilha.
+    Obtém as colunas de um arquivo Excel usando um objeto ExcelFile já aberto.
+
+    Args:
+        excel_file (pd.ExcelFile): Objeto ExcelFile já aberto
+
+    Returns:
+        list: Lista de nomes das colunas
     """
     try:
-        # Lê apenas o cabeçalho da primeira planilha para eficiência
-        df = pd.read_excel(file_path, nrows=0)
-        return list(df.columns)
-    except Exception:
+        # Lê apenas o cabeçalho (nrows=0) da primeira planilha
+        sheet_name = excel_file.sheet_names[0]
+        df = pd.read_excel(excel_file, sheet_name=sheet_name, nrows=0)
+        columns = list(df.columns)
+
+        # Limpeza explícita
+        del df
+        gc.collect()
+
+        return columns
+    except Exception as e:
+        logging.error(f"Erro ao obter colunas: {e}")
         return []
 
 
-def analyze_excel_sheets(file_path):
+def analyze_excel_sheets(excel_file):
     """
-    Analyzes the structure of sheets in an Excel (XLSX) file.
+    Analisa as planilhas de um arquivo Excel usando um objeto ExcelFile já aberto.
 
     Args:
-        file_path (str): The path to the Excel file.
+        excel_file (pd.ExcelFile): Objeto ExcelFile já aberto
 
     Returns:
-        dict: A dictionary containing the analysis status, a list of sheet information,
-              and the total number of sheets.
+        dict: Resultado da análise das planilhas
     """
+    analysis_result = {
+        "sheet_count": 0,
+        "sheet_names": [],
+        "sheets_info": {}
+    }
+
     try:
-        xls = pd.ExcelFile(file_path)
-        sheet_names = xls.sheet_names
-        num_sheets = len(sheet_names)
-        sheets_info = []
+        sheet_names = excel_file.sheet_names
+        analysis_result["sheet_count"] = len(sheet_names)
+        analysis_result["sheet_names"] = sheet_names
 
         for sheet_name in sheet_names:
             try:
-                # Read a small sample of the sheet
-                df_sample = pd.read_excel(file_path, sheet_name=sheet_name, nrows=10)
-                num_columns = df_sample.shape[1]
-                is_readable = True
-                error_message = None
+                # Lê apenas algumas linhas para análise rápida
+                df = pd.read_excel(excel_file, sheet_name=sheet_name, nrows=5)
+
+                sheet_info = {
+                    "columns": list(df.columns),
+                    "column_count": len(df.columns),
+                    "sample_row_count": len(df),
+                }
+
+                analysis_result["sheets_info"][sheet_name] = sheet_info
+
+                # Limpeza explícita após cada planilha
+                del df
+                gc.collect()
+
             except Exception as e:
-                num_columns = 0
-                is_readable = False
-                error_message = str(e)
+                logging.error(f"Erro ao analisar planilha '{sheet_name}': {e}")
+                analysis_result["sheets_info"][sheet_name] = {
+                    "error": str(e)
+                }
 
-            sheets_info.append({
-                "sheet_name": sheet_name,
-                "is_readable": is_readable,
-                "num_columns": num_columns,
-                "error_message": error_message
-            })
+        return analysis_result
 
-        return {
-            "status": "success",
-            "sheets_info": sheets_info,
-            "num_sheets": num_sheets
-        }
     except Exception as e:
+        logging.error(f"Erro na análise geral das planilhas: {e}")
         return {
-            "status": "error",
-            "error_message": str(e),
-            "sheets_info": [],
-            "num_sheets": 0
+            "error": str(e),
+            "sheet_count": 0,
+            "sheet_names": [],
+            "sheets_info": {}
         }
