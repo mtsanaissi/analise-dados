@@ -35,11 +35,23 @@ A fase de *Discovery* é usada para diagnosticar seus dados brutos. Ela gera rel
 
 3.  Clique no botão **Executar**.
 
-### Resultados
+### Visualizando os Resultados
 
--   O progresso e os logs da execução serão exibidos em tempo real na área principal da tela.
--   Se a execução for bem-sucedida e um relatório for gerado, um botão **Baixar Relatório** aparecerá, permitindo que você salve o arquivo.
--   Em caso de erro, uma mensagem clara será exibida com os detalhes para ajudar a diagnosticar o problema.
+Após cada execução, a interface apresentará os resultados da seguinte forma:
+
+1.  **Mensagem de Status**: Uma notificação de sucesso ou erro aparecerá no topo, indicando o resultado da operação.
+
+2.  **Detalhes da Execução (Colapsável)**:
+    -   Para manter a interface limpa, os detalhes técnicos da execução ficam ocultos por padrão dentro de uma seção chamada **"Ver Detalhes da Execução"**.
+    -   Clique nesta seção para expandi-la e visualizar:
+        -   **Comando Executado**: O comando completo que foi executado nos bastidores.
+        -   **Log de Saída**: O log completo do processo, útil para depuração e para entender cada passo da execução.
+
+3.  **Visualizador de Relatório**:
+    -   Se a sua operação gerou um relatório (`.html` ou `.json`), ele será exibido diretamente na interface, abaixo da seção de detalhes.
+        -   Relatórios **HTML** são renderizados como páginas interativas.
+        -   Relatórios **JSON** são exibidos em um formato estruturado e legível.
+    -   O botão **"Baixar Relatório"** continua disponível, localizado logo abaixo do visualizador, para que você possa salvar o arquivo em sua máquina.
 
 ## Fase 2: Treatment
 

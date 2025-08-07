@@ -233,7 +233,7 @@ def build_command(
                     if treatment_args.get(arg_name):
                         command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
                 if treatment_args.get("columns_to_add"):
-                    command.extend(["--columns-to-add"] + treatment_args["columns_to_add"])
+                    command.extend(["--columns-to-add", *treatment_args["columns_to_add"]])
 
             elif operation == "Concatenar Dados":
                 for arg_name in ["input_folder", "output_file", "file_type"]:

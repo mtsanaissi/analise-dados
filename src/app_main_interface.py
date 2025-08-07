@@ -21,6 +21,7 @@ import os
 import re
 import tempfile
 import chardet
+import json
 from src.utils import build_command
 from src.connectors.factory import get_data_loader
 
@@ -296,6 +297,7 @@ def main_interface():
 
             command = build_command(
                 project_path, selected_phase, discovery_args=discovery_args, treatment_args=treatment_args)
+            st.session_state.last_command = command
             st.info(f"Executando comando: `{' '.join(command)}`")
             output_placeholder = st.empty()
             output_placeholder.code("Iniciando a execução...")
@@ -312,23 +314,53 @@ def main_interface():
             st.rerun()
 
     # Exibição dos resultados da última execução
-    if st.session_state.last_run_results:
+    if st.session_state.get('last_run_results'):
         results = st.session_state.last_run_results
-        return_code = results["return_code"]
-        full_output = results["full_output"]
-        selected_phase = results["selected_phase"]
+        return_code = results.get("return_code")
+        full_output = results.get("full_output", "")
+        selected_phase = results.get("selected_phase", "Desconhecida")
+        executed_command = st.session_state.get("last_command", "Comando não encontrado.")
 
+        # Mensagem de status
         if return_code == 0:
             st.success(f"Fase '{selected_phase}' concluída com sucesso!")
-            report_path = find_report_path(full_output)
-            if report_path and os.path.exists(report_path):
-                with open(report_path, "rb") as f:
-                    st.download_button(label="Baixar Relatório", data=f, file_name=os.path.basename(
-                        report_path), use_container_width=True)
         else:
             st.error("Ocorreu um erro durante a execução.")
 
-        st.code(full_output, language='bash')
+        # Expander para detalhes da execução
+        with st.expander("Ver Detalhes da Execução"):
+            st.subheader("Comando Executado")
+            st.code(' '.join(executed_command), language='bash')
+            st.subheader("Log de Saída")
+            st.code(full_output, language='bash')
+
+        # Visualização do relatório
+        report_path = find_report_path(full_output)
+        if report_path and os.path.exists(report_path):
+            st.subheader("Visualizador de Relatório")
+
+            try:
+                if report_path.endswith('.html'):
+                    with open(report_path, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                    st.components.v1.html(html_content, height=600, scrolling=True)
+
+                elif report_path.endswith('.json'):
+                    with open(report_path, 'r', encoding='utf-8') as f:
+                        json_content = json.load(f)
+                    st.json(json_content)
+
+                # Manter o botão de download
+                with open(report_path, "rb") as f:
+                    st.download_button(
+                        label="Baixar Relatório",
+                        data=f,
+                        file_name=os.path.basename(report_path),
+                        use_container_width=True
+                    )
+            except Exception as e:
+                st.error(f"Erro ao ler ou exibir o arquivo de relatório: {e}")
+
 
 
 if __name__ == "__main__":
