@@ -213,7 +213,7 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
             "--lookup-file", "lookup.csv",
             "--main-key", "id",
             "--lookup-key", "id",
-            "--columns-to-add", "col1,col2",
+            "--columns-to-add", "col1", "col2",
             "--output-file", "enriched.csv",
         ],
     ),

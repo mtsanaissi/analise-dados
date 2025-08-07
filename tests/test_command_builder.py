@@ -146,7 +146,8 @@ def test_build_treatment_command_enrich_with_args():
     assert "--lookup-key" in command
     assert "id" in command
     assert "--columns-to-add" in command
-    assert "col1,col2" in command
+    assert "col1" in command
+    assert "col2" in command
     assert "--output-file" in command
     assert "enriched.csv" in command
 

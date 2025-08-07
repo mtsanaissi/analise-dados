@@ -98,7 +98,7 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
 
     elif args.replace_config_path:
         config_path = os.path.join(data_project_path, "fad-config", args.replace_config_path)
-        replace_config = read_yaml_config(config_path)
+        replace_config = read_yaml_config_robustly(config_path)
         if not replace_config or 'replacements' not in replace_config:
             logging.error("Arquivo de configuração YAML para substituição é inválido ou não foi encontrado.")
             return
