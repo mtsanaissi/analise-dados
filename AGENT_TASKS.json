@@ -1,18 +1,83 @@
 {
-  "backlog": [
-  ],
-  "done": [
+  "tasks": [
     {
-      "id": "T043",
-      "title": "Corrigir 'PermissionError' em Testes com Arquivos Excel no Windows",
-      "description": "Os testes que manipulam arquivos Excel estão falhando intermitentemente no Windows com um 'PermissionError', indicando que o arquivo não está sendo liberado corretamente após o uso. Isso precisa ser corrigido para garantir a estabilidade da suíte de testes.",
-      "branchName": "fix/corrige-permission-error-excel"
+      "id": "T044",
+      "status": "pending",
+      "branchName": "feature/T044-isolate-discovery-logic",
+      "description": "Sua tarefa é refatorar o orquestrador da Fase 1 para que ele não se comporte mais como um script autônomo, mas sim como um módulo de biblioteca. Você irá extrair a lógica principal para uma nova função que recebe seus parâmetros diretamente via argumentos de função (e não de uma lista de strings da linha de comando) e retorna um dicionário Python estruturado com os resultados. Isso elimina a dependência de argparse e prepara o terreno para que a nova UI e a CLI possam chamar esta função diretamente.",
+      "acceptance_criteria": [
+        "Em src/phases/phase01_discovery/phase01_orchestrator.py, a função run_discovery_phase deve ser renomeada para run_discovery_logic.",
+        "A nova função run_discovery_logic deve ter uma assinatura clara, aceitando parâmetros como data_project_path: str, compare_fields: bool = False, report_output: str = 'json', etc.",
+        "Toda a lógica de argparse.ArgumentParser deve ser completamente removida deste arquivo.",
+        "A função deve retornar um dicionário Python. Este dicionário deve conter, no mínimo, as chaves: status ('success' ou 'error'), message (uma string descritiva) e report_path (o caminho para o relatório gerado, ou None se não houver).",
+        "O teste tests/phases/phase01_discovery/test_phase01_orchestrator.py deve ser atualizado para refletir essa mudança. Ele não deve mais simular a linha de comando, mas sim importar e chamar `run_discovery_logic` diretamente, validando a estrutura e o conteúdo do dicionário retornado."
+      ]
     },
     {
-      "id": "T042",
-      "title": "Melhorar a Exibição de Resultados na UI com Componente Colapsável e Visualizador de Relatório",
-      "description": "Para melhorar a usabilidade e limpar a interface, os detalhes da execução (comando e log) devem ser exibidos dentro de um componente colapsável (st.expander) e os relatórios gerados devem ser exibidos diretamente na UI.",
-      "branchName": "feature/ui-collapsible-results"
+      "id": "T045",
+      "status": "pending",
+      "branchName": "feature/T045-isolate-treatment-logic",
+      "description": "Seguindo o padrão da tarefa anterior, sua missão é refatorar o orquestrador da Fase 2. Você irá criar uma função run_treatment_logic que atua como um 'despachante' (dispatcher). Esta função receberá o tipo de operação a ser executada (ex: 'strip_whitespace') e um dicionário de configuração, e então chamará a lógica de tratamento apropriada. O objetivo é remover completamente a dependência de argparse e da leitura de arquivos de configuração de dentro da função principal, tornando-a mais testável e reutilizável.",
+      "acceptance_criteria": [
+        "Em src/phases/phase02_treatment/phase02_orchestrator.py, a lógica principal deve ser encapsulada em uma nova função run_treatment_logic(data_project_path: str, operation: str, config: dict).",
+        "A lógica de argparse deve ser removida deste arquivo. A função não deve mais ser responsável por ler arquivos de configuração YAML; ela deve receber a configuração já carregada através do parâmetro config.",
+        "A função deve usar o parâmetro operation para decidir qual sub-rotina de tratamento executar.",
+        "Cada operação de tratamento deve retornar um dicionário estruturado com status e message.",
+        "O teste tests/phases/phase02_treatment/test_phase02_orchestrator.py deve ser atualizado para chamar run_treatment_logic diretamente. Os testes devem passar dicionários de configuração simulados (mock) para testar as diferentes operações e validar os resultados retornados."
+      ]
+    },
+    {
+      "id": "T046",
+      "status": "pending",
+      "branchName": "feature/T046-implement-new-cli",
+      "description": "Sua tarefa é construir a nova face da nossa aplicação para a linha de comando usando o script src/run.py. Este script será o único ponto de entrada da CLI. Ele deve usar argparse e sub-comandos para fornecer uma experiência de usuário clara e intuitiva. Para cada comando executado, ele chamará a função de lógica correspondente (run_discovery_logic ou run_treatment_logic), passará os argumentos apropriados e imprimirá o resultado retornado de forma amigável no console.",
+      "acceptance_criteria": [
+        "O script src/run.py deve ser o ponto de entrada principal da CLI.",
+        "Deve ser implementado usando argparse com sub-comandos: discovery e treatment.",
+        "O comando discovery (ex: python src/run.py discovery --data-path ... --compare-fields) deve importar e chamar run_discovery_logic.",
+        "O comando treatment (ex: python src/run.py treatment strip_whitespace --data-path ...) deve importar e chamar run_treatment_logic. Para operações que precisam de configuração, ele será responsável por carregar o arquivo YAML especificado (ex: --config-file) e passar o conteúdo como um dicionário para a função de lógica.",
+        "O script deve imprimir os campos message e report_path do dicionário retornado pelas funções de lógica.",
+        "Devem ser criados novos testes de integração específicos para a CLI. Esses testes usarão o módulo subprocess para executar comandos como python src/run.py ... e verificar se a saída no stdout é a esperada."
+      ]
+    },
+    {
+      "id": "T047",
+      "status": "pending",
+      "branchName": "feature/T047-refactor-ui-direct-calls",
+      "description": "Sua missão é refatorar completamente a aplicação Streamlit (src/app_main_interface.py). Você irá remover toda a camada de subprocess e build_command. Em vez disso, a UI irá importar as funções run_discovery_logic e run_treatment_logic e chamá-las diretamente quando o usuário clicar no botão 'Executar'. Você passará os valores dos widgets da UI como argumentos para essas funções e usará o dicionário de retorno para exibir os resultados, tratando exceções de forma graciosa.",
+      "acceptance_criteria": [
+        "Em src/app_main_interface.py, as funções build_command e run_process devem ser removidas.",
+        "As funções run_discovery_logic e run_treatment_logic devem ser importadas.",
+        "A lógica do botão 'Executar' deve ser reescrita para chamar a função de lógica apropriada, passando os valores dos widgets (st.text_input, st.checkbox, etc.) como argumentos.",
+        "A chamada da função deve ser envolvida em um bloco try...except Exception as e: para capturar quaisquer erros da lógica de negócio e exibi-los de forma amigável usando st.error().",
+        "A função find_report_path (que usa regex) deve ser removida. O caminho do relatório deve ser obtido diretamente do dicionário de retorno (ex: resultado['report_path']).",
+        "O teste tests/test_app_main_interface.py deve ser completamente reescrito. Ele deve usar unittest.mock.patch para 'mocar' as chamadas às funções run_discovery_logic e run_treatment_logic. Os testes devem simular a interação do usuário com os widgets e depois verificar se as funções de lógica foram chamadas com os argumentos corretos."
+      ]
+    },
+    {
+      "id": "T048",
+      "status": "pending",
+      "branchName": "feature/T048-cleanup-obsolete-code",
+      "description": "Com a nova arquitetura em vigor, o antigo ponto de entrada principal (src/main/orchestrator.py) não é mais necessário. Sua tarefa é remover este arquivo e seus testes associados, garantindo que o projeto contenha apenas o código relevante e funcional.",
+      "acceptance_criteria": [
+        "O arquivo src/main/orchestrator.py deve ser excluído.",
+        "O diretório src/main/ (e seu __pycache__) deve ser excluído.",
+        "O arquivo de teste tests/main/test_orchestrator.py deve ser excluído.",
+        "O diretório tests/main/ (e seu __pycache__) deve ser excluído."
+      ]
+    },
+    {
+      "id": "T049",
+      "status": "pending",
+      "branchName": "feature/T049-update-user-documentation",
+      "description": "Sua tarefa é revisar e reescrever a documentação do projeto para refletir a nova arquitetura. O foco principal é a seção da linha de comando, que agora usa um novo script e uma nova sintaxe de comando. A documentação da UI também deve ser revisada para garantir que o fluxo descrito ainda seja válido.",
+      "acceptance_criteria": [
+        "O arquivo COMO_USAR.md deve ser atualizado.",
+        "A seção sobre a CLI deve ser completamente reescrita para detalhar o uso de python src/run.py com os sub-comandos discovery e treatment e seus respectivos argumentos.",
+        "Exemplos claros de linha de comando para as operações mais comuns devem ser fornecidos.",
+        "O arquivo LEIAME.md deve ser revisado e seus exemplos de uso atualizados para o novo formato de comando."
+      ]
     }
-  ]
+  ],
+  "done": []
 }

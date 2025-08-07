@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 # --------------------------------------------------------------------------------
 # Descrição: Interface principal do Streamlit para o kit de ferramentas de análise de dados.
@@ -127,8 +127,6 @@ def main_interface():
         layout="wide", page_title="Kit de Ferramentas de Análise de Dados")
     st.title("Painel de Controle do Kit de Ferramentas")
 
-    st.info(f"DEBUG: st.session_state = {st.session_state}")
-
     # Inicialização do estado da sessão
     # Inicialização do estado da sessão
     if 'running' not in st.session_state:
@@ -205,7 +203,8 @@ def main_interface():
 
                     # Carrega as colunas do arquivo de lookup dinamicamente
                     if lookup_file and lookup_file != st.session_state.get('last_lookup_file'):
-                        st.session_state.lookup_columns = load_lookup_columns(project_path, lookup_file)
+                        st.session_state.lookup_columns = load_lookup_columns(
+                            project_path, lookup_file)
                         st.session_state.last_lookup_file = lookup_file
 
                     main_key = st.text_input("Chave no Principal",
@@ -238,8 +237,10 @@ def main_interface():
                     if uploaded_file is not None and st.session_state.temp_config_path is None:
                         # Processar o arquivo imediatamente após o upload
                         content_bytes = uploaded_file.getvalue()
-                        detected_encoding = chardet.detect(content_bytes)['encoding'] or 'utf-8'
-                        decoded_content = content_bytes.decode(detected_encoding)
+                        detected_encoding = chardet.detect(
+                            content_bytes)['encoding'] or 'utf-8'
+                        decoded_content = content_bytes.decode(
+                            detected_encoding)
 
                         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_file.name}", mode='w', encoding='utf-8') as tmp:
                             st.session_state.temp_config_path = tmp.name
@@ -249,7 +250,8 @@ def main_interface():
         button_label = "Nova Execução" if st.session_state.last_run_results else "Executar"
         if st.sidebar.button(button_label, type="primary", use_container_width=True, disabled=st.session_state.running):
             if not project_path or not os.path.isdir(project_path):
-                st.error(f"O caminho '{project_path}' não é um diretório válido.")
+                st.error(
+                    f"O caminho '{project_path}' não é um diretório válido.")
             else:
                 st.session_state.last_run_results = None
                 st.session_state.running = True
@@ -280,7 +282,8 @@ def main_interface():
 
                     # Validação simples
                     if not all(enrich_config.values()):
-                        st.error("Todos os campos de configuração de enriquecimento devem ser preenchidos.")
+                        st.error(
+                            "Todos os campos de configuração de enriquecimento devem ser preenchidos.")
                         st.session_state.running = False
                         st.rerun()
                         return
@@ -319,7 +322,8 @@ def main_interface():
         return_code = results.get("return_code")
         full_output = results.get("full_output", "")
         selected_phase = results.get("selected_phase", "Desconhecida")
-        executed_command = st.session_state.get("last_command", "Comando não encontrado.")
+        executed_command = st.session_state.get(
+            "last_command", "Comando não encontrado.")
 
         # Mensagem de status
         if return_code == 0:
@@ -343,7 +347,8 @@ def main_interface():
                 if report_path.endswith('.html'):
                     with open(report_path, 'r', encoding='utf-8') as f:
                         html_content = f.read()
-                    st.components.v1.html(html_content, height=600, scrolling=True)
+                    st.components.v1.html(
+                        html_content, height=600, scrolling=True)
 
                 elif report_path.endswith('.json'):
                     with open(report_path, 'r', encoding='utf-8') as f:
@@ -360,7 +365,6 @@ def main_interface():
                     )
             except Exception as e:
                 st.error(f"Erro ao ler ou exibir o arquivo de relatório: {e}")
-
 
 
 if __name__ == "__main__":
