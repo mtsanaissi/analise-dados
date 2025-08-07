@@ -23,6 +23,7 @@ import csv
 import fnmatch
 import yaml
 import logging
+from typing import Dict, Any
 
 METADATA_DIR = "fad-metadados"
 
@@ -246,7 +247,8 @@ def build_command(
 
     return command
 
-def read_yaml_config(file_path: str) -> dict | None:
+
+def read_yaml_config_robustly(file_path: str) -> Dict[str, Any] | None:
     """
     Lê um arquivo de configuração YAML de forma robusta.
 
@@ -254,15 +256,22 @@ def read_yaml_config(file_path: str) -> dict | None:
         file_path (str): O caminho para o arquivo YAML.
 
     Returns:
-        dict | None: O conteúdo do arquivo YAML como um dicionário, ou None em caso de erro.
+        Dict[str, Any] | None: Um dicionário com a configuração ou None se ocorrer um erro.
     """
     try:
         with open(file_path, 'r', encoding='utf-8-sig') as f:
-            config = yaml.safe_load(f)
-            return config
+            return yaml.safe_load(f)
     except FileNotFoundError:
-        logging.error(f"Arquivo de configuração não encontrado em: {file_path}")
+        logging.error(f"Arquivo de configuração YAML não encontrado em: {file_path}")
         return None
     except yaml.YAMLError as e:
-        logging.error(f"Erro ao processar o arquivo YAML '{os.path.basename(file_path)}': {e}")
+        logging.error(f"Erro ao decodificar o arquivo YAML '{file_path}': {e}")
         return None
+
+
+def get_project_root() -> str:
+    """
+    Retorna o caminho absoluto para o diretório raiz do projeto.
+    Assume que este script está em 'src/utils.py'.
+    """
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

@@ -64,7 +64,11 @@ A fase de *Treatment* é usada para limpar, padronizar e modificar seus dados.
     -   **Requer Configuração**: Faça o upload de um arquivo YAML especificando os arquivos de entrada e o de saída.
 
 -   **Enriquecer Dados**: Adiciona colunas a um arquivo principal com base em dados de um arquivo de consulta (lookup).
-    -   **Requer Configuração**: Faça o upload de um arquivo YAML com as especificações da operação.
+    -   **Configuração Interativa**: Esta operação agora possui uma interface dedicada para configuração.
+        -   **Arquivo Principal**: Especifique o nome do arquivo (dentro do projeto de dados) que receberá as novas colunas.
+        -   **Arquivo de Lookup**: Forneça o caminho para o arquivo que contém os dados a serem adicionados. Pode ser um caminho relativo ao projeto ou um caminho absoluto.
+        -   **Chave no Principal / Chave no Lookup**: Defina as colunas que serão usadas para combinar os dois arquivos.
+        -   **Colunas a Adicionar**: Este campo é preenchido dinamicamente! Após especificar um "Arquivo de Lookup" válido, a lista de colunas disponíveis aparecerá aqui para você selecionar.
 
 3.  Após configurar a operação e, se necessário, fazer o upload do arquivo de configuração, clique em **Executar**.
 
