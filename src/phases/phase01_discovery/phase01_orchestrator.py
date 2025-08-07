@@ -9,7 +9,7 @@ from src.phases.phase01_discovery.core.data_integrity_checker import analyze_dat
 from src.phases.phase01_discovery.file_type_specific.csv.delimiter_detector import detect_csv_delimiter
 from src.phases.phase01_discovery.file_type_specific.csv.column_consistency_checker import check_csv_structures
 from src.phases.phase01_discovery.file_type_specific.json.schema_validator import validate_json_schema
-from src.phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets
+from src.phases.phase01_discovery.file_type_specific.excel.sheet_analyzer import analyze_excel_sheets, get_excel_columns
 from src.phases.phase01_discovery.core.reporting import generate_html_report
 from src.phases.phase01_discovery.core.data_profiler import profile_dataframe
 from src.connectors.factory import CsvConnector, XlsxConnector
@@ -296,72 +296,72 @@ def run_discovery_phase(data_project_path, extra_args, extensions=['csv', 'xlsx'
         logging.info("--- Executando Análises de Excel ---")
         excel_files.sort()
         for fp in excel_files:
-            results["excel_sheet_analysis"].append(
-                {"file": os.path.basename(fp), "result": analyze_excel_sheets(fp)})
-            if args.compare_fields:
-                from .file_type_specific.excel.sheet_analyzer import get_excel_columns
-                current_columns = get_excel_columns(fp)
-                if reference_columns['excel'] is None:
-                    reference_columns['excel'] = current_columns
-                    comparison_result = {"file": os.path.basename(
-                        fp), "status": "referencia"}
-                else:
-                    are_equal = set(current_columns) == set(
-                        reference_columns['excel'])
-                    missing_columns = list(
-                        set(reference_columns['excel']) - set(current_columns))
-                    extra_columns = list(
-                        set(current_columns) - set(reference_columns['excel']))
-                    comparison_result = {
-                        "file": os.path.basename(fp),
-                        "status": "igual" if are_equal else "diferente",
-                        "missing_columns": missing_columns,
-                        "extra_columns": extra_columns
-                    }
-                results["field_comparison_analysis"].append(comparison_result)
+            base_name = os.path.basename(fp)
+            try:
+                with pd.ExcelFile(fp) as xls:
+                    # 1. Análise de Planilhas
+                    results["excel_sheet_analysis"].append(
+                        {"file": base_name, "result": analyze_excel_sheets(xls)}
+                    )
 
-            if args.compare_types:
-                base_name = os.path.basename(fp)
-                df = None
-                try:
-                    connector = XlsxConnector(file_path=fp)
-                    df = connector.read()
-
-                    if df is None or df.empty:
-                        results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
-                        continue
-
-                    profile = profile_dataframe(df)
-                    current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
-
-                    if reference_types['excel'] is None:
-                        reference_types['excel'] = current_types
-                        results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
-                    else:
-                        reference = reference_types['excel']
-                        inconsistencies = []
-                        common_columns = set(reference.keys()) & set(current_types.keys())
-
-                        for col in common_columns:
-                            if reference[col] != current_types[col]:
-                                inconsistencies.append({
-                                    "column": col,
-                                    "reference_type": reference[col],
-                                    "current_type": current_types[col]
-                                })
-
-                        if inconsistencies:
-                            results["type_consistency_analysis"].append({
-                                "file": base_name,
-                                "status": "inconsistente",
-                                "inconsistencies": inconsistencies
-                            })
+                    # 2. Comparação de Campos
+                    if args.compare_fields:
+                        current_columns = get_excel_columns(xls)
+                        if reference_columns['excel'] is None:
+                            reference_columns['excel'] = current_columns
+                            comparison_result = {"file": base_name, "status": "referencia"}
                         else:
-                            results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+                            are_equal = set(current_columns) == set(reference_columns['excel'])
+                            missing_columns = list(set(reference_columns['excel']) - set(current_columns))
+                            extra_columns = list(set(current_columns) - set(reference_columns['excel']))
+                            comparison_result = {
+                                "file": base_name,
+                                "status": "igual" if are_equal else "diferente",
+                                "missing_columns": missing_columns,
+                                "extra_columns": extra_columns
+                            }
+                        results["field_comparison_analysis"].append(comparison_result)
 
-                except Exception as e:
-                    logging.error(f"Erro ao processar o arquivo {base_name} para comparação de tipos: {e}")
+                    # 3. Comparação de Tipos
+                    if args.compare_types:
+                        # Lê a primeira planilha para o DataFrame
+                        df = xls.parse(xls.sheet_names[0])
+                        if df is None or df.empty:
+                            results["type_consistency_analysis"].append({"file": base_name, "status": "vazio_ou_nao_suportado"})
+                        else:
+                            profile = profile_dataframe(df)
+                            current_types = {item['nome_coluna']: item['tipo_inferido'] for item in profile}
+
+                            if reference_types['excel'] is None:
+                                reference_types['excel'] = current_types
+                                results["type_consistency_analysis"].append({"file": base_name, "status": "referencia"})
+                            else:
+                                reference = reference_types['excel']
+                                inconsistencies = []
+                                common_columns = set(reference.keys()) & set(current_types.keys())
+
+                                for col in common_columns:
+                                    if reference[col] != current_types[col]:
+                                        inconsistencies.append({
+                                            "column": col,
+                                            "reference_type": reference[col],
+                                            "current_type": current_types[col]
+                                        })
+
+                                if inconsistencies:
+                                    results["type_consistency_analysis"].append({
+                                        "file": base_name,
+                                        "status": "inconsistente",
+                                        "inconsistencies": inconsistencies
+                                    })
+                                else:
+                                    results["type_consistency_analysis"].append({"file": base_name, "status": "consistente"})
+            except Exception as e:
+                logging.error(f"Erro ao processar o arquivo Excel {base_name}: {e}")
+                if args.compare_types:
                     results["type_consistency_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
+                if args.compare_fields:
+                     results["field_comparison_analysis"].append({"file": base_name, "status": "erro_leitura", "details": str(e)})
 
     logging.info("Fase 1: Descoberta e Diagnóstico concluída.")
 

@@ -1,6 +1,17 @@
 {
   "backlog": [
     {
+      "id": "T043",
+      "title": "Corrigir 'PermissionError' em Testes com Arquivos Excel no Windows",
+      "description": "Os testes que manipulam arquivos Excel estão falhando intermitentemente no Windows com um 'PermissionError', indicando que o arquivo não está sendo liberado corretamente após o uso. Isso precisa ser corrigido para garantir a estabilidade da suíte de testes.",
+      "branchName": "fix/corrige-permission-error-excel",
+      "acceptance_criteria": [
+        "O método `read` em `src/connectors/xlsx_connector.py` deve ser refatorado para usar um gerenciador de contexto (`with pd.ExcelFile(...)`) para garantir que o arquivo seja fechado imediatamente após a leitura.",
+        "A função `_create_excel_file` em `tests/phases/phase01_discovery/test_type_consistency_checker.py` deve ser simplificada para usar `df.to_excel()` diretamente, removendo o uso explícito de `pd.ExcelWriter` que pode estar contribuindo para o problema.",
+        "Todos os testes devem passar de forma consistente ao executar `pytest` no ambiente Windows."
+      ]
+    },
+    {
       "id": "T039",
       "title": "[UI] Adaptar UI para Novas Operações CLI de Tratamento",
       "description": "Com a refatoração das operações --enrich-data e --concatenate-data para usar argumentos diretos, a interface do Streamlit precisa ser atualizada para fornecer campos de entrada para esses novos argumentos, em vez de um uploader de arquivo.",
@@ -12,25 +23,15 @@
         "A função build_command deve ser atualizada para construir o comando CLI com os novos argumentos e seus valores, em vez de usar config_file_path para essas duas operações.",
         "A UI deve incluir textos de ajuda (help=...) claros para o usuário, explicando que os nomes dos arquivos devem ser relativos à pasta do projeto de dados e que os arquivos de configuração para as outras operações devem estar em data/fad-config."
       ]
-    },
+    }
+  ],
+  "done": [
     {
       "id": "T042",
       "title": "Melhorar a Exibição de Resultados na UI com Componente Colapsável e Visualizador de Relatório",
       "description": "Para melhorar a usabilidade e limpar a interface, os detalhes da execução (comando e log) devem ser exibidos dentro de um componente colapsável (st.expander) e os relatórios gerados devem ser exibidos diretamente na UI.",
-      "acceptance_criteria": [
-        "Em `src/app_main_interface.py`, o comando completo executado deve ser armazenado no `st.session_state` após a execução.",
-        "Após a execução, a UI deve exibir a mensagem de status (sucesso/erro) como de costume.",
-        "Abaixo da mensagem de status, um `st.expander` com o título 'Ver Detalhes da Execução' deve ser exibido.",
-        "Dentro do `st.expander`, deve haver: 1. Um subtítulo 'Comando Executado' seguido por um campo de texto (`st.text_area` desabilitado ou `st.code`) mostrando o comando completo. 2. Um subtítulo 'Log de Saída' seguido pelo log completo da execução dentro de um `st.code`.",
-        "Abaixo do `st.expander`, verificar se um relatório foi gerado (usando a lógica existente de `find_report_path`).",
-        "Se um relatório for encontrado, seu conteúdo deve ser exibido diretamente na UI. Relatórios HTML devem ser renderizados com `st.components.v1.html`. Relatórios JSON devem ser exibidos com `st.json`.",
-        "O botão de download do relatório ('Baixar Relatório') deve ser mantido, idealmente próximo à visualização do relatório.",
-        "A documentação (`COMO_USAR.md`) e os testes devem ser atualizados para refletir a nova estrutura de exibição de resultados."
-      ],
       "branchName": "feature/ui-collapsible-results"
-    }
-  ],
-  "done": [
+    },
     {
       "id": "T036",
       "title": "Refatorar Lógica de Upload e Estado da UI para Corrigir Bug de Execução",
