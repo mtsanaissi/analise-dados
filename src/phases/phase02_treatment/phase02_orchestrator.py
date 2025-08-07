@@ -12,7 +12,6 @@ from src.connectors.factory import get_data_loader
 from .core.data_enricher import DataEnricher
 from .core.data_concatenator import DataConcatenator
 from .core.reporting import generate_json_report, generate_html_report
-from .core.text_replacer import TextReplacer
 
 
 def run_treatment_phase(data_project_path: str, extra_args: list):
@@ -262,7 +261,9 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
             generate_html_report(report_data, report_path)
 
     elif args.text_replace_config_path:
-        config_path = os.path.join(data_project_path, "fad-config", args.text_replace_config_path)
+        config_path = args.text_replace_config_path
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(data_project_path, "fad-config", config_path)
         text_replace_config = read_yaml_config_robustly(config_path)
         if not text_replace_config or 'text_replacements' not in text_replace_config:
             logging.error("Arquivo de configuração YAML para substituição de texto é inválido ou não foi encontrado.")

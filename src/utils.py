@@ -23,6 +23,7 @@ import csv
 import fnmatch
 import yaml
 import logging
+from typing import Dict, Any
 
 METADATA_DIR = "fad-metadados"
 
@@ -245,48 +246,22 @@ def build_command(
     return command
 
 
-def read_yaml_config_robustly(file_path: str) -> dict:
+def read_yaml_config_robustly(file_path: str) -> Dict[str, Any] | None:
     """
-    Lê um arquivo de configuração YAML de forma robusta, lidando com BOM.
-    """
-    try:
-        # Tenta abrir com 'utf-8-sig' para lidar com BOM
-        with open(file_path, 'r', encoding='utf-8-sig') as f:
-            return yaml.safe_load(f)
-    except (FileNotFoundError, yaml.YAMLError) as e:
-        logging.error(f"Erro ao ler o arquivo YAML {file_path}: {e}")
-        return None
-
-
-def get_file_header(file_path: str) -> list[str]:
-    """
-    Lê eficientemente o cabeçalho de um arquivo (CSV ou Excel) para extrair as colunas.
+    Lê um arquivo de configuração YAML de forma robusta.
 
     Args:
-        file_path (str): O caminho para o arquivo.
+        file_path (str): O caminho para o arquivo YAML.
 
     Returns:
-        list[str]: Uma lista com os nomes das colunas. Retorna lista vazia em caso de erro.
+        Dict[str, Any] | None: Um dicionário com a configuração ou None se ocorrer um erro.
     """
-    if not file_path or not os.path.exists(file_path):
-        logging.warning(f"Arquivo de cabeçalho não encontrado em: {file_path}")
-        return []
-
     try:
-        file_extension = os.path.splitext(file_path)[1].lower()
-        if file_extension == '.csv':
-            # Lê apenas a primeira linha do CSV
-            with open(file_path, 'r', encoding='utf-8-sig') as f:
-                reader = csv.reader(f, delimiter=';')
-                header = next(reader)
-            return header
-        elif file_extension in ['.xlsx', '.xls']:
-            # Lê apenas a primeira linha do Excel, sem carregar dados
-            df = pd.read_excel(file_path, nrows=0)
-            return df.columns.tolist()
-        else:
-            logging.warning(f"Tipo de arquivo não suportado para leitura de cabeçalho: {file_extension}")
-            return []
-    except Exception as e:
-        logging.error(f"Erro ao ler o cabeçalho do arquivo {file_path}: {e}")
-        return []
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        logging.error(f"Arquivo de configuração YAML não encontrado em: {file_path}")
+        return None
+    except yaml.YAMLError as e:
+        logging.error(f"Erro ao decodificar o arquivo YAML '{file_path}': {e}")
+        return None

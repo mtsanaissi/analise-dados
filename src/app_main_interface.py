@@ -21,7 +21,45 @@ import os
 import re
 import tempfile
 import chardet
-from src.utils import build_command, get_file_header
+from src.utils import build_command
+from src.connectors.factory import get_data_loader
+
+
+def load_lookup_columns(project_path: str, lookup_file: str, delimiter: str = None) -> list:
+    """
+    Carrega as colunas de um arquivo de lookup.
+
+    Args:
+        project_path (str): O caminho do projeto de dados.
+        lookup_file (str): O nome do arquivo de lookup.
+        delimiter (str, optional): O delimitador para arquivos CSV. Defaults to None.
+
+    Returns:
+        list: A lista de colunas do arquivo de lookup.
+    """
+    if not lookup_file or not project_path:
+        return []
+
+    try:
+        # Constrói o caminho absoluto para o lookup_file
+        file_path = os.path.join(project_path, lookup_file)
+        if not os.path.exists(file_path):
+            # Tenta como caminho absoluto se não encontrar no projeto
+            if os.path.exists(lookup_file):
+                file_path = lookup_file
+            else:
+                st.warning(f"Arquivo de lookup não encontrado: {lookup_file}")
+                return []
+
+        connector = get_data_loader(file_path, delimiter=delimiter)
+        df = connector.read()
+
+        if df is not None and not df.empty:
+            return df.columns.tolist()
+        return []
+    except Exception as e:
+        st.error(f"Erro ao carregar colunas do arquivo de lookup: {e}")
+        return []
 
 
 def run_process(command: list[str], output_placeholder):
@@ -88,6 +126,9 @@ def main_interface():
         layout="wide", page_title="Kit de Ferramentas de Análise de Dados")
     st.title("Painel de Controle do Kit de Ferramentas")
 
+    st.info(f"DEBUG: st.session_state = {st.session_state}")
+
+    # Inicialização do estado da sessão
     # Inicialização do estado da sessão
     if 'running' not in st.session_state:
         st.session_state.running = False
@@ -95,10 +136,6 @@ def main_interface():
         st.session_state.last_run_results = None
     if 'temp_config_path' not in st.session_state:
         st.session_state.temp_config_path = None
-    if 'enrich_columns_options' not in st.session_state:
-        st.session_state.enrich_columns_options = []
-    if 'enrich_columns_selected' not in st.session_state:
-        st.session_state.enrich_columns_selected = []
 
     with st.sidebar:
         st.header("Configurações de Execução")
@@ -137,35 +174,68 @@ def main_interface():
                 treatment_args["operation"] = st.selectbox(
                     "Operação de Tratamento", options=operations, help="Selecione a operação de tratamento.", disabled=st.session_state.running)
 
+                # Operação de Enriquecimento de Dados
                 if treatment_args["operation"] == "Enriquecer Dados":
-                    query_file_path = st.text_input(
-                        "Arquivo de Consulta",
-                        help="Caminho para o arquivo CSV ou Excel que contém os dados para enriquecimento.",
-                        disabled=st.session_state.running,
-                        key="query_file_path_input"
-                    )
+                    st.subheader("Configuração de Enriquecimento")
 
-                    if st.session_state.query_file_path_input:
-                        if os.path.exists(st.session_state.query_file_path_input):
-                            st.session_state.enrich_columns_options = get_file_header(st.session_state.query_file_path_input)
-                            if not st.session_state.enrich_columns_options:
-                                st.warning("Não foi possível ler as colunas do arquivo. Verifique o formato ou o caminho.")
-                        else:
-                            st.warning("Caminho do arquivo de consulta inválido.")
-                            st.session_state.enrich_columns_options = []
+                    # Inicializa o estado da sessão para os campos do formulário
+                    if 'enrich_main_file' not in st.session_state:
+                        st.session_state.enrich_main_file = ''
+                    if 'enrich_lookup_file' not in st.session_state:
+                        st.session_state.enrich_lookup_file = ''
+                    if 'enrich_main_key' not in st.session_state:
+                        st.session_state.enrich_main_key = ''
+                    if 'enrich_lookup_key' not in st.session_state:
+                        st.session_state.enrich_lookup_key = ''
+                    if 'enrich_columns_to_add' not in st.session_state:
+                        st.session_state.enrich_columns_to_add = []
+                    if 'lookup_columns' not in st.session_state:
+                        st.session_state.lookup_columns = []
 
-                    st.session_state.enrich_columns_selected = st.multiselect(
-                        "Colunas a Adicionar",
-                        options=st.session_state.enrich_columns_options,
-                        default=st.session_state.enrich_columns_selected,
-                        help="Selecione as colunas do arquivo de consulta para adicionar ao arquivo principal.",
-                        disabled=st.session_state.running
-                    )
+                    main_file = st.text_input("Arquivo Principal",
+                                              value=st.session_state.enrich_main_file,
+                                              help="Nome do arquivo principal a ser enriquecido (ex: `vendas.csv`).",
+                                              disabled=st.session_state.running)
 
+                    lookup_file = st.text_input("Arquivo de Lookup",
+                                                value=st.session_state.enrich_lookup_file,
+                                                help="Caminho para o arquivo de lookup (ex: `produtos.xlsx`).",
+                                                disabled=st.session_state.running)
+
+                    # Carrega as colunas do arquivo de lookup dinamicamente
+                    if lookup_file and lookup_file != st.session_state.get('last_lookup_file'):
+                        st.session_state.lookup_columns = load_lookup_columns(project_path, lookup_file)
+                        st.session_state.last_lookup_file = lookup_file
+
+                    main_key = st.text_input("Chave no Principal",
+                                             value=st.session_state.enrich_main_key,
+                                             help="Nome da coluna chave no arquivo principal.",
+                                             disabled=st.session_state.running)
+
+                    lookup_key = st.text_input("Chave no Lookup",
+                                               value=st.session_state.enrich_lookup_key,
+                                               help="Nome da coluna chave no arquivo de lookup.",
+                                               disabled=st.session_state.running)
+
+                    columns_to_add = st.multiselect("Colunas a Adicionar",
+                                                    options=st.session_state.lookup_columns,
+                                                    default=st.session_state.enrich_columns_to_add,
+                                                    help="Selecione as colunas do arquivo de lookup para adicionar ao principal.",
+                                                    disabled=st.session_state.running)
+
+                    # Atualiza o estado da sessão com os valores atuais
+                    st.session_state.enrich_main_file = main_file
+                    st.session_state.enrich_lookup_file = lookup_file
+                    st.session_state.enrich_main_key = main_key
+                    st.session_state.enrich_lookup_key = lookup_key
+                    st.session_state.enrich_columns_to_add = columns_to_add
+
+                # Lógica genérica para outras operações que usam upload de YAML
                 elif treatment_args["operation"] in ["Substituir Valores", "Encontrar e Substituir Texto", "Concatenar Dados"]:
                     uploaded_file = st.file_uploader("Carregar Arquivo de Configuração YAML", type=[
                         'yaml', 'yml'], help="Faça o upload do arquivo de configuração YAML.", disabled=st.session_state.running)
                     if uploaded_file is not None and st.session_state.temp_config_path is None:
+                        # Processar o arquivo imediatamente após o upload
                         content_bytes = uploaded_file.getvalue()
                         detected_encoding = chardet.detect(content_bytes)['encoding'] or 'utf-8'
                         decoded_content = content_bytes.decode(detected_encoding)
@@ -196,9 +266,33 @@ def main_interface():
     # Lógica de execução do processo
     if st.session_state.running:
         try:
-            # Passa o caminho do arquivo temporário para o comando, se existir
-            if selected_phase == "treatment" and st.session_state.get('temp_config_path'):
-                 treatment_args["config_file_path"] = st.session_state.temp_config_path
+            if selected_phase == "treatment":
+                # Para "Enriquecer Dados", gera o YAML dinamicamente
+                if treatment_args.get("operation") == "Enriquecer Dados":
+                    enrich_config = {
+                        'main_file': st.session_state.get('enrich_main_file'),
+                        'lookup_file': st.session_state.get('enrich_lookup_file'),
+                        'main_key': st.session_state.get('enrich_main_key'),
+                        'lookup_key': st.session_state.get('enrich_lookup_key'),
+                        'columns_to_add': st.session_state.get('enrich_columns_to_add')
+                    }
+
+                    # Validação simples
+                    if not all(enrich_config.values()):
+                        st.error("Todos os campos de configuração de enriquecimento devem ser preenchidos.")
+                        st.session_state.running = False
+                        st.rerun()
+                        return
+
+                    with tempfile.NamedTemporaryFile(delete=False, suffix="_enrich_config.yaml", mode='w', encoding='utf-8') as tmp:
+                        import yaml
+                        yaml.dump(enrich_config, tmp)
+                        st.session_state.temp_config_path = tmp.name
+                    treatment_args["config_file_path"] = st.session_state.temp_config_path
+
+                # Para outras operações, usa o arquivo de upload, se houver
+                elif st.session_state.get('temp_config_path'):
+                    treatment_args["config_file_path"] = st.session_state.temp_config_path
 
             command = build_command(
                 project_path, selected_phase, discovery_args=discovery_args, treatment_args=treatment_args)
