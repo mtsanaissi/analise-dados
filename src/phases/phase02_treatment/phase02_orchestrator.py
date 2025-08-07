@@ -4,7 +4,6 @@ import argparse
 import json
 import logging
 import datetime
-import shutil
 import yaml
 import re
 from src.utils import find_files, METADATA_DIR, read_yaml_config_robustly
@@ -210,7 +209,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                 relative_path = os.path.relpath(file_path, data_project_path)
                 backup_file_path = os.path.join(backup_dir_path, relative_path)
                 os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
-                shutil.move(file_path, backup_file_path)
+                with open(file_path, 'rb') as src:
+                    with open(backup_file_path, 'wb') as dst:
+                        dst.write(src.read())
+                os.remove(file_path)
                 logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
 
                 file_extension = os.path.splitext(file_path)[1].lower()
@@ -331,7 +333,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                 relative_path = os.path.relpath(file_path, data_project_path)
                 backup_file_path = os.path.join(backup_dir_path, relative_path)
                 os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
-                shutil.move(file_path, backup_file_path)
+                with open(file_path, 'rb') as src:
+                    with open(backup_file_path, 'wb') as dst:
+                        dst.write(src.read())
+                os.remove(file_path)
                 logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
 
                 file_extension = os.path.splitext(file_path)[1].lower()
@@ -410,7 +415,10 @@ def run_treatment_phase(data_project_path: str, extra_args: list):
                     relative_path = os.path.relpath(file_path, data_project_path)
                     backup_file_path = os.path.join(backup_dir_path, relative_path)
                     os.makedirs(os.path.dirname(backup_file_path), exist_ok=True)
-                    shutil.move(file_path, backup_file_path)
+                    with open(file_path, 'rb') as src:
+                        with open(backup_file_path, 'wb') as dst:
+                            dst.write(src.read())
+                    os.remove(file_path)
                     logging.info(f"  -> Arquivo original movido para: {backup_file_path}")
 
                     file_extension = os.path.splitext(file_path)[1].lower()

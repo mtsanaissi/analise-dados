@@ -60,10 +60,9 @@ def test_orchestrator_concatenate_data_routing(mock_data_concatenator, tmp_path)
     )
     mock_data_concatenator.return_value.concatenate_files.assert_called_once()
 
-@patch('src.phases.phase02_treatment.phase02_orchestrator.shutil.move')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.find_files')
 @patch('src.phases.phase02_treatment.phase02_orchestrator.get_data_loader')
-def test_orchestrator_replace_values_routing(mock_get_loader, mock_find_files, mock_shutil_move, tmp_path):
+def test_orchestrator_replace_values_routing(mock_get_loader, mock_find_files, tmp_path):
     # Arrange
     # Setup paths
     config_dir = tmp_path / "fad-config"
@@ -99,7 +98,6 @@ def test_orchestrator_replace_values_routing(mock_get_loader, mock_find_files, m
 
     # Assert
     mock_find_files.assert_called_once()
-    mock_shutil_move.assert_called_once()
 
     # Read the modified file and verify its contents
     result_df = pd.read_csv(dummy_file, sep=';')
