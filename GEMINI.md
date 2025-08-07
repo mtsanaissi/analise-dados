@@ -35,9 +35,9 @@ To ensure quality and maintainability, our "Definition of Done" for any code-rel
 
 ## 📝 Prompts for Jules
 
-When generating prompts for Jules, I will follow this structure:
+When generating prompts for Jules, I will follow this strict structure:
 
-1.  **Title:** A short, descriptive title (e.g., "Implement Google Authentication").
+1.  **Title:** A short, descriptive title (e.g., "Implement Google Authentication"). Don't prefix with "Title:".
 2.  **Guiding Principles:** The first step will always be a reminder to adhere to the rules in `JULES.md`.
 3.  **Branch Name:** At the end of the prompt, I will provide the exact `branchName` from `@AGENT_TASKS.json` that Jules **must** use to commit his changes.
 

@@ -12,6 +12,22 @@
         "A função build_command deve ser atualizada para construir o comando CLI com os novos argumentos e seus valores, em vez de usar config_file_path para essas duas operações.",
         "A UI deve incluir textos de ajuda (help=...) claros para o usuário, explicando que os nomes dos arquivos devem ser relativos à pasta do projeto de dados e que os arquivos de configuração para as outras operações devem estar em data/fad-config."
       ]
+    },
+    {
+      "id": "T042",
+      "title": "Melhorar a Exibição de Resultados na UI com Componente Colapsável e Visualizador de Relatório",
+      "description": "Para melhorar a usabilidade e limpar a interface, os detalhes da execução (comando e log) devem ser exibidos dentro de um componente colapsável (st.expander) e os relatórios gerados devem ser exibidos diretamente na UI.",
+      "acceptance_criteria": [
+        "Em `src/app_main_interface.py`, o comando completo executado deve ser armazenado no `st.session_state` após a execução.",
+        "Após a execução, a UI deve exibir a mensagem de status (sucesso/erro) como de costume.",
+        "Abaixo da mensagem de status, um `st.expander` com o título 'Ver Detalhes da Execução' deve ser exibido.",
+        "Dentro do `st.expander`, deve haver: 1. Um subtítulo 'Comando Executado' seguido por um campo de texto (`st.text_area` desabilitado ou `st.code`) mostrando o comando completo. 2. Um subtítulo 'Log de Saída' seguido pelo log completo da execução dentro de um `st.code`.",
+        "Abaixo do `st.expander`, verificar se um relatório foi gerado (usando a lógica existente de `find_report_path`).",
+        "Se um relatório for encontrado, seu conteúdo deve ser exibido diretamente na UI. Relatórios HTML devem ser renderizados com `st.components.v1.html`. Relatórios JSON devem ser exibidos com `st.json`.",
+        "O botão de download do relatório ('Baixar Relatório') deve ser mantido, idealmente próximo à visualização do relatório.",
+        "A documentação (`COMO_USAR.md`) e os testes devem ser atualizados para refletir a nova estrutura de exibição de resultados."
+      ],
+      "branchName": "feature/ui-collapsible-results"
     }
   ],
   "done": [
