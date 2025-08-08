@@ -1,6 +1,7 @@
 import pandas as pd
 import os
-from src.phases.phase02_treatment.core.data_concatenator import DataConcatenator
+import pytest
+from src.phases.phase02_treatment.core.data_concatenator import concatenate_data
 
 def test_concatenate_data(tmp_path):
     # Arrange
@@ -15,14 +16,15 @@ def test_concatenate_data(tmp_path):
     df2.to_csv(input_folder / "file2.csv", index=False, sep=';')
 
     # Act
-    concatenator = DataConcatenator(
+    result = concatenate_data(
         input_folder=str(input_folder),
         output_file=str(output_file),
         file_type='csv'
     )
-    concatenator.concatenate_files()
 
     # Assert
+    assert result['status'] == 'success'
+    assert result['report_path'] == str(output_file)
     assert os.path.exists(output_file)
     concatenated_df = pd.read_csv(output_file, sep=';').sort_values(by='A').reset_index(drop=True)
     expected_df = pd.DataFrame({'A': [1, 2, 5, 6], 'B': [3, 4, 7, 8]}).sort_values(by='A').reset_index(drop=True)
@@ -35,12 +37,13 @@ def test_concatenate_data_with_no_files(tmp_path):
     input_folder.mkdir()
 
     # Act
-    concatenator = DataConcatenator(
+    result = concatenate_data(
         input_folder=str(input_folder),
         output_file=str(output_file),
         file_type='csv'
     )
-    concatenator.concatenate_files()
 
     # Assert
+    assert result['status'] == 'success'
+    assert result['report_path'] is None
     assert not os.path.exists(output_file)
