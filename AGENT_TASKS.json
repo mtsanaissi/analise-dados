@@ -1,32 +1,6 @@
 {
   "tasks": [
     {
-      "id": "T044",
-      "status": "pending",
-      "branchName": "feature/T044-isolate-discovery-logic",
-      "description": "Sua tarefa é refatorar o orquestrador da Fase 1 para que ele não se comporte mais como um script autônomo, mas sim como um módulo de biblioteca. Você irá extrair a lógica principal para uma nova função que recebe seus parâmetros diretamente via argumentos de função (e não de uma lista de strings da linha de comando) e retorna um dicionário Python estruturado com os resultados. Isso elimina a dependência de argparse e prepara o terreno para que a nova UI e a CLI possam chamar esta função diretamente.",
-      "acceptance_criteria": [
-        "Em src/phases/phase01_discovery/phase01_orchestrator.py, a função run_discovery_phase deve ser renomeada para run_discovery_logic.",
-        "A nova função run_discovery_logic deve ter uma assinatura clara, aceitando parâmetros como data_project_path: str, compare_fields: bool = False, report_output: str = 'json', etc.",
-        "Toda a lógica de argparse.ArgumentParser deve ser completamente removida deste arquivo.",
-        "A função deve retornar um dicionário Python. Este dicionário deve conter, no mínimo, as chaves: status ('success' ou 'error'), message (uma string descritiva) e report_path (o caminho para o relatório gerado, ou None se não houver).",
-        "O teste tests/phases/phase01_discovery/test_phase01_orchestrator.py deve ser atualizado para refletir essa mudança. Ele não deve mais simular a linha de comando, mas sim importar e chamar `run_discovery_logic` diretamente, validando a estrutura e o conteúdo do dicionário retornado."
-      ]
-    },
-    {
-      "id": "T045",
-      "status": "pending",
-      "branchName": "feature/T045-expose-treatment-library",
-      "description": "Sua tarefa é refatorar os módulos principais dentro de src/phases/phase02_treatment/core/. Em vez de serem chamados por um orquestrador que interpreta argparse, cada módulo (como data_enricher.py, value_corrector.py, etc.) deve expor uma função principal com uma assinatura clara e específica para seus parâmetros. O antigo orquestrador (phase02_orchestrator.py) será eliminado, pois a UI e a CLI chamarão essas novas funções diretamente.",
-      "acceptance_criteria": [
-        "O arquivo src/phases/phase02_treatment/phase02_orchestrator.py e seu teste tests/phases/phase02_treatment/test_phase02_orchestrator.py devem ser excluídos.",
-        "Cada módulo de funcionalidade em src/phases/phase02_treatment/core/ (ex: data_enricher.py) deve fornecer uma função pública principal (ex: enrich_data(...)).",
-        "Cada uma dessas funções deve ter uma assinatura explícita, recebendo seus parâmetros diretamente (ex: main_file_path: str, join_on: str, etc.), e não um dicionário `config` genérico.",
-        "Cada função deve retornar um dicionário estruturado contendo, no mínimo, as chaves: status ('success' ou 'error'), message (uma string descritiva) e report_path (o caminho para o relatório ou arquivo de saída, se aplicável, caso contrário None).",
-        "Os testes existentes para a lógica do núcleo (ex: test_data_enricher.py) devem ser atualizados para chamar essas novas funções diretamente e validar o dicionário de retorno."
-      ]
-    },
-    {
       "id": "T046",
       "status": "pending",
       "branchName": "feature/T046-implement-new-cli",
@@ -79,5 +53,18 @@
       ]
     }
   ],
-  "done": []
+  "done": [
+    {
+      "id": "T044",
+      "status": "done",
+      "branchName": "feature/T044-isolate-discovery-logic",
+      "description": "Sua tarefa é refatorar o orquestrador da Fase 1 para que ele não se comporte mais como um script autônomo, mas sim como um módulo de biblioteca. Você irá extrair a lógica principal para uma nova função que recebe seus parâmetros diretamente via argumentos de função (e não de uma lista de strings da linha de comando) e retorna um dicionário Python estruturado com os resultados. Isso elimina a dependência de argparse e prepara o terreno para que a nova UI e a CLI possam chamar esta função diretamente."
+    },
+    {
+      "id": "T045",
+      "status": "done",
+      "branchName": "feature/T045-expose-treatment-library",
+      "description": "Sua tarefa é refatorar os módulos principais dentro de src/phases/phase02_treatment/core/. Em vez de serem chamados por um orquestrador que interpreta argparse, cada módulo (como data_enricher.py, value_corrector.py, etc.) deve expor uma função principal com uma assinatura clara e específica para seus parâmetros. O antigo orquestrador (phase02_orchestrator.py) será eliminado, pois a UI e a CLI chamarão essas novas funções diretamente."
+    }
+  ]
 }
