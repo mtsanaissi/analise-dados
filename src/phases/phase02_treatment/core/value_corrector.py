@@ -28,27 +28,28 @@ def _apply_corrections(df: pd.DataFrame, corrections: Union[Dict, List[Dict]]) -
                 if column in df_corrected.columns:
                     if not case_sensitive and pd.api.types.is_string_dtype(df_corrected[column]):
                         if isinstance(existing_value, str):
-                            df_corrected[column] = df_corrected[column].str.replace(f'^{re.escape(existing_value)}$', str(new_value), case=False, regex=True)
+                            df_corrected.loc[df_corrected[column].str.lower() == existing_value.lower(), column] = new_value
                         elif isinstance(existing_value, list):
                             for val in existing_value:
-                                df_corrected[column] = df_corrected[column].str.replace(f'^{re.escape(val)}$', str(new_value), case=False, regex=True)
-                    else:
-                        df_corrected[column] = df_corrected[column].replace(existing_value, new_value)
-            else:
-                for col_name in df_corrected.columns:
-                    # This is a global rule, apply it to all columns
-                    if not case_sensitive and pd.api.types.is_string_dtype(df_corrected[col_name]):
-                        if isinstance(existing_value, str):
-                           df_corrected[col_name] = df_corrected[col_name].mask(df_corrected[col_name].str.lower() == existing_value.lower(), new_value)
-                        elif isinstance(existing_value, list):
-                            for val in existing_value:
-                                df_corrected[col_name] = df_corrected[col_name].mask(df_corrected[col_name].str.lower() == val.lower(), new_value)
+                                df_corrected.loc[df_corrected[column].str.lower() == val.lower(), column] = new_value
                     else:
                         if isinstance(existing_value, list):
-                            for val in existing_value:
-                                df_corrected[col_name] = df_corrected[col_name].replace(val, new_value)
+                             df_corrected[column] = df_corrected[column].replace(existing_value, new_value)
                         else:
+                             df_corrected[column] = df_corrected[column].replace({existing_value: new_value})
+            else:
+                for col_name in df_corrected.columns:
+                    if not case_sensitive and pd.api.types.is_string_dtype(df_corrected[col_name]):
+                        if isinstance(existing_value, str):
+                            df_corrected.loc[df_corrected[col_name].str.lower() == existing_value.lower(), col_name] = new_value
+                        elif isinstance(existing_value, list):
+                            for val in existing_value:
+                                df_corrected.loc[df_corrected[col_name].str.lower() == val.lower(), col_name] = new_value
+                    else:
+                        if isinstance(existing_value, list):
                             df_corrected[col_name] = df_corrected[col_name].replace(existing_value, new_value)
+                        else:
+                            df_corrected[col_name] = df_corrected[col_name].replace({existing_value: new_value})
 
 
     return df_corrected
@@ -69,9 +70,9 @@ def correct_values(input_file: str, output_file: str, corrections: Union[Dict, L
     logger = logging.getLogger(__name__)
     try:
         try:
-            df = pd.read_csv(input_file, sep=';')
+            df = pd.read_csv(input_file, sep=';', keep_default_na=False, na_values=[''])
         except (pd.errors.ParserError, ValueError):
-            df = pd.read_csv(input_file)
+            df = pd.read_csv(input_file, keep_default_na=False, na_values=[''])
 
         df_corrected = _apply_corrections(df, corrections)
 
