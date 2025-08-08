@@ -1,0 +1,211 @@
+{
+    "status": "success",
+    "message": "Fase de Descoberta e Diagnóstico concluída com sucesso.",
+    "detailed_results": {
+        "encoding_analysis": [
+            {
+                "file_path": "/app/tests/data/cli_test_data/lookup.csv",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "/app/tests/data/cli_test_data/sample.csv",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "/app/tests/data/cli_test_data/output/enriched_output.csv",
+                "encoding": "ascii",
+                "confidence": 1.0
+            },
+            {
+                "file_path": "/app/tests/data/cli_test_data/correct_values_test/sample_to_correct.csv",
+                "encoding": "ascii",
+                "confidence": 1.0
+            }
+        ],
+        "data_volume_analysis": {
+            "summary_by_extension": [
+                {
+                    "extensao": "csv",
+                    "total_arquivos": 4,
+                    "total_registros": 8,
+                    "total_tamanho_bytes": 168,
+                    "media_registros_por_arquivo": 2.0,
+                    "media_tamanho_por_arquivo": 42.0
+                }
+            ],
+            "overall_summary": {
+                "total_arquivos_geral": 4,
+                "total_registros_geral": 8,
+                "total_tamanho_geral_bytes": 168,
+                "total_tamanho_geral_formatado": "168 B"
+            },
+            "files_with_errors": [],
+            "message": "Resumo de volume e tamanho gerado com sucesso."
+        },
+        "data_integrity_analysis": {
+            "status": "success",
+            "message": "Verificação de integridade concluída.",
+            "reports": [
+                {
+                    "file_path": "/app/tests/data/cli_test_data/lookup.csv",
+                    "file_type": "CSV",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "delimiter": ";",
+                        "has_header": true,
+                        "num_columns_header": 2,
+                        "column_consistency_issue": false,
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "/app/tests/data/cli_test_data/sample.csv",
+                    "file_type": "CSV",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "delimiter": ";",
+                        "has_header": true,
+                        "num_columns_header": 3,
+                        "column_consistency_issue": false,
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "/app/tests/data/cli_test_data/output/enriched_output.csv",
+                    "file_type": "CSV",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "delimiter": ",",
+                        "has_header": true,
+                        "num_columns_header": 4,
+                        "column_consistency_issue": false,
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                },
+                {
+                    "file_path": "/app/tests/data/cli_test_data/correct_values_test/sample_to_correct.csv",
+                    "file_type": "CSV",
+                    "status": "OK",
+                    "details": {
+                        "encoding": "ascii",
+                        "delimiter": ";",
+                        "has_header": true,
+                        "num_columns_header": 3,
+                        "column_consistency_issue": false,
+                        "is_empty": false,
+                        "error_message": null
+                    }
+                }
+            ]
+        },
+        "csv_delimiter_analysis": [
+            {
+                "file": "sample_to_correct.csv",
+                "result": {
+                    "delimiter": ";",
+                    "has_header": true,
+                    "encoding_used": "ascii",
+                    "confidence": 0.9
+                }
+            },
+            {
+                "file": "lookup.csv",
+                "result": {
+                    "delimiter": ";",
+                    "has_header": true,
+                    "encoding_used": "ascii",
+                    "confidence": 0.9
+                }
+            },
+            {
+                "file": "enriched_output.csv",
+                "result": {
+                    "delimiter": ",",
+                    "has_header": true,
+                    "encoding_used": "ascii",
+                    "confidence": 0.9
+                }
+            },
+            {
+                "file": "sample.csv",
+                "result": {
+                    "delimiter": ";",
+                    "has_header": true,
+                    "encoding_used": "ascii",
+                    "confidence": 0.9
+                }
+            }
+        ],
+        "csv_column_consistency_analysis": [
+            {
+                "file": "sample_to_correct.csv",
+                "status": "Referência",
+                "details": {
+                    "message": "Definido como arquivo de referência."
+                }
+            },
+            {
+                "file": "lookup.csv",
+                "status": "Inconsistente",
+                "details": {
+                    "message": "Número de colunas diferente. Esperado: 3, Encontrado: 2."
+                }
+            },
+            {
+                "file": "enriched_output.csv",
+                "status": "Inconsistente",
+                "details": {
+                    "message": "Número de colunas diferente. Esperado: 3, Encontrado: 4."
+                }
+            },
+            {
+                "file": "sample.csv",
+                "status": "OK",
+                "details": {
+                    "message": "Estrutura consistente com o arquivo de referência."
+                }
+            }
+        ],
+        "json_schema_validation": [],
+        "excel_sheet_analysis": [],
+        "field_comparison_analysis": [
+            {
+                "file": "sample_to_correct.csv",
+                "status": "Referência",
+                "details": {
+                    "message": "Definido como arquivo de referência."
+                }
+            },
+            {
+                "file": "lookup.csv",
+                "status": "Inconsistente",
+                "details": {
+                    "message": "Número de colunas diferente. Esperado: 3, Encontrado: 2."
+                }
+            },
+            {
+                "file": "enriched_output.csv",
+                "status": "Inconsistente",
+                "details": {
+                    "message": "Número de colunas diferente. Esperado: 3, Encontrado: 4."
+                }
+            },
+            {
+                "file": "sample.csv",
+                "status": "OK",
+                "details": {
+                    "message": "Estrutura consistente com o arquivo de referência."
+                }
+            }
+        ],
+        "type_consistency_analysis": []
+    }
+}
