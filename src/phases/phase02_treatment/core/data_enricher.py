@@ -21,7 +21,7 @@ import logging
 import os
 from typing import Dict, Any
 
-def enrich_data(main_file: str, lookup_file: str, main_key: str, lookup_key: str, columns_to_add: list, output_file: str, join_how: str = 'left') -> Dict[str, Any]:
+def enrich_data(main_file: str, lookup_file: str, main_key: str, lookup_key: str, columns_to_add: list, output_file: str, join_how: str = 'left', sep: str = ',') -> Dict[str, Any]:
     """
     Enriquece um dataframe principal com dados de um dataframe de consulta.
 
@@ -33,6 +33,7 @@ def enrich_data(main_file: str, lookup_file: str, main_key: str, lookup_key: str
         columns_to_add (list): Colunas a serem adicionadas do arquivo de consulta.
         output_file (str): Caminho para salvar o arquivo enriquecido.
         join_how (str): Tipo de junção a ser realizada. Padrão 'left'.
+        sep (str): Delimitador dos arquivos CSV.
 
     Returns:
         Dict[str, Any]: Um dicionário com o status da operação.
@@ -43,10 +44,10 @@ def enrich_data(main_file: str, lookup_file: str, main_key: str, lookup_key: str
             raise ValueError("Todos os parâmetros para enrich_data devem ser fornecidos.")
 
         logger.info(f"Carregando arquivo principal de: {main_file}")
-        df_main = pd.read_csv(main_file)
+        df_main = pd.read_csv(main_file, sep=sep)
 
         logger.info(f"Carregando arquivo de consulta de: {lookup_file}")
-        df_lookup = pd.read_csv(lookup_file)
+        df_lookup = pd.read_csv(lookup_file, sep=sep)
 
         # Validação da existência das colunas de junção
         if main_key not in df_main.columns:

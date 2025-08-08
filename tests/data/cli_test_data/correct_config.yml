@@ -1,0 +1,7 @@
+
+file_rules:
+  - file_pattern: "*.csv"
+    corrections:
+      - column: "name"
+        existing_value: "test1"
+        new_value: "TEST_ONE"
