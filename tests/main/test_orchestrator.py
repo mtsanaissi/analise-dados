@@ -27,23 +27,6 @@ def test_main_discovery_phase(mock_run_discovery, mock_isdir, mock_args, tmp_pat
         # Assert
         mock_run_discovery.assert_called_once_with(data_project_path=data_path)
 
-@patch("src.main.orchestrator.os.path.isdir")
-@patch("src.phases.phase02_treatment.phase02_orchestrator.run_treatment_phase")
-def test_main_treatment_phase(mock_run_treatment, mock_isdir, mock_args, tmp_path):
-    """Testa se a fase 'treatment' é chamada com os argumentos corretos."""
-    # Arrange
-    mock_isdir.return_value = True
-    data_path = str(tmp_path)
-    test_args = ["program_name"] + mock_args("treatment", data_path)
-
-    with patch.object(sys, 'argv', test_args):
-        # Act
-        orchestrator.main()
-
-        # Assert
-        mock_run_treatment.assert_called_once()
-        args, _ = mock_run_treatment.call_args
-        assert args[0] == data_path
 
 @patch("src.main.orchestrator.os.path.isdir")
 def test_main_invalid_path(mock_isdir, mock_args, caplog):

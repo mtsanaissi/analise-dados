@@ -21,114 +21,87 @@ import logging
 import os
 from typing import Dict, Any
 
-
-class DataEnricher:
+def enrich_data(main_file: str, lookup_file: str, main_key: str, lookup_key: str, columns_to_add: list, output_file: str, join_how: str = 'left') -> Dict[str, Any]:
     """
-    Uma classe para enriquecer um dataframe principal com dados de um dataframe de consulta.
+    Enriquece um dataframe principal com dados de um dataframe de consulta.
+
+    Args:
+        main_file (str): Caminho para o arquivo principal.
+        lookup_file (str): Caminho para o arquivo de consulta.
+        main_key (str): Chave de junção no arquivo principal.
+        lookup_key (str): Chave de junção no arquivo de consulta.
+        columns_to_add (list): Colunas a serem adicionadas do arquivo de consulta.
+        output_file (str): Caminho para salvar o arquivo enriquecido.
+        join_how (str): Tipo de junção a ser realizada. Padrão 'left'.
+
+    Returns:
+        Dict[str, Any]: Um dicionário com o status da operação.
     """
-
-    def __init__(self, main_file: str, lookup_file: str, main_key: str, lookup_key: str, columns_to_add: list, output_file: str, join_how: str = 'left'):
-        """
-        Inicializa o DataEnricher com os parâmetros necessários.
-
-        Args:
-            main_file (str): Caminho para o arquivo principal.
-            lookup_file (str): Caminho para o arquivo de consulta.
-            main_key (str): Chave de junção no arquivo principal.
-            lookup_key (str): Chave de junção no arquivo de consulta.
-            columns_to_add (list): Colunas a serem adicionadas do arquivo de consulta.
-            output_file (str): Caminho para salvar o arquivo enriquecido.
-            join_how (str): Tipo de junção a ser realizada. Padrão 'left'.
-        """
+    logger = logging.getLogger(__name__)
+    try:
         if not all([main_file, lookup_file, main_key, lookup_key, columns_to_add, output_file]):
-            raise ValueError("Todos os parâmetros para DataEnricher devem ser fornecidos.")
+            raise ValueError("Todos os parâmetros para enrich_data devem ser fornecidos.")
 
-        self.main_file = main_file
-        self.lookup_file = lookup_file
-        self.main_key = main_key
-        self.lookup_key = lookup_key
-        self.columns_to_add = columns_to_add
-        self.output_file = output_file
-        self.join_how = join_how
-        self.logger = logging.getLogger(__name__)
+        logger.info(f"Carregando arquivo principal de: {main_file}")
+        df_main = pd.read_csv(main_file)
 
-    def enrich_data(self) -> Dict[str, Any]:
-        """
-        Executa o processo de enriquecimento de dados.
-        """
-        self.logger.info(f"Carregando arquivo principal de: {self.main_file}")
-        df_main = pd.read_csv(self.main_file)
-
-        self.logger.info(f"Carregando arquivo de consulta de: {self.lookup_file}")
-        df_lookup = pd.read_csv(self.lookup_file)
+        logger.info(f"Carregando arquivo de consulta de: {lookup_file}")
+        df_lookup = pd.read_csv(lookup_file)
 
         # Validação da existência das colunas de junção
-        if self.main_key not in df_main.columns:
+        if main_key not in df_main.columns:
             raise ValueError(
-                f"A coluna de junção '{self.main_key}' não foi encontrada no arquivo principal: {self.main_file}")
-        if self.lookup_key not in df_lookup.columns:
+                f"A coluna de junção '{main_key}' não foi encontrada no arquivo principal: {main_file}")
+        if lookup_key not in df_lookup.columns:
             raise ValueError(
-                f"A coluna de junção '{self.lookup_key}' não foi encontrada no arquivo de consulta: {self.lookup_file}")
+                f"A coluna de junção '{lookup_key}' não foi encontrada no arquivo de consulta: {lookup_file}")
 
-        self.logger.info(
-            f"Verificando duplicatas na coluna de junção '{self.lookup_key}' do arquivo de consulta.")
+        logger.info(
+            f"Verificando duplicatas na coluna de junção '{lookup_key}' do arquivo de consulta.")
 
-        # Identifica as chaves duplicadas e emite um aviso com a contagem.
-        # A verificação de duplicatas agora serve para avisar e tratar os dados, não para interromper o processo.
-        if df_lookup[self.lookup_key].duplicated().any():
-            duplicated_keys = df_lookup[df_lookup[self.lookup_key].duplicated(
-            )][self.lookup_key]
+        if df_lookup[lookup_key].duplicated().any():
+            duplicated_keys = df_lookup[df_lookup[lookup_key].duplicated()][lookup_key]
             count = duplicated_keys.nunique()
-            warning_message = f"Valores duplicados encontrados na coluna de junção '{self.lookup_key}': {count}."
-            self.logger.warning(warning_message)
+            warning_message = f"Valores duplicados encontrados na coluna de junção '{lookup_key}': {count}."
+            logger.warning(warning_message)
 
-            # Para as linhas com chaves duplicadas no df_main, define as colunas a serem adicionadas como nulas.
-            # Isso evita que o merge falhe ou produza resultados incorretos.
             keys_to_nullify = duplicated_keys.unique()
-            for col in self.columns_to_add:
+            for col in columns_to_add:
                 if col not in df_main.columns:
-                    # Garante que a coluna exista antes de tentar atribuir valores.
                     df_main[col] = pd.NA
-                df_main.loc[df_main[self.main_key].isin(
-                    keys_to_nullify), col] = pd.NA
+                df_main.loc[df_main[main_key].isin(keys_to_nullify), col] = pd.NA
 
-            # Cria uma versão do df_lookup sem as duplicatas para o merge, mantendo a primeira ocorrência.
-            # Isso garante que o merge não crie linhas extras no dataframe principal.
             df_lookup_deduplicated = df_lookup.drop_duplicates(
-                subset=[self.lookup_key], keep='first')
+                subset=[lookup_key], keep='first')
         else:
-            # Se não houver duplicatas, o df_lookup original é usado.
             df_lookup_deduplicated = df_lookup
-            self.logger.info(
+            logger.info(
                 "Nenhuma duplicata encontrada. Executando a junção.")
 
-        # Realiza a junção usando o df_lookup sem duplicatas.
-        # As linhas no df_main que correspondem a chaves originalmente duplicadas
-        # não encontrarão correspondência aqui, preservando os nulos definidos anteriormente.
         df_enriched = pd.merge(
             df_main,
-            df_lookup_deduplicated[self.columns_to_add + [self.lookup_key]],
-            left_on=self.main_key,
-            right_on=self.lookup_key,
-            how=self.join_how,
-            # Adiciona sufixo para evitar conflito de colunas
+            df_lookup_deduplicated[columns_to_add + [lookup_key]],
+            left_on=main_key,
+            right_on=lookup_key,
+            how=join_how,
             suffixes=('', '_lookup')
         )
 
-        # Garante que a coluna de junção do lookup não seja adicionada se já existir uma com o mesmo nome
-        if self.main_key != self.lookup_key:
-            df_enriched = df_enriched.drop(columns=[self.lookup_key])
+        if main_key != lookup_key:
+            df_enriched = df_enriched.drop(columns=[lookup_key])
 
-        self.logger.info(f"Salvando o dataframe enriquecido em: {self.output_file}")
-        df_enriched.to_csv(self.output_file, index=False)
+        logger.info(f"Salvando o dataframe enriquecido em: {output_file}")
+        df_enriched.to_csv(output_file, index=False)
 
-        status = {
-            "main_file_rows": len(df_main),
-            "lookup_file_rows": len(df_lookup),
-            "enriched_file_rows": len(df_enriched),
-            "output_file_path": self.output_file
+        return {
+            "status": "success",
+            "message": f"Enriquecimento de dados concluído. {len(df_enriched)} linhas no arquivo de saída.",
+            "report_path": output_file
         }
-        self.logger.info(
-            f"Processo de enriquecimento concluído. Status: {status}")
-
-        return status
+    except Exception as e:
+        logger.error(f"Erro durante o enriquecimento de dados: {e}")
+        return {
+            "status": "error",
+            "message": str(e),
+            "report_path": None
+        }

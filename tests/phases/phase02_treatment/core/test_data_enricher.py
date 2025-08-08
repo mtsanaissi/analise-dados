@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from src.phases.phase02_treatment.core.data_enricher import DataEnricher
+from src.phases.phase02_treatment.core.data_enricher import enrich_data
 
 def test_enrich_data_success(tmp_path):
     # Arrange
@@ -18,7 +18,7 @@ def test_enrich_data_success(tmp_path):
     lookup_df.to_csv(lookup_file, index=False)
 
     # Act
-    enricher = DataEnricher(
+    result = enrich_data(
         main_file=str(main_file),
         lookup_file=str(lookup_file),
         main_key='key',
@@ -26,9 +26,10 @@ def test_enrich_data_success(tmp_path):
         columns_to_add=['extra_data'],
         output_file=str(output_file)
     )
-    enricher.enrich_data()
 
     # Assert
+    assert result['status'] == 'success'
+    assert result['report_path'] == str(output_file)
     enriched_df = pd.read_csv(output_file)
     assert 'extra_data' in enriched_df.columns
     assert len(enriched_df) == 3
@@ -50,7 +51,7 @@ def test_enrich_data_duplicate_keys_in_lookup(tmp_path):
     lookup_df.to_csv(lookup_file, index=False)
 
     # Act
-    enricher = DataEnricher(
+    result = enrich_data(
         main_file=str(main_file),
         lookup_file=str(lookup_file),
         main_key='key',
@@ -58,9 +59,9 @@ def test_enrich_data_duplicate_keys_in_lookup(tmp_path):
         columns_to_add=['extra_data'],
         output_file=str(output_file)
     )
-    enricher.enrich_data()
 
     # Assert
+    assert result['status'] == 'success'
     enriched_df = pd.read_csv(output_file)
     assert 'extra_data' in enriched_df.columns
     assert pd.isna(enriched_df.loc[0, 'extra_data'])
