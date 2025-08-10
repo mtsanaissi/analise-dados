@@ -4,17 +4,17 @@
     "detailed_results": {
         "encoding_analysis": [
             {
-                "file_path": "D:\\w\\analise-dados\\data\\sample\\ambiguous.txt",
+                "file_path": "/app/data/sample/ambiguous.txt",
                 "encoding": "ascii",
                 "confidence": 1.0
             },
             {
-                "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
+                "file_path": "/app/data/sample/consumidorgovbr_2025-02.csv",
                 "encoding": "UTF-8-SIG",
                 "confidence": 1.0
             },
             {
-                "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
+                "file_path": "/app/data/sample/consumidorgovbr_2025-01.csv",
                 "encoding": "UTF-8-SIG",
                 "confidence": 1.0
             }
@@ -25,9 +25,9 @@
                     "extensao": "csv",
                     "total_arquivos": 2,
                     "total_registros": 200,
-                    "total_tamanho_bytes": 68580,
+                    "total_tamanho_bytes": 68378,
                     "media_registros_por_arquivo": 100.0,
-                    "media_tamanho_por_arquivo": 34290.0
+                    "media_tamanho_por_arquivo": 34189.0
                 },
                 {
                     "extensao": "txt",
@@ -41,8 +41,8 @@
             "overall_summary": {
                 "total_arquivos_geral": 3,
                 "total_registros_geral": 200,
-                "total_tamanho_geral_bytes": 68609,
-                "total_tamanho_geral_formatado": "67.00 KB"
+                "total_tamanho_geral_bytes": 68407,
+                "total_tamanho_geral_formatado": "66.80 KB"
             },
             "files_with_errors": [],
             "message": "Resumo de volume e tamanho gerado com sucesso."
@@ -52,7 +52,7 @@
             "message": "Verificação de integridade concluída.",
             "reports": [
                 {
-                    "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-01.csv",
+                    "file_path": "/app/data/sample/consumidorgovbr_2025-02.csv",
                     "file_type": "CSV",
                     "status": "OK",
                     "details": {
@@ -66,7 +66,7 @@
                     }
                 },
                 {
-                    "file_path": "D:\\w\\analise-dados\\data\\sample\\consumidorgovbr_2025-02.csv",
+                    "file_path": "/app/data/sample/consumidorgovbr_2025-01.csv",
                     "file_type": "CSV",
                     "status": "OK",
                     "details": {
