@@ -1,34 +1,6 @@
 {
   "tasks": [
     {
-      "id": "T046",
-      "status": "pending",
-      "branchName": "feature/T046-implement-new-cli",
-      "description": "Sua tarefa é construir a nova face da nossa aplicação para a linha de comando usando o script src/run.py. Este script será o único ponto de entrada da CLI. Ele deve usar argparse e sub-comandos para fornecer uma experiência de usuário clara e intuitiva. Para cada comando executado, ele chamará a função de lógica correspondente (da Fase 1 ou Fase 2), passará os argumentos apropriados e imprimirá o resultado retornado de forma amigável no console.",
-      "acceptance_criteria": [
-        "O script src/run.py deve ser o ponto de entrada principal da CLI.",
-        "Deve ser implementado usando argparse com sub-comandos: discovery e treatment.",
-        "O comando discovery (ex: python src/run.py discovery --data-path ...) deve importar e chamar run_discovery_logic.",
-        "O comando treatment terá seus próprios sub-comandos para cada operação (ex: `python src/run.py treatment enrich ...`). Cada sub-comando será responsável por importar e chamar a função de lógica específica correspondente (ex: `enrich_data(...)`), passando os argumentos da linha de comando para os parâmetros da função.",
-        "O script deve imprimir os campos message e report_path (se não for None) do dicionário retornado pelas funções de lógica.",
-        "Devem ser criados novos testes de integração específicos para a CLI. Esses testes usarão o módulo subprocess para executar comandos como `python src/run.py ...` e verificar se a saída no stdout é a esperada."
-      ]
-    },
-    {
-      "id": "T047",
-      "status": "pending",
-      "branchName": "feature/T047-refactor-ui-direct-calls",
-      "description": "Sua missão é refatorar completamente a aplicação Streamlit (src/app_main_interface.py). Você irá remover toda a camada de subprocess. Em vez disso, a UI irá importar as funções de lógica (como run_discovery_logic, enrich_data, etc.) e chamá-las diretamente quando o usuário interagir com a interface. Você usará o dicionário de retorno para exibir os resultados, tratando exceções de forma graciosa.",
-      "acceptance_criteria": [
-        "Em src/app_main_interface.py, as funções build_command e run_process devem ser removidas.",
-        "As funções de lógica (run_discovery_logic, enrich_data, etc.) devem ser importadas diretamente.",
-        "A lógica do botão 'Executar' deve ser reescrita para chamar a função de lógica apropriada, passando os valores dos widgets (st.text_input, etc.) como argumentos.",
-        "A chamada da função deve ser envolvida em um bloco try...except Exception as e: para capturar quaisquer erros da lógica de negócio e exibi-los de forma amigável usando st.error().",
-        "A função find_report_path (que usa regex) deve ser removida. O caminho do relatório deve ser obtido diretamente do dicionário de retorno (ex: resultado['report_path']).",
-        "O teste tests/test_app_main_interface.py deve ser completamente reescrito. Ele deve usar unittest.mock.patch para 'mocar' as chamadas às funções de lógica. Os testes devem simular a interação do usuário e verificar se as funções de lógica foram chamadas com os argumentos corretos."
-      ]
-    },
-    {
       "id": "T048",
       "status": "pending",
       "branchName": "feature/T048-cleanup-obsolete-code",
@@ -65,6 +37,18 @@
       "status": "done",
       "branchName": "feature/T045-expose-treatment-library",
       "description": "Sua tarefa é refatorar os módulos principais dentro de src/phases/phase02_treatment/core/. Em vez de serem chamados por um orquestrador que interpreta argparse, cada módulo (como data_enricher.py, value_corrector.py, etc.) deve expor uma função principal com uma assinatura clara e específica para seus parâmetros. O antigo orquestrador (phase02_orchestrator.py) será eliminado, pois a UI e a CLI chamarão essas novas funções diretamente."
+    },
+    {
+      "id": "T046",
+      "status": "done",
+      "branchName": "feature/T046-implement-new-cli",
+      "description": "Sua tarefa é construir a nova face da nossa aplicação para a linha de comando usando o script src/run.py. Este script será o único ponto de entrada da CLI. Ele deve usar argparse e sub-comandos para fornecer uma experiência de usuário clara e intuitiva. Para cada comando executado, ele chamará a função de lógica correspondente (da Fase 1 ou Fase 2), passará os argumentos apropriados e imprimirá o resultado retornado de forma amigável no console."
+    },
+    {
+      "id": "T047",
+      "status": "done",
+      "branchName": "feature/T047-refactor-ui-direct-calls",
+      "description": "Sua missão é refatorar completamente a aplicação Streamlit (src/app_main_interface.py). Você irá remover toda a camada de subprocess. Em vez disso, a UI irá importar as funções de lógica (como run_discovery_logic, enrich_data, etc.) e chamá-las diretamente quando o usuário interagir com a interface. Você usará o dicionário de retorno para exibir os resultados, tratando exceções de forma graciosa."
     }
   ]
 }
