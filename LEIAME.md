@@ -80,66 +80,55 @@ A estrutura de diretórios foi organizada para refletir as fases do pipeline de 
 
 ## 🛠️ Como Usar
 
-O orquestrador principal (`src/main/orchestrator.py`) é o ponto de entrada para executar as diferentes fases do pipeline.
+A ferramenta pode ser operada de duas formas: através da **Interface Gráfica (GUI)** ou da **Linha de Comando (CLI)**.
 
-Para executar uma fase, certifique-se de que seu ambiente virtual esteja ativado e use o seguinte comando:
+### Interface Gráfica (Recomendado para iniciantes)
 
+Para uma experiência visual e interativa, use a interface baseada em Streamlit.
+
+**Como iniciar:**
 ```bash
-python src/main/orchestrator.py --data-project-path <caminho_para_sua_pasta_de_dados> --phase <nome_da_fase>
+streamlit run src/app_main_interface.py
 ```
+Para instruções detalhadas sobre como usar a interface gráfica, consulte o **[Guia de Uso Completo](COMO_USAR.md)**.
 
-- **`<caminho_para_sua_pasta_de_dados>`**: O caminho para o diretório que contém os arquivos de dados do seu projeto (ex: `data/meu_projeto`).
-- **`<nome_da_fase>`**: A fase que você deseja executar. As opções são: `discovery`, `treatment`, `exploratory`, `visualization`.
+### Linha de Comando (CLI)
 
-**Exemplo de execução da fase de Descoberta e Diagnóstico:**
+Para automação e usuários avançados, a CLI oferece acesso direto a todas as funcionalidades. O ponto de entrada é `src/run.py`.
 
+**Estrutura básica:**
 ```bash
-python src/main/orchestrator.py --data-project-path data/meu_projeto --phase discovery
+python src/run.py <comando> [sub-comando] [opções]
 ```
 
-Use o sufixo `-h` ou `--help` com o `orchestrator.py` para ver as opções disponíveis.
+**Comandos principais:**
+- `discovery`: Para análise e diagnóstico de dados.
+- `treatment`: Para limpeza e transformação de dados.
 
-### Ferramenta de Enriquecimento de Dados (Fase 2)
-
-A fase de tratamento inclui uma ferramenta poderosa para enriquecer um conjunto de dados principal com informações de uma fonte de dados secundária (look up). Esta funcionalidade é ideal para cenários onde você precisa, por exemplo, adicionar descrições a códigos de categoria, mesclar informações de clientes ou complementar dados transacionais.
-
-**Propósito:**
-
-- **Unir Dataframes**: Executa uma operação de `merge` (junção) entre dois arquivos de dados (principal e de consulta) com base em uma coluna-chave comum.
-- **Validação de Integridade**: Antes de unir, a ferramenta verifica se a coluna-chave no arquivo de consulta contém valores duplicados, o que poderia levar a resultados incorretos. Se duplicatas forem encontradas, a operação é interrompida com uma mensagem de erro clara.
-- **Flexibilidade**: Permite configurar os caminhos dos arquivos, a coluna de junção e o tipo de `merge` através de um arquivo de configuração JSON.
-
-**Como Usar:**
-
-A ferramenta de enriquecimento é executada através do orquestrador da **Fase 2** (`phase02_orchestrator.py`), utilizando o argumento `--enrich-data`. Este modo de execução é independente do fluxo de tratamento padrão e foca exclusivamente na tarefa de enriquecimento.
-
-Use o seguinte comando, a partir da raiz do projeto:
-
+Use a opção `--help` para ver todos os detalhes de um comando:
 ```bash
-python src/phases/phase02_treatment/phase02_orchestrator.py <caminho_para_pasta_de_dados> --enrich-data <caminho_para_config.json>
+python src/run.py discovery --help
+python src/run.py treatment --help
 ```
 
-- **`<caminho_para_pasta_de_dados>`**: Argumento posicional que, neste modo, serve como um contexto para o projeto, embora os caminhos dos arquivos sejam definidos no JSON.
-- **`--enrich-data <caminho_para_config.json>`**: Aponta para o arquivo de configuração JSON que define os parâmetros da operação de enriquecimento.
+**Exemplo 1: Executar a fase de `discovery`**
 
-**Exemplo de Arquivo de Configuração (`enrich_config.json`):**
-
-Crie um arquivo JSON com a seguinte estrutura para definir a operação:
-
-```json
-{
-  "main_file_path": "data/meu_projeto/transacoes.csv",
-  "query_file_path": "data/meu_projeto/categorias.csv",
-  "join_on": "id_categoria",
-  "join_how": "left",
-  "output_file_path": "data/meu_projeto/transacoes_enriquecidas.csv"
-}
+Este comando analisa todos os arquivos no diretório `data/sample` e gera um relatório HTML.
+```bash
+python src/run.py discovery --data-project-path ./data/sample --report-output html
 ```
 
-- `main_file_path`: Caminho para o arquivo principal que será enriquecido.
-- `query_file_path`: Caminho para o arquivo de consulta que contém os dados adicionais.
-- `join_on`: Nome da coluna usada como chave para a junção.
-- `join_how` (opcional): Tipo de `merge` a ser executado (ex: `left`, `inner`, `right`, `outer`). O padrão é `left`.
-- `output_file_path`: Caminho onde o arquivo resultante e enriquecido será salvo.
+**Exemplo 2: Enriquecer dados usando o `treatment`**
 
-**Exemplo de execução:**
+Este comando enriquece um arquivo principal com dados de um arquivo de consulta (lookup).
+```bash
+python src/run.py treatment enrich \
+    --main-file ./data/sample/consumidorgovbr_2025-01.csv \
+    --lookup-file ./data/sample/lookup.csv \
+    --main-key "CNPJ" \
+    --lookup-key "CNPJ" \
+    --columns-to-add "NOME FANTASIA" \
+    --output-file ./data/sample/consumidor_enriquecido.csv
+```
+
+Para mais exemplos e uma explicação detalhada de todos os comandos e sub-comandos, consulte a seção **Uso via Linha de Comando (CLI)** no nosso **[Guia de Uso Completo](COMO_USAR.md)**.

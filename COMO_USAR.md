@@ -93,3 +93,123 @@ A fase de *Treatment* é usada para limpar, padronizar e modificar seus dados.
 ---
 
 **Nota**: Enquanto uma operação está em andamento, todos os controles da interface são desabilitados para prevenir múltiplas execuções simultâneas. Um indicador visual (spinner) mostrará que a aplicação está ocupada.
+
+---
+
+## Uso via Linha de Comando (CLI)
+
+Além da interface gráfica, o kit de ferramentas oferece uma poderosa interface de linha de comando (CLI) para automação e execução de tarefas. O ponto de entrada para a CLI é o script `src/run.py`.
+
+### Estrutura do Comando
+
+O uso geral segue o formato:
+```bash
+python src/run.py [comando] [sub-comando] [argumentos...]
+```
+
+- **`[comando]`**: A fase principal a ser executada (`discovery` ou `treatment`).
+- **`[sub-comando]`**: Uma operação específica dentro da fase `treatment` (ex: `enrich`, `correct_values`).
+- **`[argumentos]`**: Parâmetros para configurar a execução.
+
+### Comando `discovery`
+
+Executa a fase de descoberta e diagnóstico dos dados.
+
+**Uso:**
+```bash
+python src/run.py discovery [argumentos...]
+```
+
+**Argumentos:**
+
+| Argumento                           | Descrição                                                                                             | Exemplo                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `--data-project-path` (obrigatório) | Caminho para o diretório do projeto de dados.                                                           | `--data-project-path ./data/sample`                    |
+| `--extensions`                      | Lista de extensões de arquivo a serem analisadas (padrão: `csv`, `xlsx`, `xls`, `json`, `txt`).          | `--extensions csv xlsx`                                |
+| `--no-recursive`                    | Desativa a busca recursiva por arquivos no diretório.                                                   | `--no-recursive`                                       |
+| `--output-format`                   | Formato da saída no console (`text` ou `interactive`, padrão: `text`).                                  | `--output-format interactive`                          |
+| `--report-output`                   | Formato do arquivo de relatório (`json`, `html`, ou `none`, padrão: `json`).                             | `--report-output html`                                 |
+| `--compare-fields`                  | Ativa a comparação de estrutura (colunas/campos) entre arquivos do mesmo tipo.                          | `--compare-fields`                                     |
+| `--compare-types`                   | Ativa a comparação de tipos de dados para colunas de mesmo nome entre arquivos.                         | `--compare-types`                                      |
+| `--generate-char-cleanup-config`    | Gera um arquivo de configuração YAML para a limpeza de caracteres problemáticos.                        | `--generate-char-cleanup-config clean_up.yml`          |
+
+**Exemplo Completo:**
+```bash
+python src/run.py discovery --data-project-path ./data/sample --report-output html --compare-fields --compare-types
+```
+
+### Comando `treatment`
+
+Executa a fase de tratamento para limpar, padronizar e modificar os dados. O comando `treatment` requer um sub-comando para especificar a operação.
+
+#### Sub-comando `enrich`
+
+Enriquece um arquivo de dados com base em outro (lookup).
+
+**Uso:**
+```bash
+python src/run.py treatment enrich [argumentos...]
+```
+
+**Argumentos:**
+
+| Argumento              | Descrição                                                    |
+| ---------------------- | ------------------------------------------------------------ |
+| `--main-file`          | Caminho para o arquivo principal a ser enriquecido.          |
+| `--lookup-file`        | Caminho para o arquivo de consulta (lookup).                 |
+| `--main-key`           | Nome da coluna chave no arquivo principal.                   |
+| `--lookup-key`         | Nome da coluna chave no arquivo de consulta.                 |
+| `--columns-to-add`     | Nomes das colunas a serem adicionadas do arquivo de consulta. |
+| `--output-file`        | Caminho para salvar o arquivo de saída enriquecido.          |
+| `--join-how`           | Tipo de junção (`left`, `right`, `outer`, `inner`, padrão: `left`). |
+| `--sep`                | Delimitador dos arquivos CSV (padrão: `,`).                  |
+
+**Exemplo:**
+```bash
+python src/run.py treatment enrich --main-file a.csv --lookup-file b.csv --main-key id --lookup-key id --columns-to-add nome --output-file c.csv
+```
+
+#### Sub-comando `correct_values`
+
+Corrige valores em colunas com base em um arquivo de mapeamento.
+
+**Uso:**
+```bash
+python src/run.py treatment correct_values --data-project-path [caminho] --config-file [arquivo_config]
+```
+
+#### Sub-comando `replace_text`
+
+Substitui textos em colunas com base em regras de um arquivo de configuração.
+
+**Uso:**
+```bash
+python src/run.py treatment replace_text --data-project-path [caminho] --config-file [arquivo_config]
+```
+
+#### Sub-comando `remove_whitespace`
+
+Remove espaços em branco do início e fim dos valores.
+
+**Uso:**
+```bash
+python src/run.py treatment remove_whitespace --data-project-path [caminho]
+```
+
+#### Sub-comando `transform_columns`
+
+Aplica transformações (renomear, excluir) em colunas.
+
+**Uso:**
+```bash
+python src/run.py treatment transform_columns --data-project-path [caminho]
+```
+
+#### Sub-comando `concatenate`
+
+Concatena múltiplos arquivos em um único.
+
+**Uso:**
+```bash
+python src/run.py treatment concatenate --data-project-path [caminho] --output-file [arquivo_saida] --file-type [csv|xlsx]
+```
