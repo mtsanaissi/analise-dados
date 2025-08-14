@@ -1,18 +1,6 @@
 {
   "tasks": [
     {
-      "id": "T048",
-      "status": "pending",
-      "branchName": "feature/T048-cleanup-obsolete-code",
-      "description": "Com a nova arquitetura em vigor, o antigo ponto de entrada principal (src/main/orchestrator.py) não é mais necessário. Sua tarefa é remover este arquivo e seus testes associados, garantindo que o projeto contenha apenas o código relevante e funcional.",
-      "acceptance_criteria": [
-        "O arquivo src/main/orchestrator.py deve ser excluído.",
-        "O diretório src/main/ (e seu __pycache__) deve ser excluído.",
-        "O arquivo de teste tests/main/test_orchestrator.py deve ser excluído.",
-        "O diretório tests/main/ (e seu __pycache__) deve ser excluído."
-      ]
-    },
-    {
       "id": "T049",
       "status": "pending",
       "branchName": "feature/T049-update-user-documentation",
@@ -26,6 +14,12 @@
     }
   ],
   "done": [
+    {
+      "id": "T048",
+      "status": "done",
+      "branchName": "feature/T048-cleanup-obsolete-code",
+      "description": "Com a nova arquitetura em vigor, o antigo ponto de entrada principal (src/main/orchestrator.py) não é mais necessário. Sua tarefa é remover este arquivo e seus testes associados, garantindo que o projeto contenha apenas o código relevante e funcional."
+    },
     {
       "id": "T044",
       "status": "done",
