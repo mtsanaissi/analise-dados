@@ -15,12 +15,19 @@
 # Licença: MIT
 # --------------------------------------------------------------------------------
 
-import streamlit as st
 import os
+import sys
 import tempfile
 import chardet
 import json
 import yaml
+import streamlit as st
+
+# Garante que a raiz do projeto esteja no sys.path ao executar via Streamlit.
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from src.utils import find_files
 from src.connectors.factory import get_data_loader
 from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_logic

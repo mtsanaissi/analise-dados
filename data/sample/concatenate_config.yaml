@@ -1,0 +1,7 @@
+# Arquivo de configuração para a operação "Concatenar Dados"
+
+# Nome do arquivo de saída (será criado dentro do caminho do projeto de dados)
+output_file: "fad-t-concatenacao/concatenado.csv"
+
+# Tipo de arquivo a concatenar: csv, json ou xlsx
+file_type: "csv"
