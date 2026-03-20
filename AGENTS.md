@@ -37,8 +37,8 @@ The user may refer to tasks as IDs in the format T999. You will look up `AGENT_T
 
 ## Project Structure and Naming
 
-- The project follows a modular, phase-based structure, with a central orchestrator for execution.
-- **Main Orchestrator**: The primary entry point for executing phases is `src/main/orchestrator.py`.
+- The project follows a modular, phase-based structure, with a central CLI entry point for execution.
+- **Main Entry Point**: The primary entry point for executing phases is `src/run.py`, which dispatches commands to the phase-specific logic.
 - **Phase Directories**: All phase-specific logic and tools are located within `src/phases/`. Each phase has its own dedicated directory (e.g., `src/phases/phase01_discovery/`).
   - **`src/phases/phaseXX_name/`**: Contains the specific orchestrator for that phase (e.g., `phase01_orchestrator.py`) and subdirectories for modular functions.
   - **`core/`**: For generic functions within a phase, independent of specific file types (e.g., `encoding_detector.py`, `data_volume_analyzer.py`, `data_integrity_checker.py`, `data_profiler.py`).
@@ -80,7 +80,7 @@ Every new Python **script** must start with a **header block** following this st
 ## Logging and Reporting
 
 1.  **Logging Standard**: Use the standard Python `logging` module for all script output. **Do not use `print()` for status updates or errors.**
-2.  **Configuration**: The main orchestrator (`src/main/orchestrator.py`) is responsible for the basic logging configuration (`logging.basicConfig`). Sub-modules and other scripts should not reconfigure the logger.
+2.  **Configuration**: The main CLI entry point (`src/run.py`) is responsible for the basic logging configuration (`logging.basicConfig`). Sub-modules and other scripts should not reconfigure the logger.
 3.  **Logging Levels**:
     - `logging.info()`: For messages about progress and the current state of execution.
     - `logging.warning()`: For non-critical issues that do not stop the process but should be noted.

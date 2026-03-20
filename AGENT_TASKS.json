@@ -2,6 +2,36 @@
   "tasks": [],
   "done": [
     {
+      "id": "T050",
+      "status": "done",
+      "branchName": "codex/t050-t054-scaffold-alignment",
+      "description": "Sua tarefa é adicionar à raiz do projeto um arquivo .pre-commit-config.yaml aproveitando os hooks básicos do scaffold em python-ai-scaffold/.pre-commit-config.yaml. A adoção deve ser pragmática: reaproveitar os hooks genéricos úteis sem introduzir novas suposições de tooling como ruff, pyright, uv ou formatação automática ainda não oficializada neste repositório."
+    },
+    {
+      "id": "T051",
+      "status": "done",
+      "branchName": "codex/t050-t054-scaffold-alignment",
+      "description": "Sua tarefa é atualizar o .gitignore atual para incorporar apenas as entradas de estado local de ferramentas de agente presentes em python-ai-scaffold/.gitignore, preservando integralmente as regras já existentes do projeto para dados, notebooks, ambientes virtuais, IDEs e demais artefatos locais."
+    },
+    {
+      "id": "T052",
+      "status": "done",
+      "branchName": "codex/t050-t054-scaffold-alignment",
+      "description": "Sua tarefa é criar um novo arquivo .continue/checks/python-review.md inspirado no scaffold, mas específico para este repositório de análise de dados. O check deve orientar reviews para o contexto real do projeto, incluindo fases do pipeline, GUI/CLI, artefatos em data/, YAMLs de configuração, relatórios gerados, notebooks e aderência ao AGENTS.md atual."
+    },
+    {
+      "id": "T053",
+      "status": "done",
+      "branchName": "codex/t050-t054-scaffold-alignment",
+      "description": "Sua tarefa é criar uma pasta docs/ com arquivos Markdown específicos para o domínio deste projeto, tomando como inspiração a estrutura de python-ai-scaffold/docs/, mas escrevendo conteúdo aderente ao toolkit atual de análise de dados. Esses documentos devem orientar agentes e contribuidores sobre padrões de código, testes, tooling e packaging com foco em ingestão, tratamento, análise exploratória, notebooks, reprodutibilidade, artefatos de dados e workflows reais do repositório."
+    },
+    {
+      "id": "T054",
+      "status": "done",
+      "branchName": "codex/t050-t054-scaffold-alignment",
+      "description": "Sua tarefa é corrigir o drift do AGENTS.md sobre o entrypoint principal do projeto. O arquivo não deve ser substituído pelo template do scaffold; a mudança deve ser cirúrgica, ajustando as referências incorretas a src/main/orchestrator.py para refletir o uso real de src/run.py e preservando o restante das orientações específicas do projeto."
+    },
+    {
       "id": "T049",
       "status": "done",
       "branchName": "feature/T049-update-user-documentation",

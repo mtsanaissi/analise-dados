@@ -40,3 +40,13 @@ Thumbs.db
 data/*
 !data/sample/
 !data/sample/*
+
+# AI tool local state
+*.transcript.md
+*.promptlog
+*.session.json
+AGENTS.override.md
+CLAUDE.local.md
+GEMINI.local.md
+.continue/dev_data/
+.continue/.cache/
