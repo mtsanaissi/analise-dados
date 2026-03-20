@@ -1,0 +1,25 @@
+ts	id	action	actor	note
+2026-03-20T13:36:31Z	T044	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T044	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T045	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T045	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T046	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T046	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T047	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T047	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T048	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T048	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T049	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T049	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T050	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T050	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T051	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T051	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T052	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T052	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T053	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T053	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:36:31Z	T054	create	codex	Migrated task from legacy AGENT_TASKS.json into tasks/tasks.tsv; original timestamps were not available.
+2026-03-20T13:36:31Z	T054	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
+2026-03-20T13:39:10Z	T055	create	codex	Created task to migrate the repository task mechanism from AGENT_TASKS.json to the task-ledger files under tasks/.
+2026-03-20T13:39:10Z	T055	complete	codex	Completed the migration to task-ledger, archived the legacy JSON file and updated project guidance.

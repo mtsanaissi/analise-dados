@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "memory": {
+      "source": "mtsanaissi/ai-stacks",
+      "sourceType": "github",
+      "computedHash": "d25913b248f73fe3abdf99a4c01cad0f30dc2fcd57a0d4a2e7c3e1c722d572b4"
+    },
+    "python": {
+      "source": "mtsanaissi/ai-stacks",
+      "sourceType": "github",
+      "computedHash": "79b0751bcace9d86429ff5e77078c2b091f187e231189b6f45b4bc3e560ac76d"
+    },
+    "task-ledger": {
+      "source": "mtsanaissi/ai-stacks",
+      "sourceType": "github",
+      "computedHash": "1ab0f7c74bc84e7e858472381b29fee5239900259715deb7967c78ef8da3b0a5"
+    }
+  }
+}

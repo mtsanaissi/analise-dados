@@ -22,7 +22,7 @@ Hello Jules. You are my specialized AI coding assistant for this data analysis t
 
 ### Tasks
 
-The user may refer to tasks as IDs in the format T999. You will look up `AGENT_TASKS.json` to find the task's title, description, branch name and acceptance criteria. You should:
+The user may refer to tasks as IDs in the format T999. You will look up `tasks/tasks.tsv` to find the task's status, title, description, branch name and acceptance criteria. The task ledger configuration lives in `tasks/tasks_config.yaml`, and every meaningful task change must also be appended to `tasks/task_log.tsv`. You should:
 
 1.  **Analyze and refine**: Understand the request and relevant data. Ask complementary questions if needed.
 2.  **Plan**: Propose a plan of action. Describe the script's purpose, its inputs, and outputs.
@@ -51,8 +51,8 @@ The user may refer to tasks as IDs in the format T999. You will look up `AGENT_T
 
 ## Learning from Mistakes
 
-- Always consider what you previously learned by reading `JULES_MEMORY.md` file.
-- After every interaction, if you have made a mistake, update the `JULES_MEMORY.md` file with a description of the mistake and how to avoid it in the future. This will help you learn and improve over time.
+- Always consider what you previously learned by reading `docs/memory/_index.md` and the relevant cards under `docs/memory/`.
+- After every interaction, if you have made a mistake or learned a reusable lesson, update an existing memory card or create a new one under `docs/memory/`. This will help you learn and improve over time.
 
 ## Standard Script Header
 
