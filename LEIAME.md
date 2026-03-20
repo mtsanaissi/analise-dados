@@ -38,6 +38,13 @@ Siga os passos abaixo para configurar o ambiente e executar os scripts.
     pip install -r requirements.txt
     ```
 
+4.  **Opcional: habilite os hooks locais de qualidade**
+    Se você quiser validar higiene básica de arquivos antes dos commits:
+    ```bash
+    pip install pre-commit
+    pre-commit install
+    ```
+
 ## Fases do Pipeline e Ferramentas
 
 O projeto é estruturado em fases que representam o ciclo de vida da análise de dados, desde a descoberta até a visualização. Cada fase contém um conjunto de ferramentas modulares, orquestradas por um script principal.
@@ -51,7 +58,7 @@ O projeto é estruturado em fases que representam o ciclo de vida da análise de
 
 ## 📂 Estrutura do Projeto
 
-A estrutura de diretórios foi organizada para refletir as fases do pipeline de análise e centralizar o orquestrador:
+A estrutura de diretórios foi organizada para refletir as fases do pipeline de análise e centralizar o ponto de entrada principal:
 
 ```
 /
@@ -60,8 +67,7 @@ A estrutura de diretórios foi organizada para refletir as fases do pipeline de 
 │       ├── arquivo1.csv
 │       └── ...
 ├── src/
-│   ├── main/                  # Contém o orquestrador principal
-│   │   └── orchestrator.py
+│   ├── run.py                 # Ponto de entrada principal da CLI
 │   ├── phases/                # Lógica e ferramentas de cada fase
 │   │   ├── phase01_discovery/
 │   │   │   ├── core/
@@ -70,11 +76,13 @@ A estrutura de diretórios foi organizada para refletir as fases do pipeline de 
 │   │   ├── phase02_treatment/
 │   │   ├── phase03_exploratory/
 │   │   └── phase04_visualization/
+│   ├── app_main_interface.py  # Interface gráfica Streamlit
 │   ├── connectors/            # Conectores para diferentes fontes de dados
 │   └── utils.py               # Funções utilitárias gerais
+├── docs/                      # Documentação técnica específica do projeto
 ├── .venv/                     # Ambiente virtual Python
 ├── .gitignore
-├── README.md
+├── .pre-commit-config.yaml
 └── requirements.txt           # Dependências do projeto
 ```
 
@@ -91,6 +99,7 @@ Para uma experiência visual e interativa, use a interface baseada em Streamlit.
 streamlit run src/app_main_interface.py
 ```
 Para instruções detalhadas sobre como usar a interface gráfica, consulte o **[Guia de Uso Completo](COMO_USAR.md)**.
+Para convenções técnicas e de contribuição, consulte também a pasta **[docs/](docs/README.md)**.
 
 ### Linha de Comando (CLI)
 
