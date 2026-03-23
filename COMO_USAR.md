@@ -148,7 +148,7 @@ Enriquece um arquivo de dados com base em outro (lookup).
 
 **Uso:**
 ```bash
-python src/run.py treatment enrich [argumentos...]
+python3 src/run.py treatment enrich [argumentos...]
 ```
 
 **Argumentos:**
@@ -166,7 +166,7 @@ python src/run.py treatment enrich [argumentos...]
 
 **Exemplo:**
 ```bash
-python src/run.py treatment enrich --main-file a.csv --lookup-file b.csv --main-key id --lookup-key id --columns-to-add nome --output-file c.csv
+python3 src/run.py treatment enrich --main-file a.csv --lookup-file b.csv --main-key id --lookup-key id --columns-to-add nome --output-file c.csv
 ```
 
 #### Sub-comando `correct_values`
@@ -175,7 +175,7 @@ Corrige valores em colunas com base em um arquivo de mapeamento.
 
 **Uso:**
 ```bash
-python src/run.py treatment correct_values --data-project-path [caminho] --config-file [arquivo_config]
+python3 src/run.py treatment correct_values --data-project-path [caminho] --config-file [arquivo_config]
 ```
 
 #### Sub-comando `replace_text`
@@ -184,7 +184,7 @@ Substitui textos em colunas com base em regras de um arquivo de configuração.
 
 **Uso:**
 ```bash
-python src/run.py treatment replace_text --data-project-path [caminho] --config-file [arquivo_config]
+python3 src/run.py treatment replace_text --data-project-path [caminho] --config-file [arquivo_config]
 ```
 
 #### Sub-comando `remove_whitespace`
@@ -193,16 +193,43 @@ Remove espaços em branco do início e fim dos valores.
 
 **Uso:**
 ```bash
-python src/run.py treatment remove_whitespace --data-project-path [caminho]
+python3 src/run.py treatment remove_whitespace --data-project-path [caminho]
 ```
 
 #### Sub-comando `transform_columns`
 
-Aplica transformações (renomear, excluir) em colunas.
+Remove a coluna final `Total` de arquivos CSV em um diretório.
 
 **Uso:**
 ```bash
-python src/run.py treatment transform_columns --data-project-path [caminho]
+python3 src/run.py treatment transform_columns --data-project-path [caminho]
+```
+
+#### Sub-comando `rename_columns`
+
+Renomeia colunas de um único arquivo CSV ou Excel sem duplicar a lógica de tratamento em scripts avulsos.
+
+**Uso:**
+```bash
+python3 src/run.py treatment rename_columns --input-file [arquivo] --old-columns [coluna_antiga ...] --new-columns [coluna_nova ...]
+```
+
+**Argumentos:**
+
+| Argumento        | Descrição |
+| ---------------- | --------- |
+| `--input-file`   | Caminho para o arquivo CSV ou XLSX que terá o cabeçalho alterado. |
+| `--old-columns`  | Lista com os nomes atuais das colunas a serem renomeadas. |
+| `--new-columns`  | Lista com os novos nomes das colunas, na mesma ordem de `--old-columns`. |
+| `--output-file`  | Caminho do arquivo de saída. Quando omitido, o arquivo original é sobrescrito. |
+| `--delimiter`    | Delimitador do CSV. Quando omitido, o sistema tenta detectar automaticamente. |
+| `--sheet-name`   | Nome da planilha para arquivos XLSX. Quando omitido, usa a primeira planilha. |
+
+**Exemplos:**
+```bash
+python3 src/run.py treatment rename_columns --input-file ./data/sample/clientes.csv --old-columns CPF NOME --new-columns documento nome --delimiter ";"
+python3 src/run.py treatment rename_columns --input-file ./data/sample/clientes.xlsx --old-columns CPF NOME --new-columns documento nome --sheet-name Planilha1
+python3 -m src.scripts.rename_columns --input-file ./data/sample/clientes.csv --old-columns CPF NOME --new-columns documento nome --delimiter ";"
 ```
 
 #### Sub-comando `concatenate`
@@ -211,5 +238,5 @@ Concatena múltiplos arquivos em um único.
 
 **Uso:**
 ```bash
-python src/run.py treatment concatenate --data-project-path [caminho] --output-file [arquivo_saida] --file-type [csv|xlsx]
+python3 src/run.py treatment concatenate --data-project-path [caminho] --output-file [arquivo_saida] --file-type [csv|xlsx]
 ```

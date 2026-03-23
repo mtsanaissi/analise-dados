@@ -107,7 +107,7 @@ Para automação e usuários avançados, a CLI oferece acesso direto a todas as 
 
 **Estrutura básica:**
 ```bash
-python src/run.py <comando> [sub-comando] [opções]
+python3 src/run.py <comando> [sub-comando] [opções]
 ```
 
 **Comandos principais:**
@@ -116,28 +116,44 @@ python src/run.py <comando> [sub-comando] [opções]
 
 Use a opção `--help` para ver todos os detalhes de um comando:
 ```bash
-python src/run.py discovery --help
-python src/run.py treatment --help
+python3 src/run.py discovery --help
+python3 src/run.py treatment --help
 ```
 
 **Exemplo 1: Executar a fase de `discovery`**
 
 Este comando analisa todos os arquivos no diretório `data/sample` e gera um relatório HTML.
 ```bash
-python src/run.py discovery --data-project-path ./data/sample --report-output html
+python3 src/run.py discovery --data-project-path ./data/sample --report-output html
 ```
 
 **Exemplo 2: Enriquecer dados usando o `treatment`**
 
 Este comando enriquece um arquivo principal com dados de um arquivo de consulta (lookup).
 ```bash
-python src/run.py treatment enrich \
+python3 src/run.py treatment enrich \
     --main-file ./data/sample/consumidorgovbr_2025-01.csv \
     --lookup-file ./data/sample/lookup.csv \
     --main-key "CNPJ" \
     --lookup-key "CNPJ" \
     --columns-to-add "NOME FANTASIA" \
     --output-file ./data/sample/consumidor_enriquecido.csv
+```
+
+**Exemplo 3: Renomear colunas de um CSV ou XLSX**
+
+```bash
+python3 src/run.py treatment rename_columns \
+    --input-file ./data/sample/clientes.csv \
+    --old-columns "CPF" "NOME" \
+    --new-columns "documento" "nome" \
+    --delimiter ";"
+```
+
+Como conveniência, também existe um wrapper fino em `src/scripts/rename_columns.py`, executável como módulo:
+
+```bash
+python3 -m src.scripts.rename_columns --input-file ./data/sample/clientes.xlsx --old-columns "CPF" "NOME" --new-columns "documento" "nome" --sheet-name Planilha1
 ```
 
 Para mais exemplos e uma explicação detalhada de todos os comandos e sub-comandos, consulte a seção **Uso via Linha de Comando (CLI)** no nosso **[Guia de Uso Completo](COMO_USAR.md)**.

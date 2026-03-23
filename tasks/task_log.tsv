@@ -23,3 +23,9 @@ ts	id	action	actor	note
 2026-03-20T13:36:31Z	T054	complete	codex	Imported as already done from the legacy task system during task-ledger migration.
 2026-03-20T13:39:10Z	T055	create	codex	Created task to migrate the repository task mechanism from AGENT_TASKS.json to the task-ledger files under tasks/.
 2026-03-20T13:39:10Z	T055	complete	codex	Completed the migration to task-ledger, archived the legacy JSON file and updated project guidance.
+2026-03-20T23:33:03Z	T056	create	codex	Created task to define whether one-off data utilities should live in src/scripts/ or remain thin wrappers over the existing CLI and treatment modules.
+2026-03-20T23:33:03Z	T057	create	codex	Created task to implement reusable column-renaming logic with extension-aware IO, validation and large-file considerations.
+2026-03-20T23:33:03Z	T058	create	codex	Created task to expose column renaming through supported entrypoints and add regression coverage without duplicating business logic.
+2026-03-23T12:52:47Z	T056	complete	codex	Defined src/scripts/ as a thin-wrapper layer and documented that reusable column renaming must stay in the treatment core and official CLI.
+2026-03-23T12:52:47Z	T057	complete	codex	Implemented reusable column renaming for CSV and XLSX with validation, logging, extension-aware processing and streaming for CSV headers.
+2026-03-23T12:52:47Z	T058	complete	codex	Exposed column renaming in src/run.py and src/scripts/rename_columns.py, added tests and updated user-facing documentation.

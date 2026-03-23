@@ -3,6 +3,7 @@
 import subprocess
 import os
 import sys
+import shutil
 import pytest
 
 # Define o diretório base para os dados de teste
@@ -111,7 +112,6 @@ def test_treatment_correct_values_command_success(setup_test_environment):
     target_dir = os.path.join(TEST_DATA_DIR, "correct_values_test")
     os.makedirs(target_dir, exist_ok=True)
     target_file = os.path.join(target_dir, "sample_to_correct.csv")
-    import shutil
     shutil.copy(source_file, target_file)
 
     command = [
@@ -129,3 +129,28 @@ def test_treatment_correct_values_command_success(setup_test_environment):
         content = f.read()
         assert "TEST_ONE" in content
         assert "test1" not in content
+
+
+def test_treatment_rename_columns_command_success(setup_test_environment):
+    """
+    Testa se o sub-comando 'treatment rename_columns' renomeia colunas de um CSV.
+    """
+    source_file = os.path.join(TEST_DATA_DIR, "sample.csv")
+    renamed_file = os.path.join(TEST_OUTPUT_DIR, "renamed_sample.csv")
+    shutil.copy(source_file, renamed_file)
+
+    command = [
+        "treatment", "rename_columns",
+        "--input-file", renamed_file,
+        "--old-columns", "id", "name",
+        "--new-columns", "codigo", "nome",
+        "--delimiter", ";"
+    ]
+    result = run_cli_command(command)
+
+    assert result.returncode == 0
+    assert "Renomeação de colunas concluída com sucesso." in result.stdout
+
+    with open(renamed_file, "r", encoding="utf-8") as file_handler:
+        content = file_handler.read()
+        assert content.startswith("codigo;nome;value")

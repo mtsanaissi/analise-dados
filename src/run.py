@@ -5,15 +5,15 @@
 #            Este script utiliza argparse para fornecer sub-comandos para as
 #            diferentes fases do processo (discovery, treatment).
 # Exemplo de uso:
-#   python src/run.py discovery --data-project-path ./data/sample
-#   python src/run.py treatment enrich --main-file ./data/sample/f1.csv ...
+#   python3 src/run.py discovery --data-project-path ./data/sample
+#   python3 src/run.py treatment enrich --main-file ./data/sample/f1.csv ...
 #
 # Autor: Jules
 # Criado em: 08/08/2025
 # Versão: 1.0
 #
 # Modificado por: Jules
-# Modificado em: 08/08/2025
+# Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
 
@@ -38,6 +38,7 @@ from src.phases.phase02_treatment.core.value_corrector import correct_values
 from src.phases.phase02_treatment.core.text_replacer import replace_text
 from src.phases.phase02_treatment.core.whitespace_remover import remove_whitespace
 from src.phases.phase02_treatment.core.column_transformer import transform_columns
+from src.phases.phase02_treatment.core.column_renamer import rename_columns_in_file
 from src.phases.phase02_treatment.core.data_concatenator import concatenate_data
 
 
@@ -159,8 +160,43 @@ def main():
     parser_whitespace.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
 
     # --- Transform Columns ---
-    parser_transform = treatment_subparsers.add_parser("transform_columns", help="Aplica transformações (renomear, excluir) em colunas.")
+    parser_transform = treatment_subparsers.add_parser("transform_columns", help="Remove a coluna final 'Total' de arquivos CSV em um diretório.")
     parser_transform.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
+
+    # --- Rename Columns ---
+    parser_rename_columns = treatment_subparsers.add_parser(
+        "rename_columns",
+        help="Renomeia colunas de um arquivo CSV ou Excel.",
+    )
+    parser_rename_columns.add_argument(
+        "--input-file",
+        required=True,
+        help="Caminho para o arquivo de entrada.",
+    )
+    parser_rename_columns.add_argument(
+        "--old-columns",
+        nargs="+",
+        required=True,
+        help="Lista de nomes atuais das colunas.",
+    )
+    parser_rename_columns.add_argument(
+        "--new-columns",
+        nargs="+",
+        required=True,
+        help="Lista de novos nomes das colunas.",
+    )
+    parser_rename_columns.add_argument(
+        "--output-file",
+        help="Caminho do arquivo de saída. Quando omitido, o arquivo de entrada é sobrescrito.",
+    )
+    parser_rename_columns.add_argument(
+        "--delimiter",
+        help="Delimitador do CSV. Quando omitido, tenta detectar automaticamente.",
+    )
+    parser_rename_columns.add_argument(
+        "--sheet-name",
+        help="Nome da planilha para arquivos Excel. Quando omitido, usa a primeira planilha.",
+    )
 
     # --- Concatenate Files ---
     parser_concat = treatment_subparsers.add_parser("concatenate", help="Concatena múltiplos arquivos em um único arquivo de saída.")
@@ -242,6 +278,16 @@ def main():
                 df_transformed = transform_columns(df)
                 df_transformed.to_csv(file_path, index=False, sep=';')
             result = {"status": "success", "message": f"Operação 'transform_columns' concluída. {len(all_files)} arquivos processados."}
+
+        elif args.treatment_command == "rename_columns":
+            result = rename_columns_in_file(
+                input_file=args.input_file,
+                old_columns=args.old_columns,
+                new_columns=args.new_columns,
+                output_file=args.output_file,
+                delimiter=args.delimiter,
+                sheet_name=args.sheet_name,
+            )
 
         elif args.treatment_command == "concatenate":
             result = concatenate_data(

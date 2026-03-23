@@ -39,9 +39,10 @@ pre-commit run --all-files
 ## Comandos úteis
 
 - Interface gráfica: `streamlit run src/app_main_interface.py`
-- Ajuda da CLI: `python src/run.py --help`
-- Discovery: `python src/run.py discovery --help`
-- Treatment: `python src/run.py treatment --help`
+- Ajuda da CLI: `python3 src/run.py --help`
+- Discovery: `python3 src/run.py discovery --help`
+- Treatment: `python3 src/run.py treatment --help`
+- Rename columns: `python3 src/run.py treatment rename_columns --help`
 
 ## Importante
 
