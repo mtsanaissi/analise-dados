@@ -60,7 +60,7 @@ def run_cli_command(command: list) -> subprocess.CompletedProcess:
     Returns:
         subprocess.CompletedProcess: O resultado da execução do comando.
     """
-    base_command = [sys.executable, os.path.join("src", "run.py")]
+    base_command = [sys.executable, "-m", "src.run"]
     full_command = base_command + command
     return subprocess.run(full_command, capture_output=True, text=True, check=False)
 

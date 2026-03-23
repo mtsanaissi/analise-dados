@@ -5,8 +5,8 @@
 #            Este script utiliza argparse para fornecer sub-comandos para as
 #            diferentes fases do processo (discovery, treatment).
 # Exemplo de uso:
-#   python3 src/run.py discovery --data-project-path ./data/sample
-#   python3 src/run.py treatment enrich --main-file ./data/sample/f1.csv ...
+#   python3 -m src.run discovery --data-project-path ./data/sample
+#   python3 -m src.run treatment enrich --main-file ./data/sample/f1.csv ...
 #
 # Autor: Jules
 # Criado em: 08/08/2025
@@ -20,11 +20,7 @@
 import argparse
 import logging
 import os
-import sys
-from typing import Dict, Any
-
-# Adiciona o diretório 'src' ao sys.path para importações corretas
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from typing import Any, Dict, Sequence
 
 import yaml
 import re
@@ -42,8 +38,16 @@ from src.phases.phase02_treatment.core.column_renamer import rename_columns_in_f
 from src.phases.phase02_treatment.core.data_concatenator import concatenate_data
 
 
-def setup_logging():
-    """Configura o logging básico para a aplicação."""
+def setup_logging() -> None:
+    """
+    Configura o logging básico para a aplicação.
+
+    Args:
+        None: Esta função não recebe argumentos.
+
+    Returns:
+        None: Esta função apenas configura o logging da CLI.
+    """
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -51,16 +55,19 @@ def setup_logging():
     )
 
 
-def handle_result(result: Dict[str, Any]):
+def handle_result(result: Dict[str, Any]) -> int:
     """
     Imprime a mensagem e o caminho do relatório do dicionário de resultado.
 
     Args:
         result (Dict[str, Any]): O dicionário retornado pela função de lógica.
+
+    Returns:
+        int: Código de saída da operação.
     """
     if not isinstance(result, dict):
         logging.error(f"O resultado esperado era um dicionário, mas foi recebido: {type(result)}")
-        return
+        return 1
 
     message = result.get("message")
     report_path = result.get("report_path")
@@ -70,10 +77,19 @@ def handle_result(result: Dict[str, Any]):
     if report_path:
         print(f"Relatório gerado em: {report_path}")
 
+    return 0 if result.get("status") == "success" else 1
 
-def main():
+
+def main(argv: Sequence[str] | None = None) -> int:
     """
     Função principal que configura e executa o parser de argumentos da CLI.
+
+    Args:
+        argv (Sequence[str] | None): Argumentos da linha de comando. Quando
+            None, utiliza os argumentos padrão do processo.
+
+    Returns:
+        int: Código de saída da CLI.
     """
     setup_logging()
 
@@ -205,7 +221,7 @@ def main():
     parser_concat.add_argument("--file-type", required=True, choices=["csv", "xlsx"], help="Tipo de arquivo a ser concatenado.")
 
 
-    args = parser.parse_args()
+    args = parser.parse_args(args=list(argv) if argv is not None else None)
 
     # --- Lógica de despacho ---
     if args.command == "discovery":
@@ -219,7 +235,7 @@ def main():
             compare_types=args.compare_types,
             generate_char_cleanup_config=args.generate_char_cleanup_config
         )
-        handle_result(result)
+        return handle_result(result)
     elif args.command == "treatment":
         result = None
         if args.treatment_command == "enrich":
@@ -239,7 +255,7 @@ def main():
                     config = yaml.safe_load(f)
             except Exception as e:
                 logging.error(f"Erro ao ler o arquivo de configuração {args.config_file}: {e}")
-                return
+                return 1
 
             all_files = find_files(args.data_project_path, extensions=['csv', 'xlsx'])
             processed_count = 0
@@ -297,8 +313,10 @@ def main():
             )
 
         if result:
-            handle_result(result)
+            return handle_result(result)
+
+    return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

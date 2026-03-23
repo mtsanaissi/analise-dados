@@ -175,18 +175,18 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
 
     # Assert
     assert all(item in command for item in expected_fragment)
-    assert command[3] == project_path
-    assert command[5] == "discovery"
+    assert command[:4] == [utils.sys.executable, "-m", "src.run", "discovery"]
+    assert command[4:6] == ["--data-project-path", project_path]
 
 @pytest.mark.parametrize("treatment_args, expected_fragment", [
-    ({"operation": "Remover Espaços"}, ["--strip-whitespace"]),
+    ({"operation": "Remover Espaços"}, ["remove_whitespace", "--data-project-path", "/fake/project"]),
     (
         {"operation": "Substituir Valores", "config_file_path": "/path/to/config.json"},
-        ["--replace-values", "/path/to/config.json"]
+        ["correct_values", "--data-project-path", "/fake/project", "--config-file", "/path/to/config.json"]
     ),
     (
         {"operation": "Encontrar e Substituir Texto", "config_file_path": "/path/to/find.json"},
-        ["--find-and-replace-text", "/path/to/find.json"]
+        ["replace_text", "--data-project-path", "/fake/project", "--config-file", "/path/to/find.json"]
     ),
     (
         {
@@ -195,7 +195,7 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
             "output_file": "output.csv",
             "file_type": "csv",
         },
-        ["--concatenate-data", "--input-folder", "input", "--output-file", "output.csv", "--file-type", "csv"],
+        ["concatenate", "--data-project-path", "input", "--output-file", "output.csv", "--file-type", "csv"],
     ),
     (
         {
@@ -208,7 +208,7 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
             "output_file": "enriched.csv",
         },
         [
-            "--enrich-data",
+            "enrich",
             "--main-file", "main.csv",
             "--lookup-file", "lookup.csv",
             "--main-key", "id",
@@ -218,7 +218,7 @@ def test_build_command_discovery_phase(discovery_args, expected_fragment):
         ],
     ),
     # Testa um caso onde o caminho do arquivo de configuração não é fornecido
-    ({"operation": "Substituir Valores"}, ["--replace-values"]),
+    ({"operation": "Substituir Valores"}, ["correct_values", "--data-project-path", "/fake/project"]),
 ])
 def test_build_command_treatment_phase(treatment_args, expected_fragment):
     """
@@ -232,5 +232,4 @@ def test_build_command_treatment_phase(treatment_args, expected_fragment):
 
     # Assert
     assert all(item in command for item in expected_fragment)
-    assert command[3] == project_path
-    assert command[5] == "treatment"
+    assert command[:4] == [utils.sys.executable, "-m", "src.run", "treatment"]

@@ -8,25 +8,14 @@
 # --------------------------------------------------------------------------------
 
 import sys
-import os
-import pytest
-
-# Adiciona o diretório 'src' ao sys.path para importação do módulo
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-
-from utils import build_command
+from src.utils import build_command
 
 # --- Testes Base ---
 
 def test_build_base_command():
     """Testa a construção do comando base sem argumentos extras."""
     command = build_command("data/sample", "discovery")
-    assert "-d" in command
-    assert "data/sample" in command
-    assert "-p" in command
-    assert "discovery" in command
-    # python_executable, run.py, -d, path, -p, phase
-    assert len(command) == 6
+    assert command == [sys.executable, "-m", "src.run", "discovery"]
 
 # --- Testes da Fase de Discovery ---
 
@@ -78,14 +67,21 @@ def test_build_treatment_command_no_op():
     """Testa a construção do comando de tratamento sem uma operação selecionada."""
     args = {"operation": "Selecione uma operação"}
     command = build_command("data/sample", "treatment", treatment_args=args)
-    # Nenhum argumento de operação deve ser adicionado
-    assert len(command) == 6
+    assert command == [sys.executable, "-m", "src.run", "treatment"]
 
 def test_build_treatment_command_strip_whitespace():
     """Testa a operação de remover espaços."""
     args = {"operation": "Remover Espaços"}
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--strip-whitespace" in command
+    assert command == [
+        sys.executable,
+        "-m",
+        "src.run",
+        "treatment",
+        "remove_whitespace",
+        "--data-project-path",
+        "data/sample",
+    ]
 
 def test_build_treatment_command_replace_values_with_config():
     """Testa a operação de substituir valores com um arquivo de configuração."""
@@ -94,7 +90,8 @@ def test_build_treatment_command_replace_values_with_config():
         "config_file_path": "/tmp/replace.yaml"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--replace-values" in command
+    assert "correct_values" in command
+    assert "--config-file" in command
     assert "/tmp/replace.yaml" in command
 
 def test_build_treatment_command_find_and_replace_with_config():
@@ -104,7 +101,8 @@ def test_build_treatment_command_find_and_replace_with_config():
         "config_file_path": "/tmp/find.yaml"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--find-and-replace-text" in command
+    assert "replace_text" in command
+    assert "--config-file" in command
     assert "/tmp/find.yaml" in command
 
 def test_build_treatment_command_concatenate_with_args():
@@ -116,8 +114,8 @@ def test_build_treatment_command_concatenate_with_args():
         "file_type": "csv"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--concatenate-data" in command
-    assert "--input-folder" in command
+    assert "concatenate" in command
+    assert "--data-project-path" in command
     assert "input" in command
     assert "--output-file" in command
     assert "output.csv" in command
@@ -136,7 +134,7 @@ def test_build_treatment_command_enrich_with_args():
         "output_file": "enriched.csv"
     }
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--enrich-data" in command
+    assert "enrich" in command
     assert "--main-file" in command
     assert "main.csv" in command
     assert "--lookup-file" in command
@@ -155,6 +153,5 @@ def test_build_treatment_command_with_config_missing():
     """Testa uma operação que requer config mas o caminho não é fornecido."""
     args = {"operation": "Substituir Valores", "config_file_path": None}
     command = build_command("data/sample", "treatment", treatment_args=args)
-    assert "--replace-values" in command
-    # O comando não deve incluir o caminho se ele for None
-    assert len(command) == 7
+    assert "correct_values" in command
+    assert "--config-file" not in command

@@ -185,7 +185,7 @@ def build_command(
     treatment_args: dict = None
 ) -> list[str]:
     """
-    Constrói a lista de argumentos do comando para o subprocesso.
+    Constrói a lista de argumentos do comando para a CLI atual do projeto.
 
     Args:
         project_path (str): O caminho para o projeto de dados.
@@ -197,16 +197,10 @@ def build_command(
         list[str]: A lista de argumentos do comando.
     """
     python_executable = sys.executable
-    run_script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'run.py'))
-
-    command = [
-        python_executable,
-        run_script_path,
-        "-d", project_path,
-        "-p", phase
-    ]
+    command = [python_executable, "-m", "src.run", phase]
 
     if phase == "discovery" and discovery_args:
+        command.extend(["--data-project-path", project_path])
         if discovery_args.get("compare_fields"):
             command.append("--compare-fields")
         if discovery_args.get("compare_types"):
@@ -218,11 +212,12 @@ def build_command(
 
     if phase == "treatment" and treatment_args:
         operation_map = {
-            "Remover Espaços": "--strip-whitespace",
-            "Substituir Valores": "--replace-values",
-            "Encontrar e Substituir Texto": "--find-and-replace-text",
-            "Concatenar Dados": "--concatenate-data",
-            "Enriquecer Dados": "--enrich-data"
+            "Remover Espaços": "remove_whitespace",
+            "Substituir Valores": "correct_values",
+            "Encontrar e Substituir Texto": "replace_text",
+            "Concatenar Dados": "concatenate",
+            "Enriquecer Dados": "enrich",
+            "Renomear Colunas": "rename_columns",
         }
         operation = treatment_args.get("operation")
         if operation in operation_map:
@@ -236,14 +231,31 @@ def build_command(
                     command.extend(["--columns-to-add", *treatment_args["columns_to_add"]])
 
             elif operation == "Concatenar Dados":
-                for arg_name in ["input_folder", "output_file", "file_type"]:
+                command.extend([
+                    "--data-project-path",
+                    treatment_args.get("input_folder", project_path),
+                ])
+                for arg_name in ["output_file", "file_type"]:
                     if treatment_args.get(arg_name):
                         command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
 
             elif operation in ["Substituir Valores", "Encontrar e Substituir Texto"]:
+                command.extend(["--data-project-path", project_path])
                 config_path = treatment_args.get("config_file_path")
                 if config_path:
-                    command.append(config_path)
+                    command.extend(["--config-file", config_path])
+
+            elif operation == "Remover Espaços":
+                command.extend(["--data-project-path", project_path])
+
+            elif operation == "Renomear Colunas":
+                for arg_name in ["input_file", "output_file", "delimiter", "sheet_name"]:
+                    if treatment_args.get(arg_name):
+                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+                if treatment_args.get("old_columns"):
+                    command.extend(["--old-columns", *treatment_args["old_columns"]])
+                if treatment_args.get("new_columns"):
+                    command.extend(["--new-columns", *treatment_args["new_columns"]])
 
     return command
 

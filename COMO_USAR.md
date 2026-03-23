@@ -7,7 +7,7 @@ Este guia foca em como utilizar a interface gráfica do "Painel de Controle do K
 Para começar, execute o seguinte comando no seu terminal a partir da raiz do projeto:
 
 ```bash
-streamlit run src/app_main_interface.py
+streamlit run app.py
 ```
 
 Isso iniciará a aplicação e abrirá uma nova aba no seu navegador.
@@ -98,13 +98,13 @@ A fase de *Treatment* é usada para limpar, padronizar e modificar seus dados.
 
 ## Uso via Linha de Comando (CLI)
 
-Além da interface gráfica, o kit de ferramentas oferece uma poderosa interface de linha de comando (CLI) para automação e execução de tarefas. O ponto de entrada para a CLI é o script `src/run.py`.
+Além da interface gráfica, o kit de ferramentas oferece uma poderosa interface de linha de comando (CLI) para automação e execução de tarefas. O ponto de entrada canônico da CLI é o módulo `src.run`.
 
 ### Estrutura do Comando
 
 O uso geral segue o formato:
 ```bash
-python src/run.py [comando] [sub-comando] [argumentos...]
+python3 -m src.run [comando] [sub-comando] [argumentos...]
 ```
 
 - **`[comando]`**: A fase principal a ser executada (`discovery` ou `treatment`).
@@ -117,7 +117,7 @@ Executa a fase de descoberta e diagnóstico dos dados.
 
 **Uso:**
 ```bash
-python src/run.py discovery [argumentos...]
+python3 -m src.run discovery [argumentos...]
 ```
 
 **Argumentos:**
@@ -135,7 +135,7 @@ python src/run.py discovery [argumentos...]
 
 **Exemplo Completo:**
 ```bash
-python src/run.py discovery --data-project-path ./data/sample --report-output html --compare-fields --compare-types
+python3 -m src.run discovery --data-project-path ./data/sample --report-output html --compare-fields --compare-types
 ```
 
 ### Comando `treatment`
@@ -148,7 +148,7 @@ Enriquece um arquivo de dados com base em outro (lookup).
 
 **Uso:**
 ```bash
-python3 src/run.py treatment enrich [argumentos...]
+python3 -m src.run treatment enrich [argumentos...]
 ```
 
 **Argumentos:**
@@ -166,7 +166,7 @@ python3 src/run.py treatment enrich [argumentos...]
 
 **Exemplo:**
 ```bash
-python3 src/run.py treatment enrich --main-file a.csv --lookup-file b.csv --main-key id --lookup-key id --columns-to-add nome --output-file c.csv
+python3 -m src.run treatment enrich --main-file a.csv --lookup-file b.csv --main-key id --lookup-key id --columns-to-add nome --output-file c.csv
 ```
 
 #### Sub-comando `correct_values`
@@ -175,7 +175,7 @@ Corrige valores em colunas com base em um arquivo de mapeamento.
 
 **Uso:**
 ```bash
-python3 src/run.py treatment correct_values --data-project-path [caminho] --config-file [arquivo_config]
+python3 -m src.run treatment correct_values --data-project-path [caminho] --config-file [arquivo_config]
 ```
 
 #### Sub-comando `replace_text`
@@ -184,7 +184,7 @@ Substitui textos em colunas com base em regras de um arquivo de configuração.
 
 **Uso:**
 ```bash
-python3 src/run.py treatment replace_text --data-project-path [caminho] --config-file [arquivo_config]
+python3 -m src.run treatment replace_text --data-project-path [caminho] --config-file [arquivo_config]
 ```
 
 #### Sub-comando `remove_whitespace`
@@ -193,7 +193,7 @@ Remove espaços em branco do início e fim dos valores.
 
 **Uso:**
 ```bash
-python3 src/run.py treatment remove_whitespace --data-project-path [caminho]
+python3 -m src.run treatment remove_whitespace --data-project-path [caminho]
 ```
 
 #### Sub-comando `transform_columns`
@@ -202,7 +202,7 @@ Remove a coluna final `Total` de arquivos CSV em um diretório.
 
 **Uso:**
 ```bash
-python3 src/run.py treatment transform_columns --data-project-path [caminho]
+python3 -m src.run treatment transform_columns --data-project-path [caminho]
 ```
 
 #### Sub-comando `rename_columns`
@@ -211,7 +211,7 @@ Renomeia colunas de um único arquivo CSV ou Excel sem duplicar a lógica de tra
 
 **Uso:**
 ```bash
-python3 src/run.py treatment rename_columns --input-file [arquivo] --old-columns [coluna_antiga ...] --new-columns [coluna_nova ...]
+python3 -m src.run treatment rename_columns --input-file [arquivo] --old-columns [coluna_antiga ...] --new-columns [coluna_nova ...]
 ```
 
 **Argumentos:**
@@ -227,8 +227,8 @@ python3 src/run.py treatment rename_columns --input-file [arquivo] --old-columns
 
 **Exemplos:**
 ```bash
-python3 src/run.py treatment rename_columns --input-file ./data/sample/clientes.csv --old-columns CPF NOME --new-columns documento nome --delimiter ";"
-python3 src/run.py treatment rename_columns --input-file ./data/sample/clientes.xlsx --old-columns CPF NOME --new-columns documento nome --sheet-name Planilha1
+python3 -m src.run treatment rename_columns --input-file ./data/sample/clientes.csv --old-columns CPF NOME --new-columns documento nome --delimiter ";"
+python3 -m src.run treatment rename_columns --input-file ./data/sample/clientes.xlsx --old-columns CPF NOME --new-columns documento nome --sheet-name Planilha1
 python3 -m src.scripts.rename_columns --input-file ./data/sample/clientes.csv --old-columns CPF NOME --new-columns documento nome --delimiter ";"
 ```
 
@@ -238,5 +238,5 @@ Concatena múltiplos arquivos em um único.
 
 **Uso:**
 ```bash
-python3 src/run.py treatment concatenate --data-project-path [caminho] --output-file [arquivo_saida] --file-type [csv|xlsx]
+python3 -m src.run treatment concatenate --data-project-path [caminho] --output-file [arquivo_saida] --file-type [csv|xlsx]
 ```

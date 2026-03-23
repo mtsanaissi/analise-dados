@@ -10,16 +10,16 @@ tags:
 source: documentation
 ---
 
-# Use src/run.py as CLI Entrypoint
+# Use `python -m src.run` as CLI Entrypoint
 
 ## Summary
 
-The canonical command-line entrypoint for the project is `python src/run.py`.
+The canonical command-line entrypoint for the project is `python -m src.run`.
 
 ## Context
 
-The project removed the old orchestrator entrypoint and now dispatches work from `src/run.py` into the phase-specific logic under `src/phases/`.
+The project removed the old orchestrator entrypoint and now dispatches work from the `src.run` module into the phase-specific logic under `src/phases/`.
 
 ## Remember
 
-Use `python src/run.py` as the CLI entrypoint and do not point new instructions or workflows back to the removed `src/main/orchestrator.py`.
+Use `python -m src.run` as the CLI entrypoint and do not point new instructions or workflows back to the removed `src/main/orchestrator.py`.

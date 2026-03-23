@@ -1,12 +1,8 @@
 import os
 import pandas as pd
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch
 import streamlit as st
-
-# Adiciona o diretório raiz ao sys.path
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importa as funções a serem testadas
 from src.app_main_interface import load_lookup_columns, execute_run_logic

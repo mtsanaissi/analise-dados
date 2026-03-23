@@ -67,7 +67,7 @@ A estrutura de diretórios foi organizada para refletir as fases do pipeline de 
 │       ├── arquivo1.csv
 │       └── ...
 ├── src/
-│   ├── run.py                 # Ponto de entrada principal da CLI
+│   ├── run.py                 # Módulo principal da CLI (executado via python -m src.run)
 │   ├── phases/                # Lógica e ferramentas de cada fase
 │   │   ├── phase01_discovery/
 │   │   │   ├── core/
@@ -76,11 +76,12 @@ A estrutura de diretórios foi organizada para refletir as fases do pipeline de 
 │   │   ├── phase02_treatment/
 │   │   ├── phase03_exploratory/
 │   │   └── phase04_visualization/
-│   ├── app_main_interface.py  # Interface gráfica Streamlit
+│   ├── app_main_interface.py  # Lógica da interface gráfica Streamlit
 │   ├── connectors/            # Conectores para diferentes fontes de dados
 │   └── utils.py               # Funções utilitárias gerais
 ├── docs/                      # Documentação técnica específica do projeto
 ├── .venv/                     # Ambiente virtual Python
+├── app.py                     # Wrapper da interface Streamlit
 ├── .gitignore
 ├── .pre-commit-config.yaml
 └── requirements.txt           # Dependências do projeto
@@ -96,18 +97,18 @@ Para uma experiência visual e interativa, use a interface baseada em Streamlit.
 
 **Como iniciar:**
 ```bash
-streamlit run src/app_main_interface.py
+streamlit run app.py
 ```
 Para instruções detalhadas sobre como usar a interface gráfica, consulte o **[Guia de Uso Completo](COMO_USAR.md)**.
 Para convenções técnicas e de contribuição, consulte também a pasta **[docs/](docs/README.md)**.
 
 ### Linha de Comando (CLI)
 
-Para automação e usuários avançados, a CLI oferece acesso direto a todas as funcionalidades. O ponto de entrada é `src/run.py`.
+Para automação e usuários avançados, a CLI oferece acesso direto a todas as funcionalidades. O ponto de entrada canônico é o módulo `src.run`.
 
 **Estrutura básica:**
 ```bash
-python3 src/run.py <comando> [sub-comando] [opções]
+python3 -m src.run <comando> [sub-comando] [opções]
 ```
 
 **Comandos principais:**
@@ -116,22 +117,22 @@ python3 src/run.py <comando> [sub-comando] [opções]
 
 Use a opção `--help` para ver todos os detalhes de um comando:
 ```bash
-python3 src/run.py discovery --help
-python3 src/run.py treatment --help
+python3 -m src.run discovery --help
+python3 -m src.run treatment --help
 ```
 
 **Exemplo 1: Executar a fase de `discovery`**
 
 Este comando analisa todos os arquivos no diretório `data/sample` e gera um relatório HTML.
 ```bash
-python3 src/run.py discovery --data-project-path ./data/sample --report-output html
+python3 -m src.run discovery --data-project-path ./data/sample --report-output html
 ```
 
 **Exemplo 2: Enriquecer dados usando o `treatment`**
 
 Este comando enriquece um arquivo principal com dados de um arquivo de consulta (lookup).
 ```bash
-python3 src/run.py treatment enrich \
+python3 -m src.run treatment enrich \
     --main-file ./data/sample/consumidorgovbr_2025-01.csv \
     --lookup-file ./data/sample/lookup.csv \
     --main-key "CNPJ" \
@@ -143,7 +144,7 @@ python3 src/run.py treatment enrich \
 **Exemplo 3: Renomear colunas de um CSV ou XLSX**
 
 ```bash
-python3 src/run.py treatment rename_columns \
+python3 -m src.run treatment rename_columns \
     --input-file ./data/sample/clientes.csv \
     --old-columns "CPF" "NOME" \
     --new-columns "documento" "nome" \

@@ -4,29 +4,23 @@
 # Descrição: Interface principal do Streamlit para o kit de ferramentas de análise de dados.
 #            Permite ao usuário selecionar a fase do projeto e o caminho dos dados,
 #            executando o processo correspondente e exibindo a saída em tempo real.
-# Exemplo de uso: streamlit run src/app_main_interface.py
+# Exemplo de uso: streamlit run app.py
 #
 # Autor: Jules
 # Criado em: 01/08/2025
 # Versão: 1.0
 #
 # Modificado por: Jules
-# Modificado em: 10/08/2025
+# Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
 
 import os
-import sys
 import tempfile
 import chardet
 import json
 import yaml
 import streamlit as st
-
-# Garante que a raiz do projeto esteja no sys.path ao executar via Streamlit.
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
 from src.utils import find_files
 from src.connectors.factory import get_data_loader
@@ -167,7 +161,16 @@ def run_treatment_dispatcher(project_path: str, operation: str, config_data: Dic
 
     return {"status": "error", "message": f"Operação '{operation}' não implementada."}
 
-def main_interface():
+def main() -> None:
+    """
+    Inicializa e renderiza a interface principal do Streamlit.
+
+    Args:
+        None: Esta função não recebe argumentos.
+
+    Returns:
+        None: Esta função controla apenas o fluxo da interface.
+    """
     st.set_page_config(layout="wide", page_title="Kit de Ferramentas de Análise de Dados")
     st.title("Painel de Controle do Kit de Ferramentas")
 
@@ -282,5 +285,18 @@ def main_interface():
             except Exception as e:
                 st.error(f"Erro ao ler ou exibir o arquivo de relatório: {e}")
 
+def main_interface() -> None:
+    """
+    Mantém compatibilidade nominal com chamadas antigas da interface.
+
+    Args:
+        None: Esta função não recebe argumentos.
+
+    Returns:
+        None: Esta função delega para o entrypoint principal da interface.
+    """
+    main()
+
+
 if __name__ == "__main__":
-    main_interface()
+    main()
