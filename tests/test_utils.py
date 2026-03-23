@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import os
 import pandas as pd
 import pytest
@@ -141,6 +142,196 @@ def test_save_df_to_csv(tmp_path):
     assert p.exists()
     read_df = pd.read_csv(str(p), sep=';')
     pd.testing.assert_frame_equal(df, read_df)
+
+
+def test_build_operation_parameters_discovery():
+    """Testa a serialização textual dos parâmetros de discovery."""
+    project_path = "/tmp/data/projeto_a"
+
+    parameters = utils.build_operation_parameters(
+        "discovery",
+        {
+            "data_project_path": project_path,
+            "extensions": ['csv', 'xlsx', 'xls', 'json', 'txt'],
+            "recursive": True,
+            "output_format": "text",
+            "report_output": "json",
+            "compare_fields": True,
+            "compare_types": False,
+            "generate_char_cleanup_config": None,
+        },
+    )
+
+    assert parameters == f"--data-project-path {project_path} --report-output json --compare-fields"
+
+
+def test_resolve_data_project_path_with_explicit_project(tmp_path):
+    """Testa a resolução de projeto quando o caminho explícito é fornecido."""
+    project_dir = tmp_path / "workspace" / "data" / "projeto_a"
+    project_dir.mkdir(parents=True)
+
+    resolved_path = utils.resolve_data_project_path(explicit_project_path=str(project_dir))
+
+    assert resolved_path == str(project_dir.resolve())
+
+
+def test_resolve_data_project_path_with_explicit_nested_path(tmp_path):
+    """Testa a normalização de um caminho explícito para a raiz do projeto."""
+    nested_dir = tmp_path / "workspace" / "data" / "projeto_a" / "subpasta"
+    nested_dir.mkdir(parents=True)
+
+    resolved_path = utils.resolve_data_project_path(explicit_project_path=str(nested_dir))
+
+    assert resolved_path == str((tmp_path / "workspace" / "data" / "projeto_a").resolve())
+
+
+def test_resolve_data_project_path_from_relative_and_absolute_candidates(tmp_path, monkeypatch):
+    """Testa a resolução de projeto a partir de caminhos relativos e absolutos."""
+    workspace_dir = tmp_path / "workspace"
+    project_dir = workspace_dir / "data" / "projeto_a"
+    file_path = project_dir / "arquivo.csv"
+    file_path.parent.mkdir(parents=True)
+    file_path.write_text("conteudo", encoding="utf-8")
+    monkeypatch.chdir(workspace_dir)
+
+    resolved_path = utils.resolve_data_project_path(
+        candidate_paths=["data/projeto_a/arquivo.csv", str(file_path.resolve())],
+    )
+
+    assert resolved_path == str(project_dir.resolve())
+
+
+def test_resolve_data_project_path_ignores_paths_outside_data(tmp_path):
+    """Testa que caminhos fora de `data/*` não influenciam a resolução."""
+    external_file = tmp_path / "tmp" / "config.yml"
+    external_file.parent.mkdir(parents=True)
+    external_file.write_text("valor: 1", encoding="utf-8")
+
+    resolved_path = utils.resolve_data_project_path(candidate_paths=[str(external_file)])
+
+    assert resolved_path is None
+
+
+def test_resolve_data_project_path_returns_none_for_ambiguous_paths(tmp_path):
+    """Testa a detecção de caminhos ambíguos entre dois projetos."""
+    project_a = tmp_path / "data" / "projeto_a" / "arquivo.csv"
+    project_b = tmp_path / "data" / "projeto_b" / "arquivo.csv"
+    project_a.parent.mkdir(parents=True)
+    project_b.parent.mkdir(parents=True)
+    project_a.write_text("a", encoding="utf-8")
+    project_b.write_text("b", encoding="utf-8")
+
+    resolved_path = utils.resolve_data_project_path(
+        candidate_paths=[str(project_a), str(project_b)],
+    )
+
+    assert resolved_path is None
+
+
+def test_log_project_operation_creates_header_and_row(tmp_path):
+    """Testa a criação do `ops.csv` com cabeçalho e primeira linha."""
+    project_dir = tmp_path / "data" / "projeto_ops"
+    project_dir.mkdir(parents=True)
+
+    ops_log_path = utils.log_project_operation(
+        operation_name="discovery",
+        operation_args={
+            "data_project_path": str(project_dir),
+            "report_output": "json",
+            "compare_fields": True,
+        },
+        explicit_project_path=str(project_dir),
+    )
+
+    assert ops_log_path == str((project_dir / utils.METADATA_DIR / utils.OPS_LOG_FILENAME).resolve())
+
+    with open(ops_log_path, "r", encoding="utf-8", newline="") as file_handler:
+        rows = list(csv.reader(file_handler))
+
+    assert rows[0] == ["timestamp", "operation", "parameters"]
+    assert rows[1][1] == "discovery"
+    assert rows[1][2] == f"--data-project-path {project_dir.resolve()} --report-output json --compare-fields"
+
+
+def test_log_project_operation_appends_multiple_rows(tmp_path):
+    """Testa o append de múltiplas operações no mesmo arquivo."""
+    project_dir = tmp_path / "data" / "projeto_ops"
+    project_dir.mkdir(parents=True)
+
+    utils.log_project_operation(
+        operation_name="treatment.remove_whitespace",
+        operation_args={"data_project_path": str(project_dir)},
+        explicit_project_path=str(project_dir),
+    )
+    utils.log_project_operation(
+        operation_name="treatment.transform_columns",
+        operation_args={"data_project_path": str(project_dir)},
+        explicit_project_path=str(project_dir),
+    )
+
+    ops_log_path = project_dir / utils.METADATA_DIR / utils.OPS_LOG_FILENAME
+    with open(ops_log_path, "r", encoding="utf-8", newline="") as file_handler:
+        rows = list(csv.reader(file_handler))
+
+    assert len(rows) == 3
+    assert rows[1][1] == "treatment.remove_whitespace"
+    assert rows[2][1] == "treatment.transform_columns"
+
+
+def test_log_project_operation_escapes_parameters_with_commas_and_quotes(tmp_path):
+    """Testa o escape correto do campo de parâmetros no CSV."""
+    project_dir = tmp_path / "data" / "projeto_ops"
+    input_file = project_dir / 'arquivo "a,b".csv'
+    project_dir.mkdir(parents=True)
+    input_file.write_text("id;nome\n1;teste", encoding="utf-8")
+
+    ops_log_path = utils.log_project_operation(
+        operation_name="treatment.rename_columns",
+        operation_args={
+            "input_file": str(input_file),
+            "old_columns": ["id", 'nome, "antigo"'],
+            "new_columns": ["codigo", "nome_novo"],
+            "delimiter": ";",
+        },
+        explicit_project_path=str(project_dir),
+    )
+
+    with open(ops_log_path, "r", encoding="utf-8") as file_handler:
+        raw_content = file_handler.read()
+
+    assert '""' in raw_content
+
+    with open(ops_log_path, "r", encoding="utf-8", newline="") as file_handler:
+        rows = list(csv.reader(file_handler))
+
+    assert rows[1][1] == "treatment.rename_columns"
+    assert '--old-columns id' in rows[1][2]
+    assert 'nome, \\"antigo\\"' in rows[1][2]
+
+
+def test_log_project_operation_skips_when_project_resolution_is_ambiguous(tmp_path):
+    """Testa o não registro quando os caminhos apontam para projetos diferentes."""
+    project_a = tmp_path / "data" / "projeto_a" / "arquivo.csv"
+    project_b = tmp_path / "data" / "projeto_b" / "saida.csv"
+    project_a.parent.mkdir(parents=True)
+    project_b.parent.mkdir(parents=True)
+    project_a.write_text("a", encoding="utf-8")
+    project_b.write_text("b", encoding="utf-8")
+
+    ops_log_path = utils.log_project_operation(
+        operation_name="treatment.rename_columns",
+        operation_args={
+            "input_file": str(project_a),
+            "old_columns": ["id"],
+            "new_columns": ["codigo"],
+            "output_file": str(project_b),
+        },
+        candidate_paths=[str(project_a), str(project_b)],
+    )
+
+    assert ops_log_path is None
+    assert not (tmp_path / "data" / "projeto_a" / utils.METADATA_DIR / utils.OPS_LOG_FILENAME).exists()
+    assert not (tmp_path / "data" / "projeto_b" / utils.METADATA_DIR / utils.OPS_LOG_FILENAME).exists()
 
 @pytest.mark.parametrize("discovery_args, expected_fragment", [
     ({"compare_fields": True}, ["--compare-fields"]),

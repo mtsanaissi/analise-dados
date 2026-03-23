@@ -1,3 +1,4 @@
+import csv
 import os
 import pandas as pd
 import pytest
@@ -39,18 +40,20 @@ def test_load_lookup_columns_csv_success(temp_dir):
 @patch('src.app_main_interface.run_discovery_logic')
 @patch('streamlit.empty')
 @patch('streamlit.spinner')
-def test_execute_run_logic_discovery_success(mock_spinner, mock_empty, mock_run_discovery):
+def test_execute_run_logic_discovery_success(mock_spinner, mock_empty, mock_run_discovery, tmp_path):
     """Testa uma execução bem-sucedida da fase de discovery através da nova função de lógica."""
     # Arrange
-    mock_run_discovery.return_value = {"status": "success", "message": "Discovery OK", "report_path": "/fake/report.json"}
+    project_path = tmp_path / "data" / "ui_discovery"
+    project_path.mkdir(parents=True)
+    mock_run_discovery.return_value = {"status": "success", "message": "Discovery OK", "report_path": str(project_path / "fad-metadados" / "discovery_report.json")}
     discovery_args = {"report_output": "json", "compare_fields": True}
 
     # Act
-    execute_run_logic("fake/path", "discovery", discovery_args, {})
+    execute_run_logic(str(project_path), "discovery", discovery_args, {})
 
     # Assert
     mock_run_discovery.assert_called_once_with(
-        data_project_path="fake/path",
+        data_project_path=str(project_path),
         report_output="json",
         compare_fields=True,
         compare_types=False,  # Verifica o default
@@ -58,53 +61,76 @@ def test_execute_run_logic_discovery_success(mock_spinner, mock_empty, mock_run_
     )
     assert st.session_state.last_run_results['return_code'] == 0
     assert st.session_state.last_run_results['full_output'] == "Discovery OK"
-    assert st.session_state.last_run_results['report_path'] == "/fake/report.json"
+    assert st.session_state.last_run_results['report_path'] == str(project_path / "fad-metadados" / "discovery_report.json")
+
+    ops_log_path = project_path / "fad-metadados" / "ops.csv"
+    with open(ops_log_path, "r", encoding="utf-8", newline="") as file_handler:
+        rows = list(csv.reader(file_handler))
+
+    assert len(rows) == 2
+    assert rows[1][1] == "discovery"
 
 @patch('src.app_main_interface.run_treatment_dispatcher')
 @patch('streamlit.empty')
 @patch('streamlit.spinner')
-def test_execute_run_logic_treatment_success(mock_spinner, mock_empty, mock_dispatcher):
+def test_execute_run_logic_treatment_success(mock_spinner, mock_empty, mock_dispatcher, tmp_path):
     """Testa uma execução bem-sucedida da fase de treatment através da nova função de lógica."""
     # Arrange
-    mock_dispatcher.return_value = {"status": "success", "message": "Treatment OK", "report_path": "/fake/output"}
+    project_path = tmp_path / "data" / "ui_treatment"
+    report_path = project_path / "fad-t-remocao-espacos"
+    project_path.mkdir(parents=True)
+    mock_dispatcher.return_value = {"status": "success", "message": "Treatment OK", "report_path": str(report_path)}
     treatment_args = {"operation": "Remover Espaços"}
 
     # Act
-    execute_run_logic("fake/path", "treatment", {}, treatment_args)
+    execute_run_logic(str(project_path), "treatment", {}, treatment_args)
 
     # Assert
-    mock_dispatcher.assert_called_once_with("fake/path", "Remover Espaços", None)
+    mock_dispatcher.assert_called_once_with(str(project_path), "Remover Espaços", None)
     assert st.session_state.last_run_results['return_code'] == 0
     assert st.session_state.last_run_results['full_output'] == "Treatment OK"
+
+    ops_log_path = project_path / "fad-metadados" / "ops.csv"
+    with open(ops_log_path, "r", encoding="utf-8", newline="") as file_handler:
+        rows = list(csv.reader(file_handler))
+
+    assert len(rows) == 2
+    assert rows[1][1] == "treatment.remove_whitespace"
 
 @patch('src.app_main_interface.run_discovery_logic', side_effect=Exception("Falha geral"))
 @patch('streamlit.empty')
 @patch('streamlit.spinner')
-def test_execute_run_logic_exception_handling(mock_spinner, mock_empty, mock_run_discovery):
+def test_execute_run_logic_exception_handling(mock_spinner, mock_empty, mock_run_discovery, tmp_path):
     """Verifica se exceções na lógica de negócios são capturadas corretamente."""
     # Arrange
+    project_path = tmp_path / "data" / "ui_error"
+    project_path.mkdir(parents=True)
     discovery_args = {"report_output": "json"}
 
     # Act
-    execute_run_logic("fake/path", "discovery", discovery_args, {})
+    execute_run_logic(str(project_path), "discovery", discovery_args, {})
 
     # Assert
     assert st.session_state.last_run_results['return_code'] == 1
     assert "Falha geral" in st.session_state.last_run_results['full_output']
     assert st.session_state.last_run_results['report_path'] is None
+    assert not (project_path / "fad-metadados" / "ops.csv").exists()
 
 @patch('streamlit.warning')
 @patch('streamlit.empty')
 @patch('streamlit.spinner')
-def test_execute_run_logic_no_treatment_operation(mock_spinner, mock_empty, mock_warning):
+def test_execute_run_logic_no_treatment_operation(mock_spinner, mock_empty, mock_warning, tmp_path):
     """Verifica o comportamento quando nenhuma operação de tratamento é selecionada."""
     # Arrange
+    project_path = tmp_path / "data" / "ui_noop"
+    project_path.mkdir(parents=True)
     treatment_args = {"operation": "Selecione uma operação"}
 
     # Act
-    execute_run_logic("fake/path", "treatment", {}, treatment_args)
+    execute_run_logic(str(project_path), "treatment", {}, treatment_args)
 
     # Assert
     mock_warning.assert_called_with("Por favor, selecione uma operação de tratamento.")
     # Verifica se um resultado neutro foi definido
     assert st.session_state.last_run_results['full_output'] == "Nenhuma operação selecionada."
+    assert not (project_path / "fad-metadados" / "ops.csv").exists()

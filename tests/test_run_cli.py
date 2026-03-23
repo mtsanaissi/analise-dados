@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import csv
 import subprocess
 import os
 import sys
@@ -10,6 +11,7 @@ import pytest
 TEST_DATA_DIR = os.path.join("tests", "data", "cli_test_data")
 # Define o diretório de saída para os relatórios de teste
 TEST_OUTPUT_DIR = os.path.join(TEST_DATA_DIR, "output")
+OPS_LOG_PATH = os.path.join(TEST_DATA_DIR, "fad-metadados", "ops.csv")
 
 
 @pytest.fixture(scope="module")
@@ -43,6 +45,9 @@ file_rules:
     with open(os.path.join(TEST_DATA_DIR, "correct_config.yml"), "w") as f:
         f.write(config_content)
 
+    if os.path.exists(OPS_LOG_PATH):
+        os.remove(OPS_LOG_PATH)
+
     yield
 
     # Limpeza (opcional, pode ser útil se os testes falharem)
@@ -65,6 +70,17 @@ def run_cli_command(command: list) -> subprocess.CompletedProcess:
     return subprocess.run(full_command, capture_output=True, text=True, check=False)
 
 
+def read_ops_rows() -> list[list[str]]:
+    """
+    Lê o arquivo `ops.csv` de teste e retorna suas linhas.
+
+    Returns:
+        list[list[str]]: Linhas do CSV, incluindo o cabeçalho.
+    """
+    with open(OPS_LOG_PATH, "r", encoding="utf-8", newline="") as file_handler:
+        return list(csv.reader(file_handler))
+
+
 def test_discovery_command_success(setup_test_environment):
     """
     Testa se o comando 'discovery' é executado com sucesso e gera a saída esperada.
@@ -79,6 +95,12 @@ def test_discovery_command_success(setup_test_environment):
     # Verifica se o relatório foi criado
     report_path = os.path.join(TEST_DATA_DIR, "fad-metadados", "discovery_report.json")
     assert os.path.exists(report_path)
+    assert os.path.exists(OPS_LOG_PATH)
+
+    ops_rows = read_ops_rows()
+    assert ops_rows[1][1] == "discovery"
+    assert "--data-project-path tests/data/cli_test_data" in ops_rows[1][2]
+    assert "--report-output json" in ops_rows[1][2]
 
 
 def test_treatment_enrich_command_success(setup_test_environment):
@@ -101,6 +123,9 @@ def test_treatment_enrich_command_success(setup_test_environment):
     assert result.returncode == 0
     assert "Enriquecimento de dados concluído." in result.stdout
     assert os.path.exists(output_file)
+
+    ops_rows = read_ops_rows()
+    assert any(row[1] == "treatment.enrich" for row in ops_rows[1:])
 
 
 def test_treatment_correct_values_command_success(setup_test_environment):
@@ -130,6 +155,9 @@ def test_treatment_correct_values_command_success(setup_test_environment):
         assert "TEST_ONE" in content
         assert "test1" not in content
 
+    ops_rows = read_ops_rows()
+    assert any(row[1] == "treatment.correct_values" for row in ops_rows[1:])
+
 
 def test_treatment_rename_columns_command_success(setup_test_environment):
     """
@@ -154,3 +182,30 @@ def test_treatment_rename_columns_command_success(setup_test_environment):
     with open(renamed_file, "r", encoding="utf-8") as file_handler:
         content = file_handler.read()
         assert content.startswith("codigo;nome;value")
+
+    ops_rows = read_ops_rows()
+    rename_rows = [row for row in ops_rows[1:] if row[1] == "treatment.rename_columns"]
+    assert rename_rows
+    assert "--input-file" in rename_rows[-1][2]
+    assert "--old-columns id name" in rename_rows[-1][2]
+    assert "--new-columns codigo nome" in rename_rows[-1][2]
+
+
+def test_treatment_rename_columns_error_does_not_append_log(setup_test_environment):
+    """
+    Testa que falhas na CLI não geram novas entradas no `ops.csv`.
+    """
+    existing_row_count = len(read_ops_rows())
+    missing_file = os.path.join(TEST_OUTPUT_DIR, "arquivo_inexistente.csv")
+    command = [
+        "treatment", "rename_columns",
+        "--input-file", missing_file,
+        "--old-columns", "id",
+        "--new-columns", "codigo",
+    ]
+
+    result = run_cli_command(command)
+
+    assert result.returncode == 1
+    assert "Arquivo de entrada não encontrado" in result.stdout
+    assert len(read_ops_rows()) == existing_row_count

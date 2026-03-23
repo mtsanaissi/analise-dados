@@ -25,7 +25,7 @@ from typing import Any, Dict, Sequence
 import yaml
 import re
 import pandas as pd
-from src.utils import find_files
+from src.utils import find_files, log_project_operation
 
 # --- Importações das funções de lógica ---
 from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_logic
@@ -78,6 +78,92 @@ def handle_result(result: Dict[str, Any]) -> int:
         print(f"Relatório gerado em: {report_path}")
 
     return 0 if result.get("status") == "success" else 1
+
+
+def log_cli_operation(args: argparse.Namespace, result: Dict[str, Any]) -> None:
+    """
+    Registra no `ops.csv` a operação executada pela CLI quando houver sucesso.
+
+    Args:
+        args (argparse.Namespace): Argumentos já parseados da CLI.
+        result (Dict[str, Any]): Resultado final da operação executada.
+
+    Returns:
+        None: Esta função apenas tenta persistir o log operacional.
+    """
+    if result.get("status") != "success":
+        return
+
+    operation_name = ""
+    operation_args: Dict[str, Any] = {}
+    explicit_project_path: str | None = None
+    candidate_paths: list[str | None] = [result.get("report_path")]
+
+    if args.command == "discovery":
+        operation_name = "discovery"
+        explicit_project_path = args.data_project_path
+        operation_args = {
+            "data_project_path": args.data_project_path,
+            "extensions": args.extensions,
+            "recursive": args.recursive,
+            "output_format": args.output_format,
+            "report_output": args.report_output,
+            "compare_fields": args.compare_fields,
+            "compare_types": args.compare_types,
+            "generate_char_cleanup_config": args.generate_char_cleanup_config,
+        }
+    elif args.command == "treatment":
+        operation_name = f"treatment.{args.treatment_command}"
+
+        if args.treatment_command in ["correct_values", "replace_text", "remove_whitespace", "transform_columns", "concatenate"]:
+            explicit_project_path = args.data_project_path
+
+        if args.treatment_command == "enrich":
+            operation_args = {
+                "main_file": args.main_file,
+                "lookup_file": args.lookup_file,
+                "main_key": args.main_key,
+                "lookup_key": args.lookup_key,
+                "columns_to_add": args.columns_to_add,
+                "output_file": args.output_file,
+                "join_how": args.join_how,
+                "sep": args.sep,
+            }
+            candidate_paths.extend([args.main_file, args.lookup_file, args.output_file])
+        elif args.treatment_command in ["correct_values", "replace_text"]:
+            operation_args = {
+                "data_project_path": args.data_project_path,
+                "config_file": args.config_file,
+            }
+        elif args.treatment_command in ["remove_whitespace", "transform_columns"]:
+            operation_args = {
+                "data_project_path": args.data_project_path,
+            }
+        elif args.treatment_command == "rename_columns":
+            operation_args = {
+                "input_file": args.input_file,
+                "old_columns": args.old_columns,
+                "new_columns": args.new_columns,
+                "output_file": args.output_file,
+                "delimiter": args.delimiter,
+                "sheet_name": args.sheet_name,
+            }
+            candidate_paths.extend([args.input_file, args.output_file])
+        elif args.treatment_command == "concatenate":
+            operation_args = {
+                "data_project_path": args.data_project_path,
+                "output_file": args.output_file,
+                "file_type": args.file_type,
+            }
+            candidate_paths.append(args.output_file)
+
+    if operation_name:
+        log_project_operation(
+            operation_name=operation_name,
+            operation_args=operation_args,
+            explicit_project_path=explicit_project_path,
+            candidate_paths=candidate_paths,
+        )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -235,6 +321,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             compare_types=args.compare_types,
             generate_char_cleanup_config=args.generate_char_cleanup_config
         )
+        log_cli_operation(args, result)
         return handle_result(result)
     elif args.command == "treatment":
         result = None
@@ -313,6 +400,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
 
         if result:
+            log_cli_operation(args, result)
             return handle_result(result)
 
     return 1

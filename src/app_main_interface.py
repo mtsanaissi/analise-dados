@@ -22,7 +22,7 @@ import json
 import yaml
 import streamlit as st
 
-from src.utils import find_files
+from src.utils import find_files, log_project_operation
 from src.connectors.factory import get_data_loader
 from src.phases.phase01_discovery.phase01_orchestrator import run_discovery_logic
 from src.phases.phase02_treatment.core.whitespace_remover import remove_whitespace
@@ -51,6 +51,98 @@ def load_lookup_columns(project_path: str, lookup_file: str, delimiter: str = No
         st.error(f"Erro ao carregar colunas do arquivo de lookup: {e}")
         return []
 
+
+def log_streamlit_operation(
+    project_path: str,
+    selected_phase: str,
+    discovery_args: Dict[str, Any],
+    treatment_args: Dict[str, Any],
+    config_data: Dict[str, Any] | None,
+    results: Dict[str, Any],
+) -> None:
+    """
+    Registra no `ops.csv` a operação bem-sucedida iniciada pela interface.
+
+    Args:
+        project_path (str): Caminho do projeto selecionado na interface.
+        selected_phase (str): Fase atualmente escolhida.
+        discovery_args (Dict[str, Any]): Argumentos da fase de discovery.
+        treatment_args (Dict[str, Any]): Argumentos da fase de treatment.
+        config_data (Dict[str, Any] | None): Configuração YAML carregada na UI.
+        results (Dict[str, Any]): Resultado final retornado pela execução.
+
+    Returns:
+        None: Esta função apenas tenta persistir o log operacional.
+    """
+    if results.get("status") != "success":
+        return
+
+    operation_name = ""
+    operation_args: Dict[str, Any] = {}
+    candidate_paths: list[str | None] = [results.get("report_path")]
+
+    if selected_phase == "discovery":
+        operation_name = "discovery"
+        operation_args = {
+            "data_project_path": project_path,
+            "report_output": discovery_args.get("report_output", "json"),
+            "compare_fields": discovery_args.get("compare_fields", False),
+            "compare_types": discovery_args.get("compare_types", False),
+            "generate_char_cleanup_config": discovery_args.get("char_cleanup_path"),
+        }
+    elif selected_phase == "treatment":
+        operation = treatment_args.get("operation")
+        operation_name_map = {
+            "Remover Espaços": "treatment.remove_whitespace",
+            "Substituir Valores": "treatment.correct_values",
+            "Encontrar e Substituir Texto": "treatment.replace_text",
+            "Concatenar Dados": "treatment.concatenate",
+            "Enriquecer Dados": "treatment.enrich",
+        }
+        operation_name = operation_name_map.get(operation, "")
+
+        if operation in ["Remover Espaços"]:
+            operation_args = {
+                "data_project_path": project_path,
+            }
+        elif operation in ["Substituir Valores", "Encontrar e Substituir Texto"]:
+            operation_args = {
+                "data_project_path": project_path,
+                "config_file": st.session_state.get("temp_config_path"),
+            }
+        elif operation == "Concatenar Dados":
+            output_filename = (config_data or {}).get("output_file")
+            operation_args = {
+                "data_project_path": project_path,
+                "output_file": os.path.join(project_path, output_filename) if output_filename else None,
+                "file_type": (config_data or {}).get("file_type", "csv"),
+            }
+        elif operation == "Enriquecer Dados":
+            main_file = os.path.join(project_path, st.session_state.get('enrich_main_file', ''))
+            lookup_file = st.session_state.get('enrich_lookup_file', '')
+            if lookup_file and not os.path.isabs(lookup_file):
+                lookup_file = os.path.join(project_path, lookup_file)
+
+            output_dir = os.path.join(project_path, "fad-t-enriquecimento")
+            output_file = os.path.join(output_dir, os.path.basename(main_file)) if main_file else None
+            operation_args = {
+                "main_file": main_file,
+                "lookup_file": lookup_file,
+                "main_key": st.session_state.get('enrich_main_key'),
+                "lookup_key": st.session_state.get('enrich_lookup_key'),
+                "columns_to_add": st.session_state.get('enrich_columns_to_add'),
+                "output_file": output_file,
+            }
+            candidate_paths.extend([main_file, lookup_file, output_file])
+
+    if operation_name:
+        log_project_operation(
+            operation_name=operation_name,
+            operation_args=operation_args,
+            explicit_project_path=project_path,
+            candidate_paths=candidate_paths,
+        )
+
 def execute_run_logic(project_path: str, selected_phase: str, discovery_args: Dict[str, Any], treatment_args: Dict[str, Any]):
     """
     Executa a lógica de negócios principal com base na fase e nos argumentos selecionados.
@@ -59,6 +151,7 @@ def execute_run_logic(project_path: str, selected_phase: str, discovery_args: Di
     output_placeholder = st.empty()
     output_placeholder.code("Iniciando a execução...")
     results = {}
+    config_data = None
     st.session_state.last_command = "N/A (Chamada Direta)"
 
     try:
@@ -79,7 +172,6 @@ def execute_run_logic(project_path: str, selected_phase: str, discovery_args: Di
                     # Define um resultado neutro para não quebrar a lógica de exibição
                     results = {"status": "warning", "message": "Nenhuma operação selecionada."}
                 else:
-                    config_data = None
                     if st.session_state.get('temp_config_path'):
                         with open(st.session_state.temp_config_path, 'r', encoding='utf-8') as f:
                             config_data = yaml.safe_load(f)
@@ -92,6 +184,15 @@ def execute_run_logic(project_path: str, selected_phase: str, discovery_args: Di
     except Exception as e:
         results = {"status": "error", "message": str(e), "report_path": None}
         output_placeholder.code(f"Ocorreu um erro inesperado: {e}")
+
+    log_streamlit_operation(
+        project_path=project_path,
+        selected_phase=selected_phase,
+        discovery_args=discovery_args,
+        treatment_args=treatment_args,
+        config_data=config_data,
+        results=results,
+    )
 
     # Armazena os resultados no estado da sessão
     st.session_state.last_run_results = {

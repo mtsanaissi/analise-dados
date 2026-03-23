@@ -11,21 +11,88 @@
 # Versão: 1.1
 #
 # Modificado por: Jules
-# Modificado em: 21/07/2025
+# Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
 
-import os
-import sys
-import pandas as pd
-import chardet
 import csv
 import fnmatch
-import yaml
 import logging
-from typing import Dict, Any
+import os
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Mapping, Sequence
+
+import chardet
+import pandas as pd
+import yaml
 
 METADATA_DIR = "fad-metadados"
+OPS_LOG_FILENAME = "ops.csv"
+
+_OPERATION_PARAMETER_SPECS: dict[str, list[tuple[str, str, str]]] = {
+    "discovery": [
+        ("data_project_path", "--data-project-path", "value"),
+        ("extensions", "--extensions", "multi"),
+        ("recursive", "--no-recursive", "false_flag"),
+        ("output_format", "--output-format", "value"),
+        ("report_output", "--report-output", "value"),
+        ("compare_fields", "--compare-fields", "true_flag"),
+        ("compare_types", "--compare-types", "true_flag"),
+        ("generate_char_cleanup_config", "--generate-char-cleanup-config", "value"),
+    ],
+    "treatment.correct_values": [
+        ("data_project_path", "--data-project-path", "value"),
+        ("config_file", "--config-file", "value"),
+    ],
+    "treatment.replace_text": [
+        ("data_project_path", "--data-project-path", "value"),
+        ("config_file", "--config-file", "value"),
+    ],
+    "treatment.remove_whitespace": [
+        ("data_project_path", "--data-project-path", "value"),
+    ],
+    "treatment.transform_columns": [
+        ("data_project_path", "--data-project-path", "value"),
+    ],
+    "treatment.rename_columns": [
+        ("input_file", "--input-file", "value"),
+        ("old_columns", "--old-columns", "multi"),
+        ("new_columns", "--new-columns", "multi"),
+        ("output_file", "--output-file", "value"),
+        ("delimiter", "--delimiter", "value"),
+        ("sheet_name", "--sheet-name", "value"),
+    ],
+    "treatment.concatenate": [
+        ("data_project_path", "--data-project-path", "value"),
+        ("output_file", "--output-file", "value"),
+        ("file_type", "--file-type", "value"),
+    ],
+    "treatment.enrich": [
+        ("main_file", "--main-file", "value"),
+        ("lookup_file", "--lookup-file", "value"),
+        ("main_key", "--main-key", "value"),
+        ("lookup_key", "--lookup-key", "value"),
+        ("columns_to_add", "--columns-to-add", "multi"),
+        ("output_file", "--output-file", "value"),
+        ("join_how", "--join-how", "value"),
+        ("sep", "--sep", "value"),
+    ],
+}
+
+_OPERATION_DEFAULT_VALUES: dict[str, dict[str, Any]] = {
+    "discovery": {
+        "extensions": ['csv', 'xlsx', 'xls', 'json', 'txt'],
+        "recursive": True,
+        "output_format": "text",
+    },
+    "treatment.enrich": {
+        "join_how": "left",
+        "sep": ",",
+    },
+}
 
 def find_files(root_path: str, extensions: list[str], recursive: bool = True, exclude_patterns: list[str] = None, exclude_dirs: list[str] = None) -> list[str]:
     """
@@ -92,6 +159,142 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
             print(f"Erro de SO ao listar arquivos no diretório '{root_path}': {e}", file=sys.stderr)
 
     return found_files
+
+
+def build_operation_parameters(operation_name: str, operation_args: Mapping[str, Any]) -> str:
+    """
+    Serializa os parâmetros de uma operação em formato textual de CLI.
+
+    Args:
+        operation_name (str): Nome canônico da operação.
+        operation_args (Mapping[str, Any]): Argumentos relevantes da operação.
+
+    Returns:
+        str: String normalizada com os parâmetros serializados.
+    """
+    parameter_specs = _OPERATION_PARAMETER_SPECS.get(operation_name, [])
+    default_values = _OPERATION_DEFAULT_VALUES.get(operation_name, {})
+    tokens: list[str] = []
+
+    for key, flag, value_type in parameter_specs:
+        value = operation_args.get(key)
+        default_value = default_values.get(key)
+
+        if value_type == "value":
+            if value is None or value == "" or value == default_value:
+                continue
+            tokens.extend([flag, str(value)])
+        elif value_type == "multi":
+            if value is None or value == [] or value == default_value:
+                continue
+            if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+                normalized_values = [str(item) for item in value if item not in (None, "")]
+                if normalized_values:
+                    tokens.extend([flag, *normalized_values])
+        elif value_type == "true_flag":
+            if bool(value):
+                tokens.append(flag)
+        elif value_type == "false_flag":
+            if value is False:
+                tokens.append(flag)
+
+    return subprocess.list2cmdline(tokens)
+
+
+def resolve_data_project_path(
+    explicit_project_path: str | None = None,
+    candidate_paths: Sequence[str | os.PathLike[str] | None] | None = None,
+) -> str | None:
+    """
+    Resolve o diretório do projeto de dados a partir de um caminho explícito ou
+    de caminhos candidatos que contenham um segmento `data/<projeto>`.
+
+    Args:
+        explicit_project_path (str | None): Caminho explícito do projeto, quando disponível.
+        candidate_paths (Sequence[str | os.PathLike[str] | None] | None): Caminhos
+            auxiliares usados para inferir o projeto.
+
+    Returns:
+        str | None: Caminho absoluto do projeto resolvido ou None quando a
+            resolução não for possível de forma única.
+    """
+    if explicit_project_path:
+        resolved_explicit_path = _extract_data_project_from_path(explicit_project_path)
+        if resolved_explicit_path:
+            return resolved_explicit_path
+        return str(Path(explicit_project_path).expanduser().resolve())
+
+    resolved_projects = {
+        project_path
+        for project_path in (
+            _extract_data_project_from_path(candidate_path)
+            for candidate_path in (candidate_paths or [])
+        )
+        if project_path
+    }
+
+    if len(resolved_projects) == 1:
+        return resolved_projects.pop()
+
+    return None
+
+
+def log_project_operation(
+    operation_name: str,
+    operation_args: Mapping[str, Any],
+    explicit_project_path: str | None = None,
+    candidate_paths: Sequence[str | os.PathLike[str] | None] | None = None,
+) -> str | None:
+    """
+    Registra uma operação bem-sucedida no arquivo `ops.csv` do projeto.
+
+    Args:
+        operation_name (str): Nome canônico da operação.
+        operation_args (Mapping[str, Any]): Argumentos que serão serializados.
+        explicit_project_path (str | None): Caminho explícito do projeto, quando houver.
+        candidate_paths (Sequence[str | os.PathLike[str] | None] | None): Caminhos
+            usados para inferir o projeto caso o explícito não exista.
+
+    Returns:
+        str | None: Caminho do arquivo `ops.csv` atualizado ou None quando o log
+            não puder ser registrado.
+    """
+    logger = logging.getLogger(__name__)
+    parameters = build_operation_parameters(operation_name, operation_args)
+    project_path = resolve_data_project_path(
+        explicit_project_path=explicit_project_path,
+        candidate_paths=candidate_paths,
+    )
+
+    if not project_path:
+        logger.warning(
+            "Não foi possível resolver um projeto único para registrar a operação '%s'.",
+            operation_name,
+        )
+        return None
+
+    ops_log_path = Path(_ensure_metadata_dir(project_path)) / OPS_LOG_FILENAME
+
+    try:
+        should_write_header = not ops_log_path.exists()
+        with ops_log_path.open('a', encoding='utf-8', newline='') as file_handler:
+            writer = csv.writer(file_handler)
+            if should_write_header:
+                writer.writerow(["timestamp", "operation", "parameters"])
+            writer.writerow([
+                datetime.now().strftime("%Y-%m-%d %H:%M"),
+                operation_name,
+                parameters,
+            ])
+        return str(ops_log_path)
+    except OSError as error:
+        logger.error(
+            "Falha ao registrar a operação '%s' em '%s': %s",
+            operation_name,
+            ops_log_path,
+            error,
+        )
+        return None
 
 def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None:
     """
@@ -287,3 +490,47 @@ def get_project_root() -> str:
     Assume que este script está em 'src/utils.py'.
     """
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+
+def _ensure_metadata_dir(project_path: str) -> str:
+    """
+    Garante a existência do diretório de metadados de um projeto.
+
+    Args:
+        project_path (str): Caminho do projeto de dados.
+
+    Returns:
+        str: Caminho absoluto para o diretório de metadados.
+    """
+    metadata_dir_path = Path(project_path).expanduser().resolve() / METADATA_DIR
+    metadata_dir_path.mkdir(parents=True, exist_ok=True)
+    return str(metadata_dir_path)
+
+
+def _extract_data_project_from_path(candidate_path: str | os.PathLike[str] | None) -> str | None:
+    """
+    Extrai o diretório raiz de um projeto a partir de um caminho candidato.
+
+    Args:
+        candidate_path (str | os.PathLike[str] | None): Caminho de arquivo ou diretório.
+
+    Returns:
+        str | None: Caminho absoluto do projeto resolvido ou None.
+    """
+    if not candidate_path:
+        return None
+
+    path = Path(candidate_path).expanduser()
+    absolute_path = path.resolve(strict=False)
+    parts = absolute_path.parts
+
+    data_indexes = [
+        index
+        for index, part in enumerate(parts)
+        if part.lower() == "data" and index + 1 < len(parts)
+    ]
+    if not data_indexes:
+        return None
+
+    project_index = data_indexes[-1] + 1
+    return str(Path(*parts[:project_index + 1]))
