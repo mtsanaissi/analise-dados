@@ -5,11 +5,11 @@
 # Exemplo de uso: Esta função é usada pela CLI em src/run.py e por wrappers finos
 #                 em src/scripts/.
 #
-# Autor: Jules
+# Autor: Codex GPT-5.4 High
 # Criado em: 23/03/2026
 # Versão: 1.0
 #
-# Modificado por: Jules
+# Modificado por: Codex GPT-5.4 High
 # Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
@@ -61,11 +61,14 @@ def rename_columns_in_file(
 
     try:
         input_path = Path(input_file).expanduser().resolve()
-        output_path = Path(output_file).expanduser().resolve() if output_file else input_path
+        output_path = Path(output_file).expanduser(
+        ).resolve() if output_file else input_path
 
         _validate_paths(input_path=input_path, output_path=output_path)
-        rename_map = _validate_rename_inputs(old_columns=old_columns, new_columns=new_columns)
-        _validate_output_extension(input_path=input_path, output_path=output_path)
+        rename_map = _validate_rename_inputs(
+            old_columns=old_columns, new_columns=new_columns)
+        _validate_output_extension(
+            input_path=input_path, output_path=output_path)
 
         file_extension = input_path.suffix.lower()
         if file_extension == ".csv":
@@ -131,10 +134,12 @@ def _validate_paths(input_path: Path, output_path: Path) -> None:
         None: Esta função apenas valida os caminhos recebidos.
     """
     if not input_path.exists():
-        raise FileNotFoundError(f"Arquivo de entrada não encontrado: {input_path}")
+        raise FileNotFoundError(
+            f"Arquivo de entrada não encontrado: {input_path}")
 
     if not input_path.is_file():
-        raise IsADirectoryError(f"O caminho de entrada não é um arquivo válido: {input_path}")
+        raise IsADirectoryError(
+            f"O caminho de entrada não é um arquivo válido: {input_path}")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -153,14 +158,18 @@ def _validate_rename_inputs(
     Returns:
         Dict[str, str]: Mapa entre nome antigo e novo nome.
     """
-    normalized_old_columns = [column.strip() for column in old_columns if column and column.strip()]
-    normalized_new_columns = [column.strip() for column in new_columns if column and column.strip()]
+    normalized_old_columns = [
+        column.strip() for column in old_columns if column and column.strip()]
+    normalized_new_columns = [
+        column.strip() for column in new_columns if column and column.strip()]
 
     if not normalized_old_columns or not normalized_new_columns:
-        raise ValueError("As listas de colunas antigas e novas não podem estar vazias.")
+        raise ValueError(
+            "As listas de colunas antigas e novas não podem estar vazias.")
 
     if len(normalized_old_columns) != len(old_columns) or len(normalized_new_columns) != len(new_columns):
-        raise ValueError("As listas de colunas não podem conter valores vazios.")
+        raise ValueError(
+            "As listas de colunas não podem conter valores vazios.")
 
     if len(normalized_old_columns) != len(normalized_new_columns):
         raise ValueError(
@@ -191,7 +200,8 @@ def _validate_output_extension(input_path: Path, output_path: Path) -> None:
     output_extension = output_path.suffix.lower()
 
     if input_extension not in SUPPORTED_FILE_EXTENSIONS | {".xls"}:
-        raise ValueError(f"Extensão de arquivo não suportada: {input_extension}")
+        raise ValueError(
+            f"Extensão de arquivo não suportada: {input_extension}")
 
     if output_extension != input_extension:
         raise ValueError(
@@ -217,15 +227,18 @@ def _rename_csv_columns(
     Returns:
         int: Quantidade de colunas renomeadas.
     """
-    csv_settings = _resolve_csv_settings(input_path=input_path, delimiter=delimiter)
-    line_ending = _detect_line_ending(input_path=input_path, encoding=csv_settings["encoding"])
+    csv_settings = _resolve_csv_settings(
+        input_path=input_path, delimiter=delimiter)
+    line_ending = _detect_line_ending(
+        input_path=input_path, encoding=csv_settings["encoding"])
     temporary_output_path = _build_temporary_output_path(output_path)
 
     try:
         with input_path.open("r", encoding=csv_settings["encoding"], newline="") as source_file:
             header_line = source_file.readline()
             if not header_line:
-                raise ValueError("O arquivo CSV está vazio e não possui cabeçalho para renomear.")
+                raise ValueError(
+                    "O arquivo CSV está vazio e não possui cabeçalho para renomear.")
 
             current_columns = next(
                 csv.reader([header_line], delimiter=csv_settings["delimiter"])
@@ -247,7 +260,8 @@ def _rename_csv_columns(
                         line_ending=line_ending,
                     )
                 )
-                shutil.copyfileobj(source_file, temporary_file, length=1024 * 1024)
+                shutil.copyfileobj(
+                    source_file, temporary_file, length=1024 * 1024)
 
         os.replace(temporary_output_path, output_path)
         return sum(
@@ -330,7 +344,8 @@ def _serialize_csv_row(columns: Sequence[str], delimiter: str, line_ending: str)
         str: Linha CSV serializada.
     """
     buffer = io.StringIO()
-    writer = csv.writer(buffer, delimiter=delimiter, lineterminator=line_ending)
+    writer = csv.writer(buffer, delimiter=delimiter,
+                        lineterminator=line_ending)
     writer.writerow(columns)
     return buffer.getvalue()
 
@@ -369,7 +384,8 @@ def _rename_xlsx_columns(
         for cell in worksheet[1]
     ]
     if not current_columns:
-        raise ValueError("A planilha selecionada não possui cabeçalho para renomear.")
+        raise ValueError(
+            "A planilha selecionada não possui cabeçalho para renomear.")
 
     renamed_columns = _rename_header_columns(
         current_columns=current_columns,
@@ -412,7 +428,8 @@ def _rename_header_columns(
             + ", ".join(missing_columns)
         )
 
-    renamed_columns = [rename_map.get(column_name, column_name) for column_name in current_columns]
+    renamed_columns = [rename_map.get(
+        column_name, column_name) for column_name in current_columns]
     if len(set(renamed_columns)) != len(renamed_columns):
         raise ValueError(
             "A renomeação resultaria em colunas duplicadas no arquivo de saída."

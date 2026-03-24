@@ -10,7 +10,7 @@
 # Criado em: 15/07/2025
 # Versão: 1.1
 #
-# Modificado por: Jules
+# Modificado por: Codex GPT-5.4 High
 # Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
@@ -94,6 +94,7 @@ _OPERATION_DEFAULT_VALUES: dict[str, dict[str, Any]] = {
     },
 }
 
+
 def find_files(root_path: str, extensions: list[str], recursive: bool = True, exclude_patterns: list[str] = None, exclude_dirs: list[str] = None) -> list[str]:
     """
     Encontra arquivos em um diretório com base em uma lista de extensões,
@@ -122,7 +123,8 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
         final_exclude_dirs.extend(exclude_dirs)
 
     if not os.path.isdir(root_path):
-        print(f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
+        print(
+            f"Erro: O diretório raiz '{root_path}' não existe ou não é um diretório.", file=sys.stderr)
         return found_files
 
     if recursive:
@@ -140,7 +142,8 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
                 _, file_ext_with_dot = os.path.splitext(filename)
                 file_extension = file_ext_with_dot.lstrip('.').lower()
                 if file_extension in normalized_extensions:
-                    found_files.append(os.path.abspath(os.path.join(dirpath, filename)))
+                    found_files.append(os.path.abspath(
+                        os.path.join(dirpath, filename)))
     else:
         try:
             for filename in os.listdir(root_path):
@@ -154,9 +157,11 @@ def find_files(root_path: str, extensions: list[str], recursive: bool = True, ex
                     if file_extension in normalized_extensions:
                         found_files.append(os.path.abspath(full_path))
         except PermissionError:
-            print(f"Erro de Permissão: Não foi possível acessar o diretório '{root_path}'.", file=sys.stderr)
+            print(
+                f"Erro de Permissão: Não foi possível acessar o diretório '{root_path}'.", file=sys.stderr)
         except OSError as e:
-            print(f"Erro de SO ao listar arquivos no diretório '{root_path}': {e}", file=sys.stderr)
+            print(
+                f"Erro de SO ao listar arquivos no diretório '{root_path}': {e}", file=sys.stderr)
 
     return found_files
 
@@ -188,7 +193,8 @@ def build_operation_parameters(operation_name: str, operation_args: Mapping[str,
             if value is None or value == [] or value == default_value:
                 continue
             if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
-                normalized_values = [str(item) for item in value if item not in (None, "")]
+                normalized_values = [str(item)
+                                     for item in value if item not in (None, "")]
                 if normalized_values:
                     tokens.extend([flag, *normalized_values])
         elif value_type == "true_flag":
@@ -219,7 +225,8 @@ def resolve_data_project_path(
             resolução não for possível de forma única.
     """
     if explicit_project_path:
-        resolved_explicit_path = _extract_data_project_from_path(explicit_project_path)
+        resolved_explicit_path = _extract_data_project_from_path(
+            explicit_project_path)
         if resolved_explicit_path:
             return resolved_explicit_path
         return str(Path(explicit_project_path).expanduser().resolve())
@@ -296,6 +303,7 @@ def log_project_operation(
         )
         return None
 
+
 def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None:
     """
     Lê um arquivo CSV de forma robusta, tentando detectar o encoding.
@@ -314,22 +322,29 @@ def read_csv_robust(file_path: str, delimiter: str = ';') -> pd.DataFrame | None
             encoding = detection['encoding'] if detection['confidence'] > 0.7 else 'utf-8'
 
         try:
-            df = pd.read_csv(file_path, sep=delimiter, encoding=encoding, low_memory=False)
+            df = pd.read_csv(file_path, sep=delimiter,
+                             encoding=encoding, low_memory=False)
         except UnicodeDecodeError:
-            print(f"  Aviso: Falha ao ler '{os.path.basename(file_path)}' com encoding '{encoding}'. Tentando com 'utf-8' e 'replace'.")
-            df = pd.read_csv(file_path, sep=delimiter, encoding='utf-8', errors='replace', low_memory=False)
-        
+            print(
+                f"  Aviso: Falha ao ler '{os.path.basename(file_path)}' com encoding '{encoding}'. Tentando com 'utf-8' e 'replace'.")
+            df = pd.read_csv(file_path, sep=delimiter,
+                             encoding='utf-8', errors='replace', low_memory=False)
+
         return df
 
     except FileNotFoundError:
-        print(f"Erro: Arquivo não encontrado em '{file_path}'.", file=sys.stderr)
+        print(
+            f"Erro: Arquivo não encontrado em '{file_path}'.", file=sys.stderr)
         return None
     except pd.errors.EmptyDataError:
-        print(f"Aviso: Arquivo CSV vazio ou sem dados: {os.path.basename(file_path)}", file=sys.stderr)
+        print(
+            f"Aviso: Arquivo CSV vazio ou sem dados: {os.path.basename(file_path)}", file=sys.stderr)
         return pd.DataFrame()
     except Exception as e:
-        print(f"Erro inesperado ao ler o arquivo '{os.path.basename(file_path)}': {e}", file=sys.stderr)
+        print(
+            f"Erro inesperado ao ler o arquivo '{os.path.basename(file_path)}': {e}", file=sys.stderr)
         return None
+
 
 def has_problematic_char(text_value: any) -> bool:
     """
@@ -337,7 +352,7 @@ def has_problematic_char(text_value: any) -> bool:
     Problemáticos: Unicode Replacement Character (U+FFFD), o caractere '¬'
                    ou caracteres de controle não padrão (diferentes de tab,
                    newline, carriage return).
-    
+
     Args:
         text_value (any): O valor a ser verificado.
 
@@ -358,6 +373,7 @@ def has_problematic_char(text_value: any) -> bool:
 
     return False
 
+
 def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> bool:
     """
     Salva um DataFrame em um arquivo CSV de forma padronizada.
@@ -374,12 +390,15 @@ def save_df_to_csv(df: pd.DataFrame, output_path: str, delimiter: str = ';') -> 
         output_dir = os.path.dirname(output_path)
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
-        
-        df.to_csv(output_path, sep=delimiter, index=False, encoding='utf-8-sig', quoting=csv.QUOTE_MINIMAL)
+
+        df.to_csv(output_path, sep=delimiter, index=False,
+                  encoding='utf-8-sig', quoting=csv.QUOTE_MINIMAL)
         return True
     except Exception as e:
-        print(f"Erro ao salvar o arquivo CSV em '{output_path}': {e}", file=sys.stderr)
+        print(
+            f"Erro ao salvar o arquivo CSV em '{output_path}': {e}", file=sys.stderr)
         return False
+
 
 def build_command(
     project_path: str,
@@ -409,9 +428,11 @@ def build_command(
         if discovery_args.get("compare_types"):
             command.append("--compare-types")
         if discovery_args.get("report_output"):
-            command.extend(["--report-output", discovery_args["report_output"]])
+            command.extend(
+                ["--report-output", discovery_args["report_output"]])
         if discovery_args.get("char_cleanup_path"):
-            command.extend(["--generate-char-cleanup-config", discovery_args["char_cleanup_path"]])
+            command.extend(["--generate-char-cleanup-config",
+                           discovery_args["char_cleanup_path"]])
 
     if phase == "treatment" and treatment_args:
         operation_map = {
@@ -429,9 +450,11 @@ def build_command(
             if operation == "Enriquecer Dados":
                 for arg_name in ["main_file", "lookup_file", "main_key", "lookup_key", "output_file"]:
                     if treatment_args.get(arg_name):
-                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+                        command.extend(
+                            [f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
                 if treatment_args.get("columns_to_add"):
-                    command.extend(["--columns-to-add", *treatment_args["columns_to_add"]])
+                    command.extend(
+                        ["--columns-to-add", *treatment_args["columns_to_add"]])
 
             elif operation == "Concatenar Dados":
                 command.extend([
@@ -440,7 +463,8 @@ def build_command(
                 ])
                 for arg_name in ["output_file", "file_type"]:
                     if treatment_args.get(arg_name):
-                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+                        command.extend(
+                            [f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
 
             elif operation in ["Substituir Valores", "Encontrar e Substituir Texto"]:
                 command.extend(["--data-project-path", project_path])
@@ -454,11 +478,14 @@ def build_command(
             elif operation == "Renomear Colunas":
                 for arg_name in ["input_file", "output_file", "delimiter", "sheet_name"]:
                     if treatment_args.get(arg_name):
-                        command.extend([f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
+                        command.extend(
+                            [f"--{arg_name.replace('_', '-')}", treatment_args[arg_name]])
                 if treatment_args.get("old_columns"):
-                    command.extend(["--old-columns", *treatment_args["old_columns"]])
+                    command.extend(
+                        ["--old-columns", *treatment_args["old_columns"]])
                 if treatment_args.get("new_columns"):
-                    command.extend(["--new-columns", *treatment_args["new_columns"]])
+                    command.extend(
+                        ["--new-columns", *treatment_args["new_columns"]])
 
     return command
 
@@ -477,7 +504,8 @@ def read_yaml_config_robustly(file_path: str) -> Dict[str, Any] | None:
         with open(file_path, 'r', encoding='utf-8-sig') as f:
             return yaml.safe_load(f)
     except FileNotFoundError:
-        logging.error(f"Arquivo de configuração YAML não encontrado em: {file_path}")
+        logging.error(
+            f"Arquivo de configuração YAML não encontrado em: {file_path}")
         return None
     except yaml.YAMLError as e:
         logging.error(f"Erro ao decodificar o arquivo YAML '{file_path}': {e}")
@@ -502,7 +530,8 @@ def _ensure_metadata_dir(project_path: str) -> str:
     Returns:
         str: Caminho absoluto para o diretório de metadados.
     """
-    metadata_dir_path = Path(project_path).expanduser().resolve() / METADATA_DIR
+    metadata_dir_path = Path(
+        project_path).expanduser().resolve() / METADATA_DIR
     metadata_dir_path.mkdir(parents=True, exist_ok=True)
     return str(metadata_dir_path)
 

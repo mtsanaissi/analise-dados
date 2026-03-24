@@ -12,7 +12,7 @@
 # Criado em: 08/08/2025
 # Versão: 1.0
 #
-# Modificado por: Jules
+# Modificado por: Codex GPT-5.4 High
 # Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
@@ -66,7 +66,8 @@ def handle_result(result: Dict[str, Any]) -> int:
         int: Código de saída da operação.
     """
     if not isinstance(result, dict):
-        logging.error(f"O resultado esperado era um dicionário, mas foi recebido: {type(result)}")
+        logging.error(
+            f"O resultado esperado era um dicionário, mas foi recebido: {type(result)}")
         return 1
 
     message = result.get("message")
@@ -129,7 +130,8 @@ def log_cli_operation(args: argparse.Namespace, result: Dict[str, Any]) -> None:
                 "join_how": args.join_how,
                 "sep": args.sep,
             }
-            candidate_paths.extend([args.main_file, args.lookup_file, args.output_file])
+            candidate_paths.extend(
+                [args.main_file, args.lookup_file, args.output_file])
         elif args.treatment_command in ["correct_values", "replace_text"]:
             operation_args = {
                 "data_project_path": args.data_project_path,
@@ -182,10 +184,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Ferramenta de linha de comando para análise e tratamento de dados."
     )
-    subparsers = parser.add_subparsers(dest="command", required=True, help="Comandos disponíveis")
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, help="Comandos disponíveis")
 
     # --- Parser para o comando 'discovery' ---
-    parser_discovery = subparsers.add_parser("discovery", help="Executa a fase de descoberta e diagnóstico.")
+    parser_discovery = subparsers.add_parser(
+        "discovery", help="Executa a fase de descoberta e diagnóstico.")
     parser_discovery.add_argument(
         "--data-project-path",
         required=True,
@@ -232,38 +236,59 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     # --- Parser para o comando 'treatment' ---
-    parser_treatment = subparsers.add_parser("treatment", help="Executa a fase de tratamento de dados.")
-    treatment_subparsers = parser_treatment.add_subparsers(dest="treatment_command", required=True, help="Operações de tratamento")
+    parser_treatment = subparsers.add_parser(
+        "treatment", help="Executa a fase de tratamento de dados.")
+    treatment_subparsers = parser_treatment.add_subparsers(
+        dest="treatment_command", required=True, help="Operações de tratamento")
 
     # (Sub-comandos do treatment serão adicionados aqui)
     # --- Enrich ---
-    parser_enrich = treatment_subparsers.add_parser("enrich", help="Enriquece um arquivo de dados com base em outro.")
-    parser_enrich.add_argument("--main-file", required=True, help="Caminho para o arquivo principal a ser enriquecido.")
-    parser_enrich.add_argument("--lookup-file", required=True, help="Caminho para o arquivo de consulta (lookup).")
-    parser_enrich.add_argument("--main-key", required=True, help="Nome da coluna chave no arquivo principal.")
-    parser_enrich.add_argument("--lookup-key", required=True, help="Nome da coluna chave no arquivo de consulta.")
-    parser_enrich.add_argument("--columns-to-add", nargs='+', required=True, help="Nomes das colunas a serem adicionadas do arquivo de consulta.")
-    parser_enrich.add_argument("--output-file", required=True, help="Caminho para salvar o arquivo de saída enriquecido.")
-    parser_enrich.add_argument("--join-how", default="left", choices=["left", "right", "outer", "inner"], help="Tipo de junção a ser realizada.")
-    parser_enrich.add_argument("--sep", default=",", help="Delimitador dos arquivos CSV.")
+    parser_enrich = treatment_subparsers.add_parser(
+        "enrich", help="Enriquece um arquivo de dados com base em outro.")
+    parser_enrich.add_argument("--main-file", required=True,
+                               help="Caminho para o arquivo principal a ser enriquecido.")
+    parser_enrich.add_argument(
+        "--lookup-file", required=True, help="Caminho para o arquivo de consulta (lookup).")
+    parser_enrich.add_argument(
+        "--main-key", required=True, help="Nome da coluna chave no arquivo principal.")
+    parser_enrich.add_argument(
+        "--lookup-key", required=True, help="Nome da coluna chave no arquivo de consulta.")
+    parser_enrich.add_argument("--columns-to-add", nargs='+', required=True,
+                               help="Nomes das colunas a serem adicionadas do arquivo de consulta.")
+    parser_enrich.add_argument("--output-file", required=True,
+                               help="Caminho para salvar o arquivo de saída enriquecido.")
+    parser_enrich.add_argument("--join-how", default="left", choices=[
+                               "left", "right", "outer", "inner"], help="Tipo de junção a ser realizada.")
+    parser_enrich.add_argument(
+        "--sep", default=",", help="Delimitador dos arquivos CSV.")
 
     # --- Correct Values ---
-    parser_correct = treatment_subparsers.add_parser("correct_values", help="Corrige valores em colunas específicas com base em um arquivo de mapeamento.")
-    parser_correct.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
-    parser_correct.add_argument("--config-file", required=True, help="Caminho para o arquivo de configuração YAML com as regras de correção.")
+    parser_correct = treatment_subparsers.add_parser(
+        "correct_values", help="Corrige valores em colunas específicas com base em um arquivo de mapeamento.")
+    parser_correct.add_argument("--data-project-path", required=True,
+                                help="Caminho para o diretório do projeto de dados.")
+    parser_correct.add_argument("--config-file", required=True,
+                                help="Caminho para o arquivo de configuração YAML com as regras de correção.")
 
     # --- Replace Text ---
-    parser_replace = treatment_subparsers.add_parser("replace_text", help="Substitui textos em colunas específicas com base em um arquivo de configuração.")
-    parser_replace.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
-    parser_replace.add_argument("--config-file", required=True, help="Caminho para o arquivo de configuração YAML com as regras de substituição.")
+    parser_replace = treatment_subparsers.add_parser(
+        "replace_text", help="Substitui textos em colunas específicas com base em um arquivo de configuração.")
+    parser_replace.add_argument("--data-project-path", required=True,
+                                help="Caminho para o diretório do projeto de dados.")
+    parser_replace.add_argument("--config-file", required=True,
+                                help="Caminho para o arquivo de configuração YAML com as regras de substituição.")
 
     # --- Remove Whitespace ---
-    parser_whitespace = treatment_subparsers.add_parser("remove_whitespace", help="Remove espaços em branco do início e fim dos valores em colunas de texto.")
-    parser_whitespace.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
+    parser_whitespace = treatment_subparsers.add_parser(
+        "remove_whitespace", help="Remove espaços em branco do início e fim dos valores em colunas de texto.")
+    parser_whitespace.add_argument(
+        "--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
 
     # --- Transform Columns ---
-    parser_transform = treatment_subparsers.add_parser("transform_columns", help="Remove a coluna final 'Total' de arquivos CSV em um diretório.")
-    parser_transform.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
+    parser_transform = treatment_subparsers.add_parser(
+        "transform_columns", help="Remove a coluna final 'Total' de arquivos CSV em um diretório.")
+    parser_transform.add_argument(
+        "--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
 
     # --- Rename Columns ---
     parser_rename_columns = treatment_subparsers.add_parser(
@@ -301,11 +326,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     # --- Concatenate Files ---
-    parser_concat = treatment_subparsers.add_parser("concatenate", help="Concatena múltiplos arquivos em um único arquivo de saída.")
-    parser_concat.add_argument("--data-project-path", required=True, help="Caminho para o diretório do projeto de dados.")
-    parser_concat.add_argument("--output-file", required=True, help="Caminho para o arquivo de saída concatenado.")
-    parser_concat.add_argument("--file-type", required=True, choices=["csv", "xlsx"], help="Tipo de arquivo a ser concatenado.")
-
+    parser_concat = treatment_subparsers.add_parser(
+        "concatenate", help="Concatena múltiplos arquivos em um único arquivo de saída.")
+    parser_concat.add_argument("--data-project-path", required=True,
+                               help="Caminho para o diretório do projeto de dados.")
+    parser_concat.add_argument(
+        "--output-file", required=True, help="Caminho para o arquivo de saída concatenado.")
+    parser_concat.add_argument("--file-type", required=True,
+                               choices=["csv", "xlsx"], help="Tipo de arquivo a ser concatenado.")
 
     args = parser.parse_args(args=list(argv) if argv is not None else None)
 
@@ -341,10 +369,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 with open(args.config_file, 'r', encoding='utf-8') as f:
                     config = yaml.safe_load(f)
             except Exception as e:
-                logging.error(f"Erro ao ler o arquivo de configuração {args.config_file}: {e}")
+                logging.error(
+                    f"Erro ao ler o arquivo de configuração {args.config_file}: {e}")
                 return 1
 
-            all_files = find_files(args.data_project_path, extensions=['csv', 'xlsx'])
+            all_files = find_files(
+                args.data_project_path, extensions=['csv', 'xlsx'])
             processed_count = 0
             for file_path in all_files:
                 for rule in config.get('file_rules', []):
@@ -354,33 +384,40 @@ def main(argv: Sequence[str] | None = None) -> int:
                         if args.treatment_command == "correct_values":
                             rules_to_apply = rule.get('corrections')
                             if rules_to_apply:
-                                correct_values(input_file=file_path, output_file=file_path, corrections=rules_to_apply)
+                                correct_values(
+                                    input_file=file_path, output_file=file_path, corrections=rules_to_apply)
                         elif args.treatment_command == "replace_text":
                             rules_to_apply = rule.get('replacements')
                             if rules_to_apply:
-                                replace_text(input_file=file_path, output_file=file_path, replacements=rules_to_apply)
+                                replace_text(
+                                    input_file=file_path, output_file=file_path, replacements=rules_to_apply)
 
                         if rules_to_apply:
                             processed_count += 1
                             break
-            result = {"status": "success", "message": f"Operação '{args.treatment_command}' concluída. {processed_count} arquivos processados."}
+            result = {"status": "success",
+                      "message": f"Operação '{args.treatment_command}' concluída. {processed_count} arquivos processados."}
 
         elif args.treatment_command == "remove_whitespace":
             all_files = find_files(args.data_project_path, extensions=['csv'])
             for file_path in all_files:
                 remove_whitespace(input_file=file_path, output_file=file_path)
-            result = {"status": "success", "message": f"Operação 'remove_whitespace' concluída. {len(all_files)} arquivos processados."}
+            result = {"status": "success",
+                      "message": f"Operação 'remove_whitespace' concluída. {len(all_files)} arquivos processados."}
 
         elif args.treatment_command == "transform_columns":
             all_files = find_files(args.data_project_path, extensions=['csv'])
             for file_path in all_files:
                 try:
-                    df = pd.read_csv(file_path, sep=';', keep_default_na=False, na_values=[''])
+                    df = pd.read_csv(file_path, sep=';',
+                                     keep_default_na=False, na_values=[''])
                 except (pd.errors.ParserError, ValueError):
-                    df = pd.read_csv(file_path, keep_default_na=False, na_values=[''])
+                    df = pd.read_csv(
+                        file_path, keep_default_na=False, na_values=[''])
                 df_transformed = transform_columns(df)
                 df_transformed.to_csv(file_path, index=False, sep=';')
-            result = {"status": "success", "message": f"Operação 'transform_columns' concluída. {len(all_files)} arquivos processados."}
+            result = {"status": "success",
+                      "message": f"Operação 'transform_columns' concluída. {len(all_files)} arquivos processados."}
 
         elif args.treatment_command == "rename_columns":
             result = rename_columns_in_file(

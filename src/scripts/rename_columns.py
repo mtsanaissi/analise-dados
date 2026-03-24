@@ -5,11 +5,11 @@
 # Exemplo de uso:
 #   python3 -m src.scripts.rename_columns --input-file ./dados.csv --old-columns A B --new-columns X Y
 #
-# Autor: Jules
+# Autor: Codex GPT-5.4 High
 # Criado em: 23/03/2026
 # Versão: 1.0
 #
-# Modificado por: Jules
+# Modificado por: Codex GPT-5.4 High
 # Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
@@ -67,7 +67,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Renomeia colunas de arquivos CSV e Excel."
     )
-    parser.add_argument("--input-file", required=True, help="Caminho para o arquivo de entrada.")
+    parser.add_argument("--input-file", required=True,
+                        help="Caminho para o arquivo de entrada.")
     parser.add_argument(
         "--old-columns",
         nargs="+",

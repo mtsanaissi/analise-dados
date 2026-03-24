@@ -5,11 +5,11 @@
 #            importação via sys.path.
 # Exemplo de uso: streamlit run app.py
 #
-# Autor: Jules
+# Autor: Codex GPT-5.4 High
 # Criado em: 23/03/2026
 # Versão: 1.0
 #
-# Modificado por: Jules
+# Modificado por: Codex GPT-5.4 High
 # Modificado em: 23/03/2026
 # Licença: MIT
 # --------------------------------------------------------------------------------
