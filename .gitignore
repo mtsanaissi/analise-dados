@@ -50,3 +50,6 @@ CLAUDE.local.md
 GEMINI.local.md
 .continue/dev_data/
 .continue/.cache/
+
+# MCP / Playwright
+.playwright-mcp/
